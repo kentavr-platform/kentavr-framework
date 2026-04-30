@@ -17,9 +17,13 @@ int main()
     led0.set_mode(OUTPUT_HIGH);
     led0.write_high();
 
+    // single touch even without object
+    GPIO <B1> :: set_mode(OUTPUT_LOW);
+    GPIO <B1> :: write_high();
+
     while(1)
     {
-        mdelay(100);
+        mdelay(50);
         led0.toggle();
     }
 
