@@ -1,0 +1,94 @@
+/*------------------------------------------------------------------------------------------------
+ * platform/pins.h
+ *
+ *  This file contains hardware configuration for pins abstractions.
+ *
+//----------------------------------------------------------------------------------------------*/
+#ifndef PLATFORM_IO_H
+#define PLATFORM_IO_H
+//------------------------------------------------------------------------------------------------
+#include "AVR/GPIO/avr-gpio.h"
+#define DECLARE_PIN(ID, PORT, DDR, PIN, BIT) struct ID : pin <PORT, DDR, PIN, BIT> {};
+//------------------------------------------------------------------------------------------------
+#if defined(__AVR_AVR128DA48__) || defined(__AVR_AVR128DB48__) || defined(__AVR_AVR128DD48__)
+#define AVR128DX_FAMILY 1
+#endif
+
+#ifdef AVR128DX_FAMILY
+// Note: for AVR128DX FAMILY VPORT registers are being defined
+//           pin | PORT | DDR  | PIN  | BIT
+DECLARE_PIN( A2,   0x01,  0x00,  0x02,  2)
+DECLARE_PIN( A3,   0x01,  0x00,  0x02,  3)
+DECLARE_PIN( A4,   0x01,  0x00,  0x02,  4)
+DECLARE_PIN( A5,   0x01,  0x00,  0x02,  5)
+DECLARE_PIN( A6,   0x01,  0x00,  0x02,  6)
+DECLARE_PIN( A7,   0x01,  0x00,  0x02,  7)
+DECLARE_PIN( B0,   0x05,  0x04,  0x06,  0)
+DECLARE_PIN( B1,   0x05,  0x04,  0x06,  1)
+DECLARE_PIN( B2,   0x05,  0x04,  0x06,  2)
+DECLARE_PIN( B3,   0x05,  0x04,  0x06,  3)
+DECLARE_PIN( B4,   0x05,  0x04,  0x06,  4)
+DECLARE_PIN( B5,   0x05,  0x04,  0x06,  5)
+DECLARE_PIN( C0,   0x09,  0x08,  0x0A,  0)
+DECLARE_PIN( C1,   0x09,  0x08,  0x0A,  1)
+DECLARE_PIN( C2,   0x09,  0x08,  0x0A,  2)
+DECLARE_PIN( C3,   0x09,  0x08,  0x0A,  3)
+DECLARE_PIN( C4,   0x09,  0x08,  0x0A,  4)
+DECLARE_PIN( C5,   0x09,  0x08,  0x0A,  5)
+DECLARE_PIN( C6,   0x09,  0x08,  0x0A,  6)
+DECLARE_PIN( C7,   0x09,  0x08,  0x0A,  7)
+DECLARE_PIN( D0,   0x0D,  0x0C,  0x0E,  0)
+DECLARE_PIN( D1,   0x0D,  0x0C,  0x0E,  1)
+DECLARE_PIN( D2,   0x0D,  0x0C,  0x0E,  2)
+DECLARE_PIN( D3,   0x0D,  0x0C,  0x0E,  3)
+DECLARE_PIN( D4,   0x0D,  0x0C,  0x0E,  4)
+DECLARE_PIN( D5,   0x0D,  0x0C,  0x0E,  5)
+DECLARE_PIN( D6,   0x0D,  0x0C,  0x0E,  6)
+DECLARE_PIN( D7,   0x0D,  0x0C,  0x0E,  7)
+DECLARE_PIN( E0,   0x11,  0x10,  0x12,  0)
+DECLARE_PIN( E1,   0x11,  0x10,  0x12,  1)
+DECLARE_PIN( E2,   0x11,  0x10,  0x12,  2)
+DECLARE_PIN( E3,   0x11,  0x10,  0x12,  3)
+DECLARE_PIN( F0,   0x15,  0x14,  0x16,  0)
+DECLARE_PIN( F1,   0x15,  0x14,  0x16,  1)
+DECLARE_PIN( F2,   0x15,  0x14,  0x16,  2)
+DECLARE_PIN( F3,   0x15,  0x14,  0x16,  3)
+DECLARE_PIN( F4,   0x15,  0x14,  0x16,  4)
+DECLARE_PIN( F5,   0x15,  0x14,  0x16,  5)
+#endif
+//------------------------------------------------------------------------------------------------
+#ifdef __AVR_ATmega1284P__
+// Temporary definitions for debugging in OM-128 board
+//           pin | PORT | DDR  | PIN  | BIT
+DECLARE_PIN( A0,   0x02,  0x01,  0x00,  0)
+DECLARE_PIN( A1,   0x02,  0x01,  0x00,  1)
+DECLARE_PIN( A2,   0x02,  0x01,  0x00,  2)
+DECLARE_PIN( A3,   0x02,  0x01,  0x00,  3)
+DECLARE_PIN( A4,   0x02,  0x01,  0x00,  4)
+DECLARE_PIN( A5,   0x02,  0x01,  0x00,  5)
+DECLARE_PIN( A6,   0x02,  0x01,  0x00,  6)
+DECLARE_PIN( A7,   0x02,  0x01,  0x00,  7)
+DECLARE_PIN( B0,   0x05,  0x04,  0x03,  0)
+DECLARE_PIN( B1,   0x05,  0x04,  0x03,  1)
+DECLARE_PIN( B2,   0x05,  0x04,  0x03,  2)
+DECLARE_PIN( B3,   0x05,  0x04,  0x03,  3)
+DECLARE_PIN( C0,   0x08,  0x07,  0x06,  0)
+DECLARE_PIN( C1,   0x08,  0x07,  0x06,  1)
+DECLARE_PIN( C2,   0x08,  0x07,  0x06,  2)
+DECLARE_PIN( C3,   0x08,  0x07,  0x06,  3)
+DECLARE_PIN( C4,   0x08,  0x07,  0x06,  4)
+DECLARE_PIN( C5,   0x08,  0x07,  0x06,  5)
+DECLARE_PIN( C6,   0x08,  0x07,  0x06,  6)
+DECLARE_PIN( C7,   0x08,  0x07,  0x06,  7)
+DECLARE_PIN( D0,   0x0B,  0x0A,  0x09,  0)
+DECLARE_PIN( D1,   0x0B,  0x0A,  0x09,  1)
+DECLARE_PIN( D2,   0x0B,  0x0A,  0x09,  2)
+DECLARE_PIN( D3,   0x0B,  0x0A,  0x09,  3)
+DECLARE_PIN( D4,   0x0B,  0x0A,  0x09,  4)
+DECLARE_PIN( D5,   0x0B,  0x0A,  0x09,  5)
+DECLARE_PIN( D6,   0x0B,  0x0A,  0x09,  6)
+DECLARE_PIN( D7,   0x0B,  0x0A,  0x09,  7)
+#endif
+//------------------------------------------------------------------------------------------------
+#endif // PLATFORM_IO_H
+
