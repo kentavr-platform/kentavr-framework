@@ -11,10 +11,14 @@
 //------------------------------------------------------------------------------------------------
 enum GPIO_mode
 {
-    INPUT_OPEN      = 1,    // input and leave opened
-    INPUT_PULLUP    = 2,    // input with internal pull-up
-    OUTPUT_HIGH     = 3,    // output and set high
-    OUTPUT_LOW      = 4,    // output and set low
+    /// Set pin as input and leave opened
+    INPUT_OPEN      = 1,
+    /// Set pin as input with internal pull-up
+    INPUT_PULLUP    = 2,
+    /// Set pin as output and set high level
+    OUTPUT_HIGH     = 3,
+    /// Set pin as output and set low level
+    OUTPUT_LOW      = 4,
 };
 //------------------------------------------------------------------------------------------------
 template <
