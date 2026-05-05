@@ -10,8 +10,6 @@
 #include "AVR/GPIO/avr-gpio.h"
 #define DECLARE_PIN(ID, PORT, DDR, PIN, BIT) struct ID : pin <PORT, DDR, PIN, BIT> {};
 //------------------------------------------------------------------------------------------------
-
-
 #ifdef AVR128DX_FAMILY
 // Note: for AVR128DX FAMILY VPORT registers are being defined
 //           pin | PORT | DDR  | PIN  | BIT

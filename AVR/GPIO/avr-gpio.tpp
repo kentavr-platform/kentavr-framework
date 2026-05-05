@@ -58,7 +58,12 @@ __inline void GPIO <pin> :: toggle()
 #endif
 }
 //------------------------------------------------------------------------------------------------
-
+// Not Connected "pin" and an (if constexpr) compile-time checker
+struct NC {};
+template <class T> struct is_connected { static constexpr bool value = true; };
+template <> struct is_connected <NC> { static constexpr bool value = false; };
+template <class T> inline constexpr bool connected = is_connected <T> :: value;
+//------------------------------------------------------------------------------------------------
 
 
 
