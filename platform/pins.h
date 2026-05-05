@@ -10,9 +10,7 @@
 #include "AVR/GPIO/avr-gpio.h"
 #define DECLARE_PIN(ID, PORT, DDR, PIN, BIT) struct ID : pin <PORT, DDR, PIN, BIT> {};
 //------------------------------------------------------------------------------------------------
-#if defined(__AVR_AVR128DA48__) || defined(__AVR_AVR128DB48__) || defined(__AVR_AVR128DD48__)
-#define AVR128DX_FAMILY 1
-#endif
+
 
 #ifdef AVR128DX_FAMILY
 // Note: for AVR128DX FAMILY VPORT registers are being defined
@@ -55,7 +53,7 @@ DECLARE_PIN( F2,   0x15,  0x14,  0x16,  2)
 DECLARE_PIN( F3,   0x15,  0x14,  0x16,  3)
 DECLARE_PIN( F4,   0x15,  0x14,  0x16,  4)
 DECLARE_PIN( F5,   0x15,  0x14,  0x16,  5)
-#endif
+#endif // AVR128DX_FAMILY
 //------------------------------------------------------------------------------------------------
 #ifdef __AVR_ATmega1284P__
 // Temporary definitions for debugging in OM-128 board
@@ -91,4 +89,5 @@ DECLARE_PIN( D7,   0x0B,  0x0A,  0x09,  7)
 #endif
 //------------------------------------------------------------------------------------------------
 #endif // PLATFORM_IO_H
+
 
