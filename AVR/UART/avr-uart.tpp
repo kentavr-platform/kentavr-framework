@@ -1,11 +1,18 @@
+/*------------------------------------------------------------------------------------------------
+ * avr-uart.tpp
+ *
+ * ATTENTION! This file is included from avr-uart.h and must NOT be built.
+ *
+//----------------------------------------------------------------------------------------------*/
+// static members initialisation
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_buf[RX_BUF_SIZE];
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_buf[TX_BUF_SIZE];
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
-volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_head = 0;
+uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_head = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
-volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_tail = 0;
+uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_tail = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_errors = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
@@ -14,7 +21,9 @@ template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_tail = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_errors = 0;
-//------------------------------------------------------------------------------------------------z
+//------------------------------------------------------------------------------------------------
+/// void UART :: init(...)
+/// Intialize and enable UART with corresponding parameters
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: init(enum UART_BAUD_RATE rate,
                                                          enum UART_DATA_BITS dbits,
@@ -151,6 +160,8 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: flush_rx()
     rx_errors = 0;
 }
 //------------------------------------------------------------------------------------------------
+/// void UART :: flush_tx()
+/// Cleans up (flushes) transmitter buffer
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: flush_tx()
 {
@@ -160,21 +171,24 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: flush_tx()
     tx_errors = 0;
 }
 //------------------------------------------------------------------------------------------------
+/// bool UART :: tx_busy()
+/// Checks the TX line for an active transission
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_busy()
 {
     return (tx_head != tx_tail) || !test_bit(regs :: STATUS, TXC);
 }
 //------------------------------------------------------------------------------------------------
+/// bool UART :: tx_wait()
+/// BLOCKING method that waits until the current transmission will be completed
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_wait()
 {
-    while(tx_busy())
-    {
-        GPIO <A7> :: toggle();
-    }
+    while(tx_busy());
 }
 //------------------------------------------------------------------------------------------------
+/// void UART :: rx_interrupt();
+/// Receiver interrupt handler (ISR)
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_interrupt()
 {
@@ -185,6 +199,8 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_interrupt()
     rx_head = index;
 }
 //------------------------------------------------------------------------------------------------
+/// void UART :: tx_interrupt();
+/// Transmitter UDRE interrupt handler (ISR)
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_interrupt()
 {
@@ -196,6 +212,7 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_interrupt()
     }
     else
     {
+
         // buffer is empty - so disable interrupt
         clr_bit(regs :: CTRLB, UDRIE);
     }
@@ -215,12 +232,13 @@ __inline bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_char(const char chr)
     }
     else
     {
-        // === BUFFER WRITE ===
+        // === BUFFERED WRITE ===
         uint8_t i = (tx_head + 1) & (TX_BUF_SIZE - 1);     // modulo power-of-two optimization
         if (i == tx_tail)
         {
-            // TX buffer overrun
+            // TX buffer overrun detected
             if(tx_errors != 0xFF) tx_errors++;
+            // you may add some other signals over here - for example turn on a LED at GPIO pin
             GPIO <B3> :: set_mode(OUTPUT_HIGH);
             return false;
         }
@@ -232,28 +250,165 @@ __inline bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_char(const char chr)
 }
 //------------------------------------------------------------------------------------------------
 /// void UART :: write(const char *str)
-/// Writes null-terminated string from RAM
+/// Non-blocking write of a null-terminated string from RAM.
+/// Drops the whole string if it does not fit into TX buffer
+/// at the moment of checking (best-effort, non-atomic guarantee).
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(const char *str)
 {
+    uint8_t free = (tx_tail - tx_head - 1) & (TX_BUF_SIZE - 1);
+    if(strlen(str) > free)
+    {
+        // required string does not fit into buffer
+        return;
+    }
     while(*str)
     {
         write_char(*str++);
     }
 }
 //------------------------------------------------------------------------------------------------
+/// void UART :: write_all(const char *str)
+/// BLOCKING write of a null-terminated string from RAM.
+/// In case of lack buffer space this method BLOCKS (does not return) and WAITS until
+/// the buffer will become free and all the string will be placed in the buffer completely.
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(const char *str)
+{
+    while(*str)
+    {
+        while(!write_char(*str));
+        str++;
+    }
+}
+//------------------------------------------------------------------------------------------------
+/// uint8_t UART :: write_any(const char *str)
+/// Non-blocking write of a null-terminated string from RAM.
+/// In case of lack buffer space this method writes ONLY available PART of the string.
+/// Returns the number of bytes, placed in the buffer.
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(const char *str)
+{
+    uint8_t count = 0;
+    while(*str)
+    {
+        if(!write_char(*str++))
+        {
+            return count;
+        }
+        count++;
+    }
+    return count;
+}
+//------------------------------------------------------------------------------------------------
 /// void UART :: write(_flash(const char *str))
-/// Writes null-terminated string from flash memory (PROGMEM)
+/// Non-blocking write of a null-terminated string from flash memory (PROGMEM).
+/// Drops the whole string if it does not fit into TX buffer
+/// at the moment of checking (best-effort, non-atomic guarantee).
 /// Hint: always use _flash() macro for literals to save your RAM
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(FlashStringWrapper fs)
 {
     const char *ptr = fs.str;
+    uint8_t free = (tx_tail - tx_head - 1) & (TX_BUF_SIZE - 1);
+    if(strlen(ptr) > free)
+    {
+        // required string does not fit into buffer
+        return;
+    }
     char ch;
     while ((ch = pgm_read_byte(ptr++)))
     {
         write_char(ch);
     }
+}
+//------------------------------------------------------------------------------------------------
+/// void UART :: write_all(_flash(const char *str))
+/// BLOCKING write of a null-terminated string from flash memory (PROGMEM).
+/// In case of lack buffer space this method BLOCKS (does not return) and WAITS until
+/// the buffer will become free and all the string will be placed in the buffer completely.
+/// Hint: always use _flash() macro for literals to save your RAM
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(FlashStringWrapper fs)
+{
+    const char *ptr = fs.str;
+    char ch;
+    while ((ch = pgm_read_byte(ptr++)))
+    {
+        while(!write_char(ch));
+    }
+}
+//------------------------------------------------------------------------------------------------
+/// void UART :: write_any(_flash(const char *str))
+/// Non-blocking write of a null-terminated string from flash memory (PROGMEM).
+/// In case of lack buffer space this method writes ONLY available PART of the string.
+/// Returns the number of bytes, placed in the buffer.
+/// Hint: always use _flash() macro for literals to save your RAM
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(FlashStringWrapper fs)
+{
+    uint8_t count = 0;
+    const char *ptr = fs.str;
+    char ch;
+    while((ch = pgm_read_byte(ptr++)))
+    {
+        if(!write_char(ch))
+        {
+            return count;
+        }
+        count++;
+    }
+    return count;
+}
+//------------------------------------------------------------------------------------------------
+/// void UART :: write(uint8_t *buf, uint8_t count)
+/// Non-blocking write 'count' bytes from a buffer 'buf'.
+/// Does nothing if 'count' is greater than available TX buffer size at the moment of
+/// checking (best-effort, non-atomic guarantee).
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(uint8_t *buf, uint8_t count)
+{
+    uint8_t free = (tx_tail - tx_head - 1) & (TX_BUF_SIZE - 1);
+    if(count > free)
+    {
+        return;
+    }
+    while(count--)
+    {
+        write_char(*buf++);
+    }
+}
+//------------------------------------------------------------------------------------------------
+/// void UART :: write_all(uint8_t *buf, uint8_t count)
+/// BLOCKING write 'count' bytes from a buffer 'buf'.
+/// In case of lack buffer space this method BLOCKS (does not return) and WAITS until the buffer
+/// will become free and all 'count' bytes from will be placed in the TX buffer completely.
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(uint8_t *buf, uint8_t count)
+{
+    while(count--)
+    {
+        while(!write_char(*buf));
+        buf++;
+    }
+}
+//------------------------------------------------------------------------------------------------
+/// uint8_t UART :: write_any(uint8_t *buf, uint8_t count)
+/// Non-blocking write 'count' bytes from a buffer 'buf'.
+/// In case of lack buffer space this method writes ONLY available PART of the buffer.
+/// Returns the number of bytes, placed in the buffer.
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(uint8_t *buf, uint8_t count)
+{
+    uint8_t n = 0;
+    while(count--)
+    {
+        if(!write_char(*buf++))
+        {
+            return n;
+        }
+    }
+    return n;
 }
 //------------------------------------------------------------------------------------------------
 

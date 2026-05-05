@@ -2,6 +2,7 @@
 #define AVR_UART_H
 //------------------------------------------------------------------------------------------------
 #include <avr/pgmspace.h>
+#include <string.h>
 #include "AVR/avr-macro.h"
 #include "avr-uart-regs.h"
 //------------------------------------------------------------------------------------------------
@@ -47,45 +48,61 @@ class UART
 {
 public:
     UART() {};
-    static void init(enum UART_BAUD_RATE rate,
-                     enum UART_DATA_BITS dbits = DATA_BITS_8,
-                     enum UART_PARITY parity = PARITY_NONE,
-                     enum UART_STOP_BITS sbits= STOP_BITS_1);
-    static void disable();
-    static void disable_rx();
-    static void disable_tx();
-    static void enable();
-    static void enable_rx();
-    static void enable_tx();
-    uint8_t peek();
-    uint8_t read(uint8_t *buf, const uint8_t count);
-    static void write(const char *str);
-    static void write(FlashStringWrapper fs);
-    static bool tx_busy();
-    static void tx_wait();
-    static void rx_interrupt();
-    static void tx_interrupt();
+    // configuring and control management
+    static void     init(enum UART_BAUD_RATE rate,
+                         enum UART_DATA_BITS dbits = DATA_BITS_8,
+                         enum UART_PARITY parity = PARITY_NONE,
+                         enum UART_STOP_BITS sbits= STOP_BITS_1);
+    static void     disable();
+    static void     disable_rx();
+    static void     disable_tx();
+    static void     enable();
+    static void     enable_rx();
+    static void     enable_tx();
+    static bool     tx_busy();
+    static void     tx_wait();
+    //              readings
+    static uint8_t  peek();
+    static uint8_t  read(uint8_t *buf, const uint8_t count);
+    //              null-terminated string writes from RAM
+    static void     write    (const char *str);
+    static void     write_all(const char *str);
+    static uint8_t  write_any(const char *str);
+    //              null-terminated string writes from PROGMEM
+    static void     write    (FlashStringWrapper fs);
+    static void     write_all(FlashStringWrapper fs);
+    static uint8_t  write_any(FlashStringWrapper fs);
+    //              bufer writes from RAM
+    static void     write    (uint8_t *buf, uint8_t count);
+    static void     write_all(uint8_t *buf, uint8_t count);
+    static uint8_t  write_any(uint8_t *buf, uint8_t count);
+    //              interrupts handlers
+    static void     rx_interrupt();
+    static void     tx_interrupt();
 private:
-    using regs = USART_traits <N>;
-    static void flush_rx();
-    static void flush_tx();
-    static bool write_char(const char chr);
-    static uint8_t rx_buf[RX_BUF_SIZE];
-    static uint8_t tx_buf[TX_BUF_SIZE];
-    static volatile uint8_t rx_head, rx_tail;
-    static  uint8_t tx_head, tx_tail;
-    static uint8_t rx_errors;
-    static uint8_t tx_errors;
-    //uint8_t available();
-};
+    //              internal routings
+    static void     flush_rx();
+    static void     flush_tx();
+    static bool     write_char(const char chr);
+    //uint8_t       available();
+    //              internal data
+    static uint8_t  rx_buf[RX_BUF_SIZE];
+    static uint8_t  tx_buf[TX_BUF_SIZE];
+    static uint8_t  rx_head, rx_tail;
+    static uint8_t  tx_head, tx_tail;
+    static uint8_t  rx_errors;
+    static uint8_t  tx_errors;
+    using           regs = USART_traits <N>;
 
+};
 //------------------------------------------------------------------------------------------------
 #define ENABLE_UART(N, RX_BUF_SIZE, TX_BUF_SIZE) \
 using UART##N = UART <N, RX_BUF_SIZE, TX_BUF_SIZE>; \
 ISR(USART##N##_RX_vect)     { UART##N :: rx_interrupt(); } \
 ISR(USART##N##_UDRE_vect)   { UART##N :: tx_interrupt(); }
-#define ENABLE_UART0(RX, TX) ENABLE_UART(0, RX, TX)
-#define ENABLE_UART1(RX, TX) ENABLE_UART(1, RX, TX)
+
+#define ENABLE_UART0(RX_BUF_SIZE, TX_BUF_SIZE) ENABLE_UART(0, RX_BUF_SIZE, TX_BUF_SIZE)
+#define ENABLE_UART1(RX_BUF_SIZE, TX_BUF_SIZE) ENABLE_UART(1, RX_BUF_SIZE, TX_BUF_SIZE)
 //------------------------------------------------------------------------------------------------
 #include "avr-uart.tpp"
 //------------------------------------------------------------------------------------------------
