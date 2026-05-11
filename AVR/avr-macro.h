@@ -42,13 +42,13 @@
 #define enable_interrupts() __asm__ volatile ("sei")
 #define disable_interrupts() { __asm__ volatile ("cli"); }
 //------------------------------------------------------------------------------------------------
-class AtomicBlock
+class ATOMIC_BLOCK
 {
 private:
     uint8_t sreg;
 public:
-    AtomicBlock()   { sreg = SREG; disable_interrupts(); }
-    ~AtomicBlock()  { SREG = sreg; }
+    ATOMIC_BLOCK()   { sreg = SREG; disable_interrupts(); }
+    ~ATOMIC_BLOCK()  { SREG = sreg; }
 };
 #define ATOMIC_BLOCK AtomicBlock _atomic_;
 //------------------------------------------------------------------------------------------------

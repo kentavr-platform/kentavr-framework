@@ -16,9 +16,11 @@ struct USART_traits <N> { \
     static inline volatile uint16_t& BAUD  = _BAUD; \
 };
 template <uint8_t N> struct USART_traits;
+
 #ifdef __AVR_ATmega1284P__
-DEFINE_USART_REGS(0, UDR0, UDR0, UCSR0A, UCSR0A, UCSR0B, UCSR0C, UBRR0);
-DEFINE_USART_REGS(1, UDR1, UDR1, UCSR1A, UCSR1A, UCSR1B, UCSR1C, UBRR1);
+DEFINE_USART_REGS(0, UDR0, UDR0, UCSR0A, UCSR0A, UCSR0B, UCSR0C, UBRR0);  // RX = <D0>, TX = <D1>
+DEFINE_USART_REGS(1, UDR1, UDR1, UCSR1A, UCSR1A, UCSR1B, UCSR1C, UBRR1);  // RX = <D2>, TX = <D3>
+//------------------------------------------------------------------------------------------------
 // the following declarations use UART #0 bits because they are the same for UART #0 and UART #1
 #define RXEN    RXEN0
 #define TXEN    TXEN0
