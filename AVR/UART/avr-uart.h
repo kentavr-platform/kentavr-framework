@@ -40,9 +40,6 @@ enum UART_PARITY
     PARITY_ODD
 };
 //------------------------------------------------------------------------------------------------
-struct FlashStringWrapper { const char *str; };
-#define _flash(a) (FlashStringWrapper{PSTR(a)})
-//------------------------------------------------------------------------------------------------
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 class UART
 {

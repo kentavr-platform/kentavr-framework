@@ -1,0 +1,10 @@
+#ifndef IS_NUMBER_H
+#define IS_NUMBER_H
+//------------------------------------------------------------------------------------------------
+template <class Type>
+struct is_number
+{
+    static constexpr bool value = is_integer <Type> :: value || is_floating <Type> :: value;
+};
+//------------------------------------------------------------------------------------------------
+#endif // IS_NUMBER_H

@@ -9,19 +9,28 @@
 //------------------------------------------------------------------------------------------------
 #include <stdint.h>
 #include <avr/interrupt.h>
+
+// core utils
+#include "core/type_traits.h"
+
+// hardware-specific components drivers
 #include "AVR/avr-macro.h"
 #include "AVR/avr-delay.h"
 #include "AVR/GPIO/avr-gpio.h"
-#include "platform/pins.h"
+#include "AVR/GPIO/pins.h"
 #include "AVR/UART/avr-uart.h"
+#include "AVR/Serial/serial-bit-out.h"
+
+// external components drivers
 #include "LED/led.h"
+#include "Console/console.h"
 //------------------------------------------------------------------------------------------------
 
 /// Early init could be useful in some cases
 void early_init() __attribute__((naked, used, section(".init0")));
 
 //------------------------------------------------------------------------------------------------
-/** Enable and configure UARTs here
+/** Enable and configure hardware UARTs here
 
     All UART instances share the same driver implementation.
 
@@ -38,15 +47,12 @@ ENABLE_UARTx(
              RX_BUFFER_SIZE,  -- size of reception buffer (required)
              TX_BUFFER_SIZE,  -- size of transmission buffer (required)
 
-    Feel free to uncomment and modify the following lines.
+    Feel free to uncomment and modify the following lines to enable hardware UARTs.
                                                                                                 */
-ENABLE_UART0(4, 64);
-ENABLE_UART1(8, 2);
+// ENABLE_UART0(0, 128);
+// ENABLE_UART1(8, 8);
 
 //------------------------------------------------------------------------------------------------
-
-
-
 
 //------------------------------------------------------------------------------------------------
 #endif // CORE_H

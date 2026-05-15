@@ -447,7 +447,7 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(FlashStringWrapper fs)
 {
     if constexpr(TX_BUF_SIZE > 0)
     {
-        const char *ptr = fs.str;
+        PGM_P ptr = fs.str;
         uint8_t free = (tx_tail - tx_head - 1) & (TX_BUF_SIZE - 1);
         if(strlen_P(ptr) > free)
         {
@@ -472,7 +472,7 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(FlashStringWrapper
 {
     if constexpr(TX_BUF_SIZE > 0)
     {
-        const char *ptr = fs.str;
+        PGM_P ptr = fs.str;
         char ch;
         while ((ch = pgm_read_byte(ptr++)))
         {
@@ -492,7 +492,7 @@ __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(FlashStringWrap
     if constexpr(TX_BUF_SIZE > 0)
     {
         uint8_t count = 0;
-        const char *ptr = fs.str;
+        PGM_P ptr = fs.str;
         char ch;
         while((ch = pgm_read_byte(ptr++)))
         {
