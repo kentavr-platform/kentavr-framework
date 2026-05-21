@@ -123,6 +123,7 @@ public:
     template <class Type> void dump_mem(Type *ptr, size_t size, bool show_ascii = false);
     void        dump_flash(PGM_P ptr, size_t size, bool show_ascii = false);
     void        dump_eeprom(uint8_t *ptr, size_t size, bool show_ascii = false);
+    void        check_result(ResultCode code, bool show_OK = true);
 private:
     Stream      &stream;
     template <class Type> void _print_floating(Type value, const uint8_t align_digits);

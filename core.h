@@ -12,6 +12,7 @@
 
 // core utils
 #include "core/type_traits.h"
+#include "core/errors.h"
 
 // hardware-specific components drivers
 #include "AVR/avr-macro.h"

@@ -814,7 +814,16 @@ __inline void Console <Stream> :: _print_dump(const void *ptr, size_t size, bool
     }
 }
 //------------------------------------------------------------------------------------------------
-
+template <class Stream>
+__inline void Console <Stream> :: check_result(ResultCode code, bool show_OK)
+{
+    if(!show_OK && !code)
+    {
+        return;
+    }
+    log(FlashStringWrapper{err_id[code]});
+}
+//------------------------------------------------------------------------------------------------
 
 
 
