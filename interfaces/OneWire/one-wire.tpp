@@ -1,4 +1,9 @@
-//------------------------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------------------------
+ * one-wire.tpp
+ *
+ * ATTENTION! This file is included from one-wire.h and must NOT be built.
+ *
+//----------------------------------------------------------------------------------------------*/
 uint8_t Dallas_CRC8(const uint8_t *data, uint8_t len)
 {
     uint8_t crc = 0;
@@ -22,9 +27,6 @@ uint8_t Dallas_CRC8(const uint8_t *data, uint8_t len)
 template <class pin>
 __inline void OneWireBus <pin> :: _pull_down(uint16_t delay)
 {
-    // wait for the bus to become free
-    while(!GPIO <pin> :: read());
-
     // attach to the bus and release it after delay
     GPIO <pin> :: set_mode(OUTPUT_LOW);
     udelay(delay);
@@ -48,14 +50,15 @@ __inline void OneWireBus <pin> :: _write_zero()
 template <class pin>
 __inline uint8_t OneWireBus <pin> :: _read_bit()
 {
+    int8_t tmp = 0;
     ATOMIC_BLOCK
     {
         _pull_down(1);
         udelay(2);
-        int8_t tmp = GPIO <pin> :: read();
+        tmp = GPIO <pin> :: read();
         udelay(70 - 1);
-        return tmp;
     }
+    return tmp;
 }
 //------------------------------------------------------------------------------------------------
 template <class pin>
@@ -74,26 +77,33 @@ __inline void OneWireBus <pin> :: _write_bit(uint8_t bit)
     }
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Sends reset pulse and checks for device presence.
+ *
+ * @return 0 if at least one device responded (presence detected),
+ *         1 if no devices are present.
+ *
+ * @note 1-Wire presence pulse is active LOW.
+ */
 template <class pin>
 __inline uint8_t OneWireBus <pin> :: reset()
 {
-    ATOMIC_BLOCK
-    {
-        _pull_down(500);
-        udelay(70);
-        uint8_t tmp = GPIO <pin> :: read();
-        udelay(500 - 70);
-        return tmp;
-    }
+    _pull_down(480);
+    udelay(70);
+    uint8_t tmp = GPIO <pin> :: read();
+    udelay(480 - 70 + 5);
+    return tmp;
 }
 //------------------------------------------------------------------------------------------------
 /**
- * Returns true while one or more 1-Wire devices
- * are performing temperature conversion.
+ * @brief Checks if any device is currently performing conversion.
  *
  * Valid after CONVERT T command.
  *
- * For externally powered devices only.
+ * @return true if bus reads LOW (device busy),
+ *         false otherwise.
+ *
+ * @note VFor externally powered devices only.
  */
 template <class pin>
 __inline bool OneWireBus <pin> :: busy()
@@ -101,6 +111,11 @@ __inline bool OneWireBus <pin> :: busy()
     return _read_bit() == 0;
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Writes a byte to 1-Wire bus (LSB-first).
+ *
+ * @param data Byte to transmit.
+ */
 template <class pin>
 __inline void OneWireBus <pin> :: write_byte(uint8_t data)
 {
@@ -118,52 +133,103 @@ __inline void OneWireBus <pin> :: write_byte(uint8_t data)
     }
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Reads a single byte from 1-Wire bus (LSB-first).
+ *
+ * @return Received byte.
+ */
 template <class pin>
 __inline uint8_t OneWireBus <pin> :: read_byte()
 {
     uint8_t tmp = 0;
     for(uint8_t i = 0; i < 8; i++)
     {
-        tmp >>= 1;
-        tmp |= _read_bit() ? 0x80 : 0;
+        tmp |= (_read_bit() << i);
     }
     return tmp;
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Reads a 16-bit word from 1-Wire bus.
+ *
+ * @return Received word (LSB-first).
+ */
 template <class pin>
 __inline uint16_t OneWireBus <pin> :: read_word()
 {
-    uint8_t tmp = 0;
+    uint16_t tmp = 0;
     for(uint8_t i = 0; i < 16; i++)
     {
-        tmp >>= 1;
-        tmp |= _read_bit() ? 0x8000 : 0;
+        tmp |= (_read_bit() << i);
     }
     return tmp;
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Starts ROM search and returns first discovered device.
+ *
+ * @param addr Output ROM address.
+ * @return true if device found, false otherwise.
+ */
 template <class pin>
 __inline bool OneWireBus <pin> :: find_first(OneWireAddress &addr)
 {
-    find_reset();
+    find_reset(addr);
     return find_next(addr);
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Continues ROM search to find next device.
+ *
+ * @param addr Output ROM address.
+ * @return true if next device found, false if no more devices exist.
+ */
 template <class pin>
 __inline bool OneWireBus <pin> :: find_next(OneWireAddress &addr)
 {
     return _find(addr, 0xF0);  // ‎CMD ROM SEARCH
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Searches for devices in alarm state (ALARM SEARCH command).
+ *
+ * @param addr Output ROM address.
+ * @return true if alarm device found.
+ */
 template <class pin>
 __inline bool OneWireBus <pin> :: find_alarm(OneWireAddress &addr)
 {
     return _find(addr, 0xEC);  // ‎CMD ALARM SEARCH
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Resets ROM search state machine.
+ *
+ * Must be called before starting a new enumeration sequence.
+ *
+ * @param addr ROM address buffer to be cleared before next search starts.
+ *
+ * @note Application should provide a clear address for next search call.
+ */
 template <class pin>
 __inline void OneWireBus <pin> :: find_reset()
 {
+    _last_discrepancy = 0;
+    _last_device = false;
+}
+//------------------------------------------------------------------------------------------------
+/**
+ * @brief Resets ROM search state machine and prepairs OneWireAddress for
+ * the new search after a previous one.
+ *
+ * Must be called before starting a new enumeration sequence.
+ *
+ * @param addr ROM address buffer to be cleared before next search starts.
+ */
+template <class pin>
+__inline void OneWireBus <pin> :: find_reset(OneWireAddress &addr)
+{
+    addr = {0};
     _last_discrepancy = 0;
     _last_device = false;
 }
@@ -191,6 +257,9 @@ __inline bool OneWireBus <pin> :: _find(OneWireAddress &addr, uint8_t mode)
     uint8_t rom_byte = 0;
     uint8_t rom_mask = 1;
     uint8_t discrepancy_marker = 0;
+    uint8_t saved_discrepancy = _last_discrepancy;
+    bool saved_last_device = _last_device;
+    OneWireAddress path = addr;
 
     while(bit_index <= 64)
     {
@@ -217,7 +286,7 @@ __inline bool OneWireBus <pin> :: _find(OneWireAddress &addr, uint8_t mode)
             if(bit_index < _last_discrepancy)
             {
                 // follow previous path
-                selected_bit = (addr.data[rom_byte] & rom_mask) ? 1 : 0;
+                selected_bit = (path.data[rom_byte] & rom_mask) ? 1 : 0;
             }
             else if(bit_index == _last_discrepancy)
             {
@@ -239,11 +308,11 @@ __inline bool OneWireBus <pin> :: _find(OneWireAddress &addr, uint8_t mode)
         // store selected bit
         if(selected_bit)
         {
-            addr.data[rom_byte] |= rom_mask;
+            path.data[rom_byte] |= rom_mask;
         }
         else
         {
-            addr.data[rom_byte] &= ~rom_mask;
+            path.data[rom_byte] &= ~rom_mask;
         }
         _write_bit(selected_bit);
 
@@ -263,17 +332,27 @@ __inline bool OneWireBus <pin> :: _find(OneWireAddress &addr, uint8_t mode)
         _last_device = true;
     }
 
-    if(Dallas_CRC8(addr.data, 7) != addr.crc())
+    if(Dallas_CRC8(path.data, 7) != path.crc())
     {
+        _last_discrepancy = saved_discrepancy;
+        _last_device = saved_last_device;
         _last_error = ERR_BAD_CHECKSUM;
         return false;
     }
-
+    addr = path;
     _last_error = OK;
     return true;
 }
 //------------------------------------------------------------------------------------------------
-// select device without presense guarantee
+/**
+ * @brief Selects a specific device by its address.
+ *
+ * @param addr Target device address.
+ *
+ * @return true if bus reset succeeded and command was sent.
+ *
+ * @note Does not verify device presence after selection.
+ */
 template <class pin>
 __inline bool OneWireBus <pin> :: select_device(const OneWireAddress &addr)
 {
@@ -291,7 +370,14 @@ __inline bool OneWireBus <pin> :: select_device(const OneWireAddress &addr)
     return true;
 }
 //------------------------------------------------------------------------------------------------
-// select device without presense guarantee
+/**
+ * @brief Selects all devices on the bus (broadcast mode).
+ *
+ * The next command will be processed by all the devices
+ * (if supported).
+ *
+ * @return true if bus reset succeeded.
+ */
 template <class pin>
 __inline bool OneWireBus <pin> :: start_broadcast()
 {
@@ -305,6 +391,11 @@ __inline bool OneWireBus <pin> :: start_broadcast()
     return true;
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Returns last bus operation error code.
+ *
+ * @return ResultCode of last operation.
+ */
 template <class pin>
 __inline ResultCode OneWireBus <pin> :: last_error()
 {

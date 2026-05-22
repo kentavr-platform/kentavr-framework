@@ -29,9 +29,10 @@
 // external components drivers
 #include "LED/led.h"
 #include "Console/console.h"
+#include "sensors/DS1820/DS18x20.h"
+#include "sensors/DS1820/DS1820.h"
+#include "sensors/DS18S20/DS18S20.h"
 #include "sensors/DS18B20/DS18B20.h"
-#include "sensors/DS1822/DS1822.h"
-#include "sensors/DS1825/DS1825.h"
 //------------------------------------------------------------------------------------------------
 
 /// Early init could be useful in some cases

@@ -121,8 +121,11 @@
 		<Unit filename="interfaces/OneWire/one-wire.h" />
 		<Unit filename="interfaces/OneWire/one-wire.tpp" />
 		<Unit filename="main.cpp" />
-		<Unit filename="sensors/DS1820/DS1820.h" />
-		<Unit filename="sensors/DS1820/DS1820.tpp" />
+		<Unit filename="sensors/DS1822/DS1822.h" />
+		<Unit filename="sensors/DS1825/DS1825.h" />
+		<Unit filename="sensors/DS18B20/DS18B20.h" />
+		<Unit filename="sensors/DS18x20/DS18x20.h" />
+		<Unit filename="sensors/DS18x20/DS18x20.tpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

@@ -1,25 +1,18 @@
-#ifndef DS18B20_H
-#define DS18B20_H
+#ifndef DS1820_H
+#define DS1820_H
 //------------------------------------------------------------------------------------------------
 #ifndef DS18X20_H
 #error Include sensors/DS18X20 header file first
 #endif
 //------------------------------------------------------------------------------------------------
-enum DS_Temp_Resolution
-{
-    BITS_9  = 0x1F,     // LSB = 0.5 deg C
-    BITS_10 = 0x3F,     // LSB = 0.25 deg C
-    BITS_11 = 0x5F,     // LSB = 0.125 deg C
-    BITS_12 = 0x7F      // LSB = 0.0625 deg C
-};
-//------------------------------------------------------------------------------------------------
 /**
- * @brief Driver for DS18B20 1-Wire temperature sensor.
+ * @brief Driver for DS18S20 1-Wire temperature sensor.
  *
  * This class provides a concrete specialization of the generic
- * Protocol_DS18x20 for the legacy DS18B20 devices.
+ * Protocol_DS18x20 for the legacy DS18S20 devices.
   *
- * These sensors use configurable 9...12-bit resolution.
+ * These sensors use 9-bit resolution with extended resolution
+ * computation based on count_per_c / count_remain.
  *
  * Typical usage example:
  *
@@ -30,8 +23,7 @@ enum DS_Temp_Resolution
  *
  *  if(bus.find_first(addr))
  *  {
- *      Sensor_DS18B20 sensor(bus, addr);
- *      sensor.set_resolution(BITS_10);
+ *      Sensor_DS1820 sensor(bus, addr);
  *      sensor.start_conversion();
  *      ...
  *      sensor.get_temperature(temp);
@@ -39,7 +31,7 @@ enum DS_Temp_Resolution
  *      sensor.set_alarm(15, 25);
  *  }
  *  ...
- *  Sensor_DS18B20_Group all_sensors(bus);
+ *  Sensor_DS1820_Group all_sensors(bus);
  *  all_sensors.start_conversion();
  *  ...
  *  bus.find_reset(addr);
@@ -58,25 +50,22 @@ enum DS_Temp_Resolution
  * @tparam Bus OneWire bus object
  */
 template <class Bus>
-class Sensor_DS18B20 : public Protocol_DS18x20 <Bus, B20_Family>
+class Sensor_DS1820 : public Protocol_DS18x20 <Bus, S20_Family>
 {
 public:
-    using Protocol_DS18x20 <Bus, B20_Family> :: Protocol_DS18x20;
-    ResultCode        set_resolution(enum DS_Temp_Resolution bits, bool make_default = false);
+    using Protocol_DS18x20 <Bus, S20_Family> :: Protocol_DS18x20;
 };
 template <class Bus>
-Sensor_DS18B20(Bus&, const OneWireAddress&) -> Sensor_DS18B20 <Bus>;
+Sensor_DS1820(Bus&, const OneWireAddress&) -> Sensor_DS1820 <Bus>;
 //------------------------------------------------------------------------------------------------
 template <class Bus>
-class Sensor_DS18B20_Group : public Protocol_DS18x20_Group <Bus, B20_Family>
+class Sensor_DS1820_Group : public Protocol_DS18x20_Group <Bus, S20_Family>
 {
 public:
-    using Protocol_DS18x20_Group <Bus, B20_Family> :: Protocol_DS18x20_Group;
+    using Protocol_DS18x20_Group <Bus, S20_Family> :: Protocol_DS18x20_Group;
     bool is_valid() = delete;
 };
 template <class Bus>
-Sensor_DS18B20_Group(Bus&) -> Sensor_DS18B20_Group <Bus>;
-//------------------------------------------------------------------------------------------------
-#include "DS18B20.tpp"
+Sensor_DS1820_Group(Bus&) -> Sensor_DS1820_Group <Bus>;
 //------------------------------------------------------------------------------------------------
 #endif
