@@ -19,6 +19,8 @@
 					<Add directory="./" />
 					<Add directory="Serial" />
 					<Add directory="Console" />
+					<Add directory="sensors/DS1820" />
+					<Add directory="interfaces/OneWire" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega1284p" />
@@ -37,6 +39,8 @@
 					<Add directory="./" />
 					<Add directory="Serial" />
 					<Add directory="Console" />
+					<Add directory="sensors/DS1820" />
+					<Add directory="interfaces/OneWire" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="avr128db48" />
@@ -103,6 +107,9 @@
 		<Unit filename="LED/led.h" />
 		<Unit filename="LED/led.tpp" />
 		<Unit filename="core.h" />
+		<Unit filename="core/CRC/CRC.cpp" />
+		<Unit filename="core/CRC/CRC.h" />
+		<Unit filename="core/errors.h" />
 		<Unit filename="core/type_traits.h" />
 		<Unit filename="core/type_traits/is_enum.h" />
 		<Unit filename="core/type_traits/is_floating.h" />
@@ -110,9 +117,15 @@
 		<Unit filename="core/type_traits/is_integer.h" />
 		<Unit filename="core/type_traits/is_number.h" />
 		<Unit filename="core/type_traits/is_pointer.h" />
+		<Unit filename="core/units.h" />
+		<Unit filename="interfaces/OneWire/one-wire.h" />
+		<Unit filename="interfaces/OneWire/one-wire.tpp" />
 		<Unit filename="main.cpp" />
-		<Unit filename="utils/byteStack.h" />
-		<Unit filename="utils/other-macro.h" />
+		<Unit filename="sensors/DS1822/DS1822.h" />
+		<Unit filename="sensors/DS1825/DS1825.h" />
+		<Unit filename="sensors/DS18B20/DS18B20.h" />
+		<Unit filename="sensors/DS18x20/DS18x20.h" />
+		<Unit filename="sensors/DS18x20/DS18x20.tpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

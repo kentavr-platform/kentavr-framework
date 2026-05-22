@@ -13,6 +13,7 @@
 // core utils
 #include "core/type_traits.h"
 #include "core/errors.h"
+#include "core/units.h"
 
 // hardware-specific components drivers
 #include "AVR/avr-macro.h"
@@ -22,9 +23,16 @@
 #include "AVR/UART/avr-uart.h"
 #include "AVR/Serial/serial-bit-out.h"
 
+// external interfaces
+#include "interfaces/OneWire/one-wire.h"
+
 // external components drivers
 #include "LED/led.h"
 #include "Console/console.h"
+#include "sensors/DS1820/DS18x20.h"
+#include "sensors/DS1820/DS1820.h"
+#include "sensors/DS18S20/DS18S20.h"
+#include "sensors/DS18B20/DS18B20.h"
 //------------------------------------------------------------------------------------------------
 
 /// Early init could be useful in some cases
