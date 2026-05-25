@@ -17,7 +17,7 @@ struct DebugHEX
 //------------------------------------------------------------------------------------------------
 // default console-printable value (may be overriten for variable classes)
 template <class Type>
-__inline Type console_value(Type value)     { return value; }
+__inline Type console_value(const Type &value)     { return value; }
 //------------------------------------------------------------------------------------------------
 // default Object type-namer = empty string
 template <class Type>

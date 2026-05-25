@@ -130,8 +130,8 @@ public:
     void        print(float value, const uint8_t align_digits = 3);
     void        print(double value, const uint8_t align_digits = 3);
     void        print(FlashStringWrapper fs);
-    template <class Type> void print(Type *ptr);      // writer for pointers
-    template <class Type> void print(Type value);     // default writer (for variable integers)
+    template <class Type> void print(const Type *ptr);      // writer for pointers
+    template <class Type> void print(const Type &value);    // default writer (for variable integers)
     void        print_ln();
     //          decorators
     void        clear();
@@ -149,8 +149,8 @@ public:
     void        reset_style();
     //          debugging methods
     void        log(const char *str);
-    template <class Type> void log(Type value);
-    template <class Type> void log(Type *ptr);
+    template <class Type> void log(const Type *ptr);
+    template <class Type> void log(const Type &value);
     template <class Type> void log(const DebugDEC <Type> &some);
     template <class Type> void log(const DebugHEX <Type> &some);
     void        dump_mem(const uint8_t *ptr, size_t size, bool show_ascii = false);

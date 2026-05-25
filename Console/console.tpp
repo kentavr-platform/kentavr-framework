@@ -28,7 +28,7 @@ __inline void Console <Stream> :: log(const char *str)
  */
 template <class Stream>
 template <class Type>
-__inline void Console <Stream> :: log(Type value)
+__inline void Console <Stream> :: log(const Type &value)
 {
     print(value);
     print_ln();
@@ -51,7 +51,7 @@ __inline void Console <Stream> :: log(Type value)
  */
 template <class Stream>
 template <class Type>
-__inline void Console <Stream> :: log(Type *ptr)
+__inline void Console <Stream> :: log(const Type *ptr)
 {
     print(ptr);
     print_ln();
@@ -76,7 +76,7 @@ __inline void Console <Stream> :: log(Type *ptr)
  */
 template <class Stream>
 template <class Type>
-__inline void Console <Stream> :: print(Type value)
+__inline void Console <Stream> :: print(const Type &value)
 {
     if constexpr(is_nostream <Stream> :: value)
     {
@@ -133,7 +133,7 @@ __inline void Console <Stream> :: print(Type value)
  */
 template <class Stream>
 template <class Type>
-__inline void Console <Stream> :: print(Type *ptr)
+__inline void Console <Stream> :: print(const Type *ptr)
 {
     if constexpr(is_function <Type> :: value)
     {
