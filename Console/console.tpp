@@ -19,14 +19,11 @@ __inline void Console <Stream> :: log(const char *str)
 }
 //------------------------------------------------------------------------------------------------
 /**
- * @brief Writes integer or enum value followed by CRLF.
+ * @brief Writes a value followed by CRLF.
  *
- * This is a "default" method for logging other unoverloaded types, that
- * expects and supports only
- * - integer types,
- * - enum types.
+ * Supports the same normalization and fallback
+ * rules as Console :: print().
  *
- * @tparam Type Integer or enum type.
  * @param value Value to print.
  */
 template <class Stream>
@@ -38,52 +35,102 @@ __inline void Console <Stream> :: log(Type value)
 }
 //------------------------------------------------------------------------------------------------
 /**
- * @brief Writes pointer's address in hexadecimal form followed by CRLF.
+ * @brief Writes a pointer value followed by CRLF.
  *
- * Outputs pointer address as:
+ * Prints the pointer using Console::print(ptr)
+ * and appends CRLF.
+ *
+ * Object pointers are printed as their hexadecimal addresses.
  * @code
  * 0x1234
  * @endcode
  *
- * @tparam Type Pointer type.
+ * Function pointers are printed as "Function".
+ *
  * @param ptr Pointer value.
  */
- template <class Stream>
+template <class Stream>
 template <class Type>
 __inline void Console <Stream> :: log(Type *ptr)
 {
-    static_assert(!is_function <Type> :: value, "Function pointers are not supported.");
-    stream.write(_flash("0x"));
-    _write_hex <sizeof(uintptr_t) * 2> ((uintptr_t)ptr);
+    print(ptr);
     print_ln();
 }
 //------------------------------------------------------------------------------------------------
 /**
- * @brief Writes integer or enum value in decimal form.
+ * @brief Writes a value in default form.
  *
- * Supports:
- * - signed integers,
- * - unsigned integers,
- * - enum types.
+ * The value is normalized through console_value()
+ * before formatting.
  *
- * Conversion is performed without libc formatting functions.
+ * Supported normalized output kinds:
+ * - integer values,
+ * - enum values,
+ * - function values as "Function",
+ * - "Object(TypeName)" if TypeName is provided,
+ * - "Object" for other objects.
  *
- * @tparam Type Integer or enum type.
+ * TypeName is provided by console_type_name() in the type module.
+ *
  * @param value Value to print.
  */
 template <class Stream>
 template <class Type>
 __inline void Console <Stream> :: print(Type value)
 {
-    static_assert(is_integer <Type> :: value || is_enum <Type> :: value,
-                  "Integer values were expected here.");
-    if constexpr(is_enum <Type> :: value)
+    using Value = decltype(console_value(value));
+    if constexpr(is_integer <Value> :: value)
     {
-        _write_int((__underlying_type(Type))value);
+        Value v = console_value(value);
+        _write_int(v);
+    }
+    else if constexpr(is_enum <Value> :: value)
+    {
+        Value v = console_value(value);
+        _write_int((__underlying_type(Value))v);
+    }
+    else if constexpr(is_function <Value> :: value)
+    {
+        stream.write(_flash("Function"));
     }
     else
     {
-        _write_int(value);
+        stream.write(_flash("Object"));
+        FlashStringWrapper name = console_type_name(value);
+        if(name.str)
+        {
+            stream.write('(');
+            stream.write(name);
+            stream.write(')');
+        }
+    }
+}
+//------------------------------------------------------------------------------------------------
+/**
+ * @brief Writes a pointer value.
+ *
+ * Object pointers are printed as their hexadecimal addresses.
+ * @code
+ * 0x1234
+ * @endcode
+ *
+ * Function pointers are printed as "Function".
+ *
+ * @param ptr Pointer value.
+ */
+template <class Stream>
+template <class Type>
+__inline void Console <Stream> :: print(Type *ptr)
+{
+    if constexpr(is_function <Type> :: value)
+    {
+        (void) ptr;
+        stream.write(_flash("Function"));
+    }
+    else
+    {
+        stream.write(_flash("0x"));
+        _write_hex <sizeof(uintptr_t) * 2>((uintptr_t)ptr);
     }
 }
 //------------------------------------------------------------------------------------------------
@@ -142,10 +189,10 @@ __inline void Console <Stream> :: print(FlashStringWrapper fs)
  * Output uses fixed-point notation only.
  * Scientific notation is NOT supported.
  *
- * May expose special values (NaN, INF, -INF)
+ * Supports special values, such as NaN, INF and -INF.
  *
  * @param value Floating-point value.
- * @param align_digits Number of digits after decimal point.
+ * @param align_digits Number of decimal digits for non-zero values.
  */
 template <class Stream>
 __inline void Console <Stream> :: print(float value, const uint8_t align_digits)
@@ -162,7 +209,7 @@ __inline void Console <Stream> :: print(float value, const uint8_t align_digits)
  * Supports special values (NaN, INF, -INF).
  *
  * @param value Floating-point value.
- * @param align_digits Number of digits after decimal point.
+ * @param align_digits Number of decimal digits for non-zero values.
  */
 template <class Stream>
 __inline void Console <Stream> :: print(double value, const uint8_t align_digits)
@@ -176,7 +223,6 @@ __inline void Console <Stream> :: print(double value, const uint8_t align_digits
  * Produces fixed-point decimal output without
  * using libc formatting functions.
  *
- * @tparam Type Floating-point type.
  * @param value Floating-point value.
  * @param align_digits Number of digits after decimal point OR first meaning digit.
  */
@@ -332,7 +378,6 @@ __inline void Console <Stream> :: home()
     stream.write(_flash("\x1B[H"));
 }
 //------------------------------------------------------------------------------------------------
-template <class Stream>
 /**
  * @brief Moves cursor to specified screen coordinates.
  *
@@ -346,6 +391,7 @@ template <class Stream>
  *
  * Requires ANSI-compatible terminal support.
  */
+template <class Stream>
 __inline void Console <Stream> :: goto_xy(uint8_t pos, uint8_t line)
 {
     stream.write(_flash("\x1B["));
@@ -504,7 +550,6 @@ __inline void Console <Stream> :: set_background(uint8_t bg_color)
  *
  * Supports both signed and unsigned integer types and enums.
  *
- * @tparam Type Integer type.
  * @param value Integer value to write.
  */
 template <class Stream>
@@ -553,7 +598,6 @@ __inline void Console <Stream> :: _write_int(Type value)
  * If width is zero, full type width is used automatically.
  *
  * @tparam width Fixed hexadecimal width in digits.
- * @tparam Type Integer type.
  * @param value Value to write in hexadecimal form.
  */
 template <class Stream>
@@ -569,9 +613,9 @@ inline void Console <Stream> :: _write_hex(Type value)
 }
 //------------------------------------------------------------------------------------------------
 /**
- * @brief Writes named integer value in decimal form.
+ * @brief Writes a named value in its default form.
  *
- * Useful for debugging variables.
+ * Useful for debugging variables through VAR(...).
  *
  * Output format:
  * @code
@@ -580,19 +624,15 @@ inline void Console <Stream> :: _write_hex(Type value)
  *
  * Automatically appends CRLF.
  *
- * Pointer types are not allowed.
- *
- * @tparam Type Any integer or enum type.
  * @param some Debug wrapper object.
  */
 template <class Stream>
 template <class Type>
 __inline void Console <Stream> :: log(const DebugDEC <Type> &some)
 {
-    static_assert(!is_pointer <Type> :: value, "Pointers are not allowed here!");
     stream.write(some.name);
     stream.write(_flash("="));
-    _write_int(some.value);
+    print(some.value);
     print_ln();
 }
 //------------------------------------------------------------------------------------------------
@@ -608,9 +648,8 @@ __inline void Console <Stream> :: log(const DebugDEC <Type> &some)
  *
  * Automatically appends CRLF.
  *
- * Pointer types are not allowed.
+ * Pointer types are intentionally rejected.
  *
- * @tparam Type Integer type.
  * @param some Debug wrapper object.
  */
 template <class Stream>
@@ -814,6 +853,14 @@ __inline void Console <Stream> :: _print_dump(const void *ptr, size_t size, bool
     }
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Prints textual representation of ResultCode.
+ *
+ * Successful "OK" result may optionally be suppressed.
+ *
+ * @param code Result code value.
+ * @param show_OK Enables printing of successful result.
+ */
 template <class Stream>
 __inline void Console <Stream> :: check_result(ResultCode code, bool show_OK)
 {

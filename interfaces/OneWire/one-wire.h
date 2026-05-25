@@ -63,6 +63,8 @@ uint8_t Dallas_CRC8(const uint8_t *data, uint8_t len);
 template <class Type> struct is_OneWireBus : false_type {};
 template <class pin>  struct is_OneWireBus <OneWireBus<pin>>  : true_type {};
 //------------------------------------------------------------------------------------------------
+SET_CONSOLE_TEMPLATE_TYPE_NAME(OneWireBus);
+//------------------------------------------------------------------------------------------------
 #include "one-wire.tpp"
 //------------------------------------------------------------------------------------------------
 #endif

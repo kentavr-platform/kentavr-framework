@@ -144,6 +144,13 @@ _ENABLE_UART_TX_ISR(N, TX_BUF_SIZE)
 #define ENABLE_UART0(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(0, RX_BUF_SIZE, TX_BUF_SIZE)
 #define ENABLE_UART1(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(1, RX_BUF_SIZE, TX_BUF_SIZE)
 //------------------------------------------------------------------------------------------------
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline FlashStringWrapper
+console_type_name(const UART<N, RX_BUF_SIZE, TX_BUF_SIZE> &)
+{
+    return _flash("UART");
+}
+//------------------------------------------------------------------------------------------------
 #include "avr-uart.tpp"
 //------------------------------------------------------------------------------------------------
 #endif // AVR_UART_H

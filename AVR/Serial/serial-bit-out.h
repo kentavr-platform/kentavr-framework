@@ -31,6 +31,12 @@ private:
     static constexpr uint32_t _bit_delay = (F_CPU + baud / 2) / baud - _bit_cycles;
 };
 //------------------------------------------------------------------------------------------------
+template <class pin, uint32_t baud>
+FlashStringWrapper console_type_name(const SerialBitOut <pin, baud> &)
+{
+    return _flash("SerialBitOut");
+}
+//------------------------------------------------------------------------------------------------
 #include "serial-bit-out.tpp"
 //------------------------------------------------------------------------------------------------
 #endif // SERIAL_BITOUT_H

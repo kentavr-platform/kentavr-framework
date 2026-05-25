@@ -18,9 +18,11 @@
 // hardware-specific components drivers
 #include "AVR/avr-macro.h"
 #include "AVR/avr-delay.h"
+#include "Console/debug.h"
 #include "AVR/GPIO/avr-gpio.h"
 #include "AVR/GPIO/pins.h"
 #include "AVR/UART/avr-uart.h"
+#include "AVR/EEPROM/avr-eeprom.h"
 #include "AVR/Serial/serial-bit-out.h"
 
 // external interfaces

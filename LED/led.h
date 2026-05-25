@@ -167,6 +167,20 @@ public:
     void off();
 };
 //------------------------------------------------------------------------------------------------
+// console namers:
+SET_CONSOLE_TEMPLATE_TYPE_NAME(LED_A);
+SET_CONSOLE_TEMPLATE_TYPE_NAME(LED_C);
+
+SET_CONSOLE_TEMPLATE_TYPE_NAME(RG_LED_CC);
+SET_CONSOLE_TEMPLATE_TYPE_NAME(RB_LED_CC);
+SET_CONSOLE_TEMPLATE_TYPE_NAME(GB_LED_CC)
+SET_CONSOLE_TEMPLATE_TYPE_NAME(RGB_LED_CC);
+
+SET_CONSOLE_TEMPLATE_TYPE_NAME(RG_LED_CA);
+SET_CONSOLE_TEMPLATE_TYPE_NAME(RB_LED_CA);
+SET_CONSOLE_TEMPLATE_TYPE_NAME(GB_LED_CA)
+SET_CONSOLE_TEMPLATE_TYPE_NAME(RGB_LED_CA);
+//------------------------------------------------------------------------------------------------
 #include "led.tpp"
 //------------------------------------------------------------------------------------------------
 #endif // LED_H

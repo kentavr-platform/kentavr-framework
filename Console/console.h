@@ -67,7 +67,6 @@
 //------------------------------------------------------------------------------------------------
 #include <limits.h>
 #include <avr/eeprom.h>
-#include "debug.h"
 //------------------------------------------------------------------------------------------------
 enum class MemoryArea : uint8_t
 {
@@ -97,7 +96,8 @@ public:
     void        print(float value, const uint8_t align_digits = 3);
     void        print(double value, const uint8_t align_digits = 3);
     void        print(FlashStringWrapper fs);
-    template <class Type> void print(Type value);     // default writer for variable integers
+    template <class Type> void print(Type *ptr);      // writer for pointers
+    template <class Type> void print(Type value);     // default writer (for variable integers)
     void        print_ln();
     //          decorators
     void        clear();
@@ -131,6 +131,8 @@ private:
     template <class Type> void _write_int(Type value);
     template <uint8_t width = 0, class Type> void _write_hex(Type value);
 };
+//------------------------------------------------------------------------------------------------
+SET_CONSOLE_TEMPLATE_TYPE_NAME(Console);
 //------------------------------------------------------------------------------------------------
 #include "console.tpp"
 //------------------------------------------------------------------------------------------------

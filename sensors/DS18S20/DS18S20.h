@@ -69,4 +69,7 @@ public:
 template <class Bus>
 Sensor_DS18S20_Group(Bus&) -> Sensor_DS18S20_Group <Bus>;
 //------------------------------------------------------------------------------------------------
+SET_CONSOLE_TEMPLATE_TYPE_NAME(Sensor_DS18S20);
+SET_CONSOLE_TEMPLATE_TYPE_NAME(Sensor_DS18S20_Group);
+//------------------------------------------------------------------------------------------------
 #endif
