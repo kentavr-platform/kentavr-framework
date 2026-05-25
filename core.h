@@ -10,10 +10,11 @@
 #include <stdint.h>
 #include <avr/interrupt.h>
 
-// core utils
+// core modules
 #include "core/type_traits.h"
 #include "core/errors.h"
 #include "core/units.h"
+#include "core/nostream.h"
 
 // hardware-specific components drivers
 #include "AVR/avr-macro.h"

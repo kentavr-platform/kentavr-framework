@@ -14,14 +14,16 @@
  * - building embedded command shells,
  * - debugging output.
  *
- * Features:
- * - integer and enum printing,
- * - floating-point formatting without libc,
- * - RAM and FLASH string support,
- * - ANSI terminal control sequences,
- * - hexadecimal memory dump utilities,
- * - EEPROM and FLASH dumping support,
- * - lightweight debug logging helpers.
+ * Supports:
+ * - plain values through print() / log(),
+ * - pointer addresses,
+ * - named debug wrappers VAR(...) and REG(...),
+ * - terminal control sequences,
+ * - RAM / FLASH / EEPROM memory dumps.
+ *
+ * Values are normalized through console_value() before formatting.
+ * Unsupported object values are printed as "Object" or "Object(TypeName)"
+ * when console_type_name() is provided by the corresponding type module.
  *
  * Characteristics:
  * - no dynamic allocation,
@@ -60,6 +62,37 @@
  * @endcode
  *
  * ANSI-related methods require compatible terminal support.
+ *
+ *
+ * @note Disabled console mode
+ *
+ * When console is instantiated without a stream, it is completely disabled
+ * at run-time and almost completely cleared from code while all the methods
+ * calls are still supported. This mode is useful for disabling debug outputs
+ * without changing user code.
+ *
+ * Example:
+ *
+ * @code
+ * #ifdef DEBUG
+ *   SerialBitOut <D1, 2000000> debug_stream;
+ *   Console console(debug_stream);
+ * #else
+ *   Console console;   // creates no-output console
+ * #endif
+ * ...
+ * console.clear();
+ * console.log(_flash("DEBUG READY"));
+ * ...
+ * @endcode
+ *
+ * @warning Use Console console; or Console console{}; for a no-output console.
+ * Console console(); declares a function, not an object!
+ *
+ * @warning Disabled console mode suppresses output and formatting code,
+ * but arguments passed to methods may still be evaluated by C++ rules.
+ * Avoid side-effect or expensive expressions in debug-only calls when
+ * they must disappear completely.
  */
  //------------------------------------------------------------------------------------------------
 #ifndef CONSOLE_H
@@ -85,10 +118,11 @@ enum class MemoryArea : uint8_t
  *
  * @tparam Stream Output stream implementation.
  */
-template <class Stream>
+template <class Stream = _nostream>
 class Console
 {
 public:
+    Console() : stream(__nostream()) {};
     explicit    Console(Stream& stream) : stream(stream) {};
     //          writers
     void        print(bool value);
@@ -126,11 +160,15 @@ public:
     void        check_result(ResultCode code, bool show_OK = true);
 private:
     Stream      &stream;
+    static Stream &__nostream() { static Stream stream; return stream; }
     template <class Type> void _print_floating(Type value, const uint8_t align_digits);
     template <MemoryArea> void _print_dump(const void *ptr, size_t size, bool show_ascii);
     template <class Type> void _write_int(Type value);
     template <uint8_t width = 0, class Type> void _write_hex(Type value);
 };
+//------------------------------------------------------------------------------------------------
+template <class Stream> Console(Stream &) -> Console<Stream>;
+Console() -> Console<>;
 //------------------------------------------------------------------------------------------------
 SET_CONSOLE_TEMPLATE_TYPE_NAME(Console);
 //------------------------------------------------------------------------------------------------

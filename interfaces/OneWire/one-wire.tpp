@@ -4,7 +4,7 @@
  * ATTENTION! This file is included from one-wire.h and must NOT be built.
  *
 //----------------------------------------------------------------------------------------------*/
-uint8_t Dallas_CRC8(const uint8_t *data, uint8_t len)
+__inline uint8_t Dallas_CRC8(const uint8_t *data, uint8_t len)
 {
     uint8_t crc = 0;
     for(uint8_t i = 0; i < len; i++)

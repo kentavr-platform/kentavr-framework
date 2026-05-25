@@ -1,0 +1,23 @@
+#ifndef NOSTREAM_H
+#define NOSTREAM_H
+//------------------------------------------------------------------------------------------------
+struct _nostream
+{
+    // empty stream
+    template <class Type>
+    __inline void write(Type) {};
+};
+//------------------------------------------------------------------------------------------------
+template <class Stream>
+struct is_nostream
+{
+    static constexpr bool value = false;
+};
+//------------------------------------------------------------------------------------------------
+template <>
+struct is_nostream <_nostream>
+{
+    static constexpr bool value = true;
+};
+//------------------------------------------------------------------------------------------------
+#endif

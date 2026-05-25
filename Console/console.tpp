@@ -78,30 +78,43 @@ template <class Stream>
 template <class Type>
 __inline void Console <Stream> :: print(Type value)
 {
-    using Value = decltype(console_value(value));
-    if constexpr(is_integer <Value> :: value)
+    if constexpr(is_nostream <Stream> :: value)
     {
-        Value v = console_value(value);
-        _write_int(v);
-    }
-    else if constexpr(is_enum <Value> :: value)
-    {
-        Value v = console_value(value);
-        _write_int((__underlying_type(Value))v);
-    }
-    else if constexpr(is_function <Value> :: value)
-    {
-        stream.write(_flash("Function"));
+        (void) value;
+        return;
     }
     else
     {
-        stream.write(_flash("Object"));
-        FlashStringWrapper name = console_type_name(value);
-        if(name.str)
+        using Value = decltype(console_value(value));
+        if constexpr(is_integer <Value> :: value)
         {
-            stream.write('(');
-            stream.write(name);
-            stream.write(')');
+            Value v = console_value(value);
+            _write_int(v);
+        }
+        else if constexpr(is_enum <Value> :: value)
+        {
+            Value v = console_value(value);
+            _write_int((__underlying_type(Value))v);
+        }
+        else if constexpr(is_floating <Value> :: value)
+        {
+            Value v = console_value(value);
+            print(v);   // redirecting to print(float)
+        }
+        else if constexpr(is_function <Value> :: value)
+        {
+            stream.write(_flash("Function"));
+        }
+        else
+        {
+            stream.write(_flash("Object"));
+            FlashStringWrapper name = console_type_name(value);
+            if(name.str)
+            {
+                stream.write('(');
+                stream.write(name);
+                stream.write(')');
+            }
         }
     }
 }
@@ -197,7 +210,15 @@ __inline void Console <Stream> :: print(FlashStringWrapper fs)
 template <class Stream>
 __inline void Console <Stream> :: print(float value, const uint8_t align_digits)
 {
-    _print_floating <float> (value, align_digits);
+    if constexpr(is_nostream <Stream> :: value)
+    {
+        (void) value;
+        return;
+    }
+    else
+    {
+        _print_floating <float> (value, align_digits);
+    }
 }
 //------------------------------------------------------------------------------------------------
 /**
@@ -214,7 +235,15 @@ __inline void Console <Stream> :: print(float value, const uint8_t align_digits)
 template <class Stream>
 __inline void Console <Stream> :: print(double value, const uint8_t align_digits)
 {
-    _print_floating <double> (value, align_digits);
+    if constexpr(is_nostream <Stream> :: value)
+    {
+        (void) value;
+        return;
+    }
+    else
+    {
+        _print_floating <double> (value, align_digits);
+    }
 }
 //------------------------------------------------------------------------------------------------
 /**
@@ -394,11 +423,20 @@ __inline void Console <Stream> :: home()
 template <class Stream>
 __inline void Console <Stream> :: goto_xy(uint8_t pos, uint8_t line)
 {
-    stream.write(_flash("\x1B["));
-    _write_int(line + 1);
-    stream.write(_flash(";"));
-    _write_int(pos + 1);
-    stream.write(_flash("H"));
+    if constexpr(is_nostream <Stream> :: value)
+    {
+        (void) pos;
+        (void) line;
+        return;
+    }
+    else
+    {
+        stream.write(_flash("\x1B["));
+        _write_int(line + 1);
+        stream.write(_flash(";"));
+        _write_int(pos + 1);
+        stream.write(_flash("H"));
+    }
 }
 //------------------------------------------------------------------------------------------------
 /**
@@ -604,11 +642,19 @@ template <class Stream>
 template < uint8_t width, class Type>
 inline void Console <Stream> :: _write_hex(Type value)
 {
-    constexpr uint8_t digits = width ? width : sizeof(Type) * 2;
-    for(int8_t i = digits - 1; i >= 0; --i)
+    if constexpr(is_nostream <Stream> :: value)
     {
-        uint8_t byte = (value >> (i * 4)) & 0x0F;
-        stream.write(byte < 10 ? ('0' + byte) : ('A' + byte - 10));
+        (void) value;
+        return;
+    }
+    else
+    {
+        constexpr uint8_t digits = width ? width : sizeof(Type) * 2;
+        for(int8_t i = digits - 1; i >= 0; --i)
+        {
+            uint8_t byte = (value >> (i * 4)) & 0x0F;
+            stream.write(byte < 10 ? ('0' + byte) : ('A' + byte - 10));
+        }
     }
 }
 //------------------------------------------------------------------------------------------------
@@ -656,11 +702,19 @@ template <class Stream>
 template <class Type>
 __inline void Console <Stream> :: log(const DebugHEX <Type> &some)
 {
-    static_assert(!is_pointer <Type> :: value, "Pointers are not allowed here!");
-    stream.write(some.name);
-    stream.write(_flash("=0x"));
-    _write_hex(some.value);
-    print_ln();
+    if constexpr(is_nostream <Stream> :: value)
+    {
+        (void) some;
+        return;
+    }
+    else
+    {
+        static_assert(!is_pointer <Type> :: value, "Pointers are not allowed here!");
+        stream.write(some.name);
+        stream.write(_flash("=0x"));
+        _write_hex(some.value);
+        print_ln();
+    }
 }
 //------------------------------------------------------------------------------------------------
 /**
@@ -769,86 +823,95 @@ template <class Stream>
 template <MemoryArea area>
 __inline void Console <Stream> :: _print_dump(const void *ptr, size_t size, bool show_ascii)
 {
-    constexpr uint8_t addr_width = []() constexpr
+    if constexpr(is_nostream <Stream> :: value)
     {
-        if constexpr(area == MemoryArea :: FLASH)
-        {
-            return
-                (FLASHEND <= 0xFF)       ? 2 :
-                (FLASHEND <= 0xFFFF)     ? 4 :
-                (FLASHEND <= 0xFFFFFF)   ? 6 :
-                                           8;
-        }
-        else if constexpr(area == MemoryArea :: EEPROM)
-        {
-            return
-                (E2END <= 0xFF)       ? 2 :
-                (E2END <= 0xFFFF)     ? 4 :
-                (E2END <= 0xFFFFFF)   ? 6 :
-                                        8;
-        }
-        else
-        {
-            return
-                (RAMEND <= 0xFF)       ? 2 :
-                (RAMEND <= 0xFFFF)     ? 4 :
-                (RAMEND <= 0xFFFFFF)   ? 6 :
-                                         8;
-        }
-    }();
-    constexpr uint8_t bytes_per_line = 16;
-    char ascii[]="|................|\r\n";
-    size_t index;
-    uint8_t ascii_pos;
-    if(!size)
-    {
+        (void) ptr;
+        (void) show_ascii;
         return;
     }
-    // align size to full-line border for better ascii output
-    size = show_ascii ? ((size + bytes_per_line - 1) / bytes_per_line) * bytes_per_line : size;
-
-    for(size_t k = 0; k <= (size - 1) / bytes_per_line; k++)
+    else
     {
-        _write_hex <addr_width> ((uintptr_t)(ptr) + k * bytes_per_line);
-        stream.write(_flash(": "));
-        ascii_pos = 1;  // skip formatting chars, see ascii[] definition
-        for(size_t i = 0; i < bytes_per_line; i++)
+        constexpr uint8_t addr_width = []() constexpr
         {
-            index = k * bytes_per_line + i;
-            if(index < size)
+            if constexpr(area == MemoryArea :: FLASH)
             {
-                uint8_t val = 0;
-                if constexpr(area == MemoryArea :: RAM)
-                {
-                    val = ((const uint8_t*)ptr)[index];
-                }
-                else if constexpr(area == MemoryArea :: FLASH)
-                {
-                    val = pgm_read_byte((const uint8_t*)ptr + index);
-                }
-                else if constexpr(area == MemoryArea :: EEPROM)
-                {
-                   val = eeprom_read_byte((const uint8_t*)ptr + index);
-                }
-                _write_hex(val);
-                if(show_ascii)
-                {
-                    ascii[ascii_pos++] = (val >= 32 && val <= 126) ? val : '.';
-                }
+                return
+                    (FLASHEND <= 0xFF)       ? 2 :
+                    (FLASHEND <= 0xFFFF)     ? 4 :
+                    (FLASHEND <= 0xFFFFFF)   ? 6 :
+                                               8;
+            }
+            else if constexpr(area == MemoryArea :: EEPROM)
+            {
+                return
+                    (E2END <= 0xFF)       ? 2 :
+                    (E2END <= 0xFFFF)     ? 4 :
+                    (E2END <= 0xFFFFFF)   ? 6 :
+                                            8;
             }
             else
             {
-                stream.write(_flash("  "));
+                return
+                    (RAMEND <= 0xFF)       ? 2 :
+                    (RAMEND <= 0xFFFF)     ? 4 :
+                    (RAMEND <= 0xFFFFFF)   ? 6 :
+                                             8;
             }
-            stream.write(' ');
-        }
-        if(show_ascii)
+        }();
+        constexpr uint8_t bytes_per_line = 16;
+        char ascii[]="|................|\r\n";
+        size_t index;
+        uint8_t ascii_pos;
+        if(!size)
         {
-            stream.write(ascii);
+            return;
         }
-        else
+        // align size to full-line border for better ascii output
+        size = show_ascii ? ((size + bytes_per_line - 1) / bytes_per_line) * bytes_per_line : size;
+
+        for(size_t k = 0; k <= (size - 1) / bytes_per_line; k++)
         {
-            print_ln();
+            _write_hex <addr_width> ((uintptr_t)(ptr) + k * bytes_per_line);
+            stream.write(_flash(": "));
+            ascii_pos = 1;  // skip formatting chars, see ascii[] definition
+            for(size_t i = 0; i < bytes_per_line; i++)
+            {
+                index = k * bytes_per_line + i;
+                if(index < size)
+                {
+                    uint8_t val = 0;
+                    if constexpr(area == MemoryArea :: RAM)
+                    {
+                        val = ((const uint8_t*)ptr)[index];
+                    }
+                    else if constexpr(area == MemoryArea :: FLASH)
+                    {
+                        val = pgm_read_byte((const uint8_t*)ptr + index);
+                    }
+                    else if constexpr(area == MemoryArea :: EEPROM)
+                    {
+                       val = eeprom_read_byte((const uint8_t*)ptr + index);
+                    }
+                    _write_hex(val);
+                    if(show_ascii)
+                    {
+                        ascii[ascii_pos++] = (val >= 32 && val <= 126) ? val : '.';
+                    }
+                }
+                else
+                {
+                    stream.write(_flash("  "));
+                }
+                stream.write(' ');
+            }
+            if(show_ascii)
+            {
+                stream.write(ascii);
+            }
+            else
+            {
+                print_ln();
+            }
         }
     }
 }
