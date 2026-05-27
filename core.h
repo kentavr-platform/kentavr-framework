@@ -16,7 +16,7 @@
 #include "core/units.h"
 #include "core/nostream.h"
 
-// hardware-specific components drivers
+// hardware-specific drivers
 #include "AVR/avr-macro.h"
 #include "AVR/avr-delay.h"
 #include "Console/debug.h"
@@ -26,10 +26,12 @@
 #include "AVR/EEPROM/avr-eeprom.h"
 #include "AVR/Serial/serial-bit-out.h"
 
-// external interfaces
+
+// interfaces
+#include "core/settings/settings.h"
 #include "interfaces/OneWire/one-wire.h"
 
-// external components drivers
+// external drivers
 #include "LED/led.h"
 #include "Console/console.h"
 #include "sensors/DS1820/DS18x20.h"
