@@ -44,6 +44,7 @@
 void early_init() __attribute__((naked, used, section(".init0")));
 
 //------------------------------------------------------------------------------------------------
+
 /** Enable and configure hardware UARTs here
 
     All UART instances share the same driver implementation.
@@ -57,9 +58,10 @@ void early_init() __attribute__((naked, used, section(".init0")));
 
     Flow control is not implemented in this design. However you can do it yourself.
 
-ENABLE_UARTx(
-             RX_BUFFER_SIZE,  -- size of reception buffer (required)
-             TX_BUFFER_SIZE,  -- size of transmission buffer (required)
+ ENABLE_UARTx(
+              RX_BUFFER_SIZE,  -- size of reception buffer (required)
+              TX_BUFFER_SIZE,  -- size of transmission buffer (required)
+             )
 
     Feel free to uncomment and modify the following lines to enable hardware UARTs.
                                                                                                 */
@@ -68,5 +70,20 @@ ENABLE_UARTx(
 
 //------------------------------------------------------------------------------------------------
 
+/**
+    Enable settings instance and reserves EEPROM space.
+
+    Allocates an EEPROM object occupying exactly Size bytes and creates a
+    global settings storage instance using that region.
+
+ ENABLE_SETTINGS(
+                 SETTINGS_SIZE  -- EEPROM size reserved for settings storage
+                                   (header + data + index)
+                )
+
+    Uncomment and modify the following lines to enable
+                                                                                                */
+ENABLE_SETTINGS(512);
+
 //------------------------------------------------------------------------------------------------
-#endif // CORE_H
+#endif

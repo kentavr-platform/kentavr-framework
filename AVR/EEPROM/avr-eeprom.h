@@ -7,29 +7,36 @@ class EEPROM_Storage
 public:
     using offset_t = uint16_t;
 
-    ResultCode read(offset_t addr, void *data, size_t size)
+    static __inline void erase()
+    {
+        for(uint16_t addr = 0; addr <= E2END; addr++)
+            eeprom_update_byte((uint8_t*)addr, 0xFF);
+    }
+
+    static __inline ResultCode read(offset_t addr, void *data, size_t size)
     {
         eeprom_read_block(data, reinterpret_cast <const void*> (addr), size);
         return OK;
     }
 
-    ResultCode write(offset_t addr, const void *data, size_t size)
+    static __inline ResultCode write(offset_t addr, const void *data, size_t size)
     {
         eeprom_update_block(data, reinterpret_cast <void*> (addr), size);
         return OK;
     }
 
     template <class Type>
-    ResultCode read(offset_t addr, Type &value)
+    static __inline ResultCode read(offset_t addr, Type &value)
     {
         return read(addr, &value, sizeof(Type));
     }
 
     template <class Type>
-    ResultCode write(offset_t addr, const Type &value)
+    static __inline ResultCode write(offset_t addr, const Type &value)
     {
         return write(addr, &value, sizeof(Type));
     }
-} EEPROM;
+};
+inline EEPROM_Storage EEPROM;
 //------------------------------------------------------------------------------------------------
 #endif
