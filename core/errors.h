@@ -7,15 +7,17 @@
 #define _QUOT(x) #x
 #define QUOTE(x) _QUOT(x)
 //------------------------------------------------------------------------------------------------
-#define ERROR_LIST \
-    ERR_(NOT_FOUND) \
-    ERR_(NO_MORE) \
-    ERR_(NOT_MODIFIED) \
-    ERR_(REJECTED) \
-    ERR_(ABORTED) \
-    ERR_(BUSY) \
+#define ERROR_LIST      \
+    ERR_(NOT_FOUND)     \
+    ERR_(NO_MORE)       \
+    ERR_(NOT_MODIFIED)  \
+    ERR_(NO_SPACE_LEFT) \
+    ERR_(REJECTED)      \
+    ERR_(INVALID)       \
+    ERR_(ABORTED)       \
+    ERR_(BUSY)          \
     ERR_(BAD_PARAMETER) \
-    ERR_(BAD_CHECKSUM) \
+    ERR_(BAD_CHECKSUM)  \
     ERR_(UNKNOWN)
 //------------------------------------------------------------------------------------------------
 enum ResultCode
