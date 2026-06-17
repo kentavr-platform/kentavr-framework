@@ -1,0 +1,10 @@
+#ifndef IS_STRING_H
+#define IS_STRING_H
+//------------------------------------------------------------------------------------------------
+template <class Type>
+struct is_string : false_type {};
+//------------------------------------------------------------------------------------------------
+template <> struct is_string <char*>                : true_type {};
+template <> struct is_string <const char*>          : true_type {};
+//------------------------------------------------------------------------------------------------
+#endif // IS_STRING_H

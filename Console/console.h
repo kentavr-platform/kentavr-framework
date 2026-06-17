@@ -21,7 +21,7 @@
  * - terminal control sequences,
  * - RAM / FLASH / EEPROM memory dumps.
  *
- * Values are normalized through console_value() before formatting.
+ * Values are normalized through console_value() function before formatting.
  * Unsupported object values are printed as "Object" or "Object(TypeName)"
  * when console_type_name() is provided by the corresponding type module.
  *

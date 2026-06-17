@@ -96,6 +96,17 @@ __inline void Console <Stream> :: print(const Type &value)
             Value v = console_value(value);
             _write_int((__underlying_type(Value))v);
         }
+        else if constexpr(is_string <Value> :: value)
+        {
+            Value v = console_value(value);
+            print(v);
+        }
+        else if constexpr(is_pointer <Value> :: value)
+        {
+            Value v = console_value(value);
+            stream.write(_flash("0x"));
+            _write_hex(reinterpret_cast <uintptr_t> (v));
+        }
         else if constexpr(is_floating <Value> :: value)
         {
             Value v = console_value(value);

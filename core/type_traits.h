@@ -7,6 +7,7 @@ struct false_type { static constexpr bool value = false; };
 #include "type_traits/is_integer.h"
 #include "type_traits/is_floating.h"
 #include "type_traits/is_number.h"
+#include "type_traits/is_string.h"
 #include "type_traits/is_pointer.h"
 #include "type_traits/is_function.h"
 #include "type_traits/is_enum.h"
