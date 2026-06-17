@@ -596,31 +596,37 @@ __inline void Console <Stream> :: _write_int(Type value)
 {
     static_assert(is_integer <Type> :: value || is_enum <Type> :: value,
                   "_write_int works with integer types only!");
+    using UnsignedType = typename make_unsigned <Type> :: type;
     char buf[sizeof(Type) * 3];     // mirrored numbers buffer
     uint8_t pos = 0;
-    bool negative = false;
-    // signed-type check
-    if ((Type) - 1 < 0)
+    UnsignedType number;
+
+    if constexpr((Type) - 1 < 0)
     {
-        if (value < 0)
+        // signed type
+        if(value < 0)
         {
-            negative = true;
-            // avoid overflow on min value
-            value = -(value + 1);
-            value += 1;
+            stream.write('-');   // send sign for negative values
+            number = UnsignedType(0) - UnsignedType(value);
+        }
+        else
+        {
+            number = UnsignedType(value);
         }
     }
+    else
+    {
+        // unsigned type
+        number = value;
+    }
+
     do
     {
-        Type div = value / 10;
-        buf[pos++] = '0' + (value - div * 10);
-        value = div;
-    } while (value);
-    // add sign for negative values
-    if(negative)
-    {
-        buf[pos++] = '-';
-    }
+        UnsignedType div = number / 10;
+        buf[pos++] = '0' + (uint8_t)(number % 10);
+        number = div;
+    } while (number);
+
     // stream out
     while(pos)
     {

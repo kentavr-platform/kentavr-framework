@@ -10,5 +10,6 @@ struct false_type { static constexpr bool value = false; };
 #include "type_traits/is_pointer.h"
 #include "type_traits/is_function.h"
 #include "type_traits/is_enum.h"
+#include "type_traits/make_unsigned.h"
 //------------------------------------------------------------------------------------------------
 #endif // TYPE_TRAITS_H
