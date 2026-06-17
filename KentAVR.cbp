@@ -21,6 +21,7 @@
 					<Add directory="Console" />
 					<Add directory="sensors/DS1820" />
 					<Add directory="interfaces/OneWire" />
+					<Add directory="AVR/EEPROM" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega1284p" />
@@ -41,6 +42,7 @@
 					<Add directory="Console" />
 					<Add directory="sensors/DS1820" />
 					<Add directory="interfaces/OneWire" />
+					<Add directory="AVR/EEPROM" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="avr128db48" />
@@ -68,8 +70,6 @@
 			<Add option="-mmcu=$(MCU)" />
 			<Add option="-nodefaultlibs" />
 			<Add option="-Wl,-Map=$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).map" />
-			<Add option="-Wl,--section-start=.eeprog=0x00810000" />
-			<Add option="-Wl,--section-start=.eeprom=0x00810010" />
 			<Add library="c" />
 			<Add library="gcc" />
 			<Add library="$MCU" />
@@ -86,10 +86,6 @@
 			<Add after="avr-readelf -sW $(TARGET_OUTPUT_FILE) | grep OBJECT &gt; $(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).data || true" />
 			<Add after="avr-size -C --mcu=$(MCU) -d $(TARGET_OUTPUT_FILE)" />
 		</ExtraCommands>
-		<Unit filename="AVR/EEPROM/avr-eeprom.cpp">
-			<Option compile="0" />
-			<Option link="0" />
-		</Unit>
 		<Unit filename="AVR/EEPROM/avr-eeprom.h" />
 		<Unit filename="AVR/GPIO/avr-gpio.h" />
 		<Unit filename="AVR/GPIO/avr-gpio.tpp" />
@@ -108,6 +104,9 @@
 		<Unit filename="LED/led.tpp" />
 		<Unit filename="core.h" />
 		<Unit filename="core/errors.h" />
+		<Unit filename="core/nostream.h" />
+		<Unit filename="core/settings/settings.h" />
+		<Unit filename="core/settings/settings.tpp" />
 		<Unit filename="core/type_traits.h" />
 		<Unit filename="core/type_traits/is_enum.h" />
 		<Unit filename="core/type_traits/is_floating.h" />
