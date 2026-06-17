@@ -33,7 +33,7 @@ SerialBitOut <pin, baud> :: SerialBitOut()
  * @note This function is inlined for zero-call overhead.
  */
 template <class pin, uint32_t baud>
-__inline void SerialBitOut <pin, baud> :: write(uint8_t data)
+void SerialBitOut <pin, baud> :: write(uint8_t data)
 {
     ATOMIC_BLOCK
     {
@@ -51,7 +51,7 @@ __inline void SerialBitOut <pin, baud> :: write(uint8_t data)
  * @note Timing is strictly serial and blocking.
  */
 template <class pin, uint32_t baud>
-__inline void SerialBitOut <pin, baud> :: write(const char *str)
+void SerialBitOut <pin, baud> :: write(const char *str)
 {
     ATOMIC_BLOCK
     {
@@ -76,7 +76,7 @@ __inline void SerialBitOut <pin, baud> :: write(const char *str)
  * @note Timing is strictly serial and blocking.
  */
 template <class pin, uint32_t baud>
-__inline void SerialBitOut <pin, baud> :: write(FlashStringWrapper fs)
+void SerialBitOut <pin, baud> :: write(FlashStringWrapper fs)
 {
     ATOMIC_BLOCK
     {

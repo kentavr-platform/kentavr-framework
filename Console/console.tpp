@@ -640,7 +640,7 @@ __inline void Console <Stream> :: _write_int(Type value)
  */
 template <class Stream>
 template < uint8_t width, class Type>
-inline void Console <Stream> :: _write_hex(Type value)
+__inline void Console <Stream> :: _write_hex(Type value)
 {
     if constexpr(is_nostream <Stream> :: value)
     {
