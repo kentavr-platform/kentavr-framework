@@ -40,20 +40,36 @@ enum UART_PARITY
     PARITY_ODD
 };
 //------------------------------------------------------------------------------------------------
+struct BaudConfig
+{
+    uint16_t ubrr;
+    uint32_t real_rate;
+    uint32_t error_ppm;
+    bool u2x;
+};
+//------------------------------------------------------------------------------------------------
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 class UART
 {
 public:
-    UART() {};
+    UART() = default;
+    UART(uint32_t rate,
+         enum UART_DATA_BITS dbits = DATA_BITS_8,
+         enum UART_PARITY parity = PARITY_NONE,
+         enum UART_STOP_BITS sbits = STOP_BITS_1) { _configure(rate, dbits, parity, sbits); }
+    UART(enum UART_BAUD_RATE rate,
+         enum UART_DATA_BITS dbits = DATA_BITS_8,
+         enum UART_PARITY parity = PARITY_NONE,
+         enum UART_STOP_BITS sbits = STOP_BITS_1) { _configure(rate, dbits, parity, sbits); }
     // configuring and control management
-    static void     init(enum UART_BAUD_RATE rate,
-                         enum UART_DATA_BITS dbits = DATA_BITS_8,
-                         enum UART_PARITY parity = PARITY_NONE,
-                         enum UART_STOP_BITS sbits= STOP_BITS_1);
-    static void     init(uint32_t rate,
-                         enum UART_DATA_BITS dbits = DATA_BITS_8,
-                         enum UART_PARITY parity = PARITY_NONE,
-                         enum UART_STOP_BITS sbits = STOP_BITS_1);
+    static ResultCode init(uint32_t rate,
+                           enum UART_DATA_BITS dbits = DATA_BITS_8,
+                           enum UART_PARITY parity = PARITY_NONE,
+                           enum UART_STOP_BITS sbits = STOP_BITS_1);
+    static ResultCode init(enum UART_BAUD_RATE rate,
+                           enum UART_DATA_BITS dbits = DATA_BITS_8,
+                           enum UART_PARITY parity = PARITY_NONE,
+                           enum UART_STOP_BITS sbits = STOP_BITS_1);
     static void     disable();
     static void     disable_rx();
     static void     disable_tx();
@@ -92,9 +108,15 @@ public:
     static void     tx_interrupt();
 private:
     //              internal routines
-    static void     _init_common(enum UART_DATA_BITS dbits,
-                                 enum UART_PARITY parity,
-                                 enum UART_STOP_BITS sbits);
+    static BaudConfig _calc_baud(uint32_t rate, bool u2x);
+    static BaudConfig _select_baud(uint32_t rate);
+    static ResultCode _configure(uint32_t rate,
+                                 enum UART_DATA_BITS dbits = DATA_BITS_8,
+                                 enum UART_PARITY parity = PARITY_NONE,
+                                 enum UART_STOP_BITS sbits = STOP_BITS_1);
+    static void     _configure_common(enum UART_DATA_BITS dbits,
+                                      enum UART_PARITY parity,
+                                      enum UART_STOP_BITS sbits);
     static bool     _write_char(const char chr);
     //              internal data
     static uint8_t  rx_buf[RX_BUF_SIZE];

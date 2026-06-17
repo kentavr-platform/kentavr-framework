@@ -22,92 +22,72 @@ volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_tail = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_errors = 0;
 //------------------------------------------------------------------------------------------------
-/// void UART :: init(enum UART_BAUD_RATE rate, ...)
+/// ResultCode UART :: init(uint32_t rate, ...)
+/// Intialize and enable UART with corresponding parameters
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: init(uint32_t rate,
+                                                               enum UART_DATA_BITS dbits,
+                                                               enum UART_PARITY parity,
+                                                               enum UART_STOP_BITS sbits)
+{
+    ResultCode result = _configure(rate, dbits, parity, sbits);
+    if(result != OK)
+        return result;
+    enable_interrupts();
+    return OK;
+};
+//------------------------------------------------------------------------------------------------
+/// ResultCode UART :: init(enum UART_BAUD_RATE rate, ...)
 /// Intialize and enable UART with corresponding parameters
 /// This method is preferred for standart rates and works faster.
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
-__inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: init(enum UART_BAUD_RATE rate,
-                                                         enum UART_DATA_BITS dbits,
-                                                         enum UART_PARITY parity,
-                                                         enum UART_STOP_BITS sbits)
+__inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: init(enum UART_BAUD_RATE rate,
+                                                               enum UART_DATA_BITS dbits,
+                                                               enum UART_PARITY parity,
+                                                               enum UART_STOP_BITS sbits)
 {
-    // disable everything and set default values
-    regs :: CTRLA = 0;
-    regs :: CTRLB = 0;
-    regs :: CTRLC = 0;
-    // baud rate
     switch(rate)
     {
     case BAUD_2400:
-        regs :: BAUD = (F_CPU / 8 / 2400 - 1) / 2;
-        break;
+        return init(2400, dbits, parity, sbits);
     case BAUD_4800:
-        regs :: BAUD = (F_CPU / 8 / 4800 - 1) / 2;
-        break;
+        return init(4800, dbits, parity, sbits);
     case BAUD_9600:
-        regs :: BAUD = (F_CPU / 8 / 9600 - 1) / 2;
-        break;
+        return init(9600, dbits, parity, sbits);
     case BAUD_19200:
-        regs :: BAUD = (F_CPU / 8 / 19200 - 1) / 2;
-        break;
+        return init(19200, dbits, parity, sbits);
     case BAUD_38400:
-        regs :: BAUD = (F_CPU / 8 / 38400 - 1) / 2;
-        break;
+        return init(38400, dbits, parity, sbits);
     case BAUD_57600:
-        set_bit(regs :: CTRLA, U2X);
-        regs :: BAUD = (F_CPU / 4 / 57600 - 1) / 2;
-        break;
+        return init(57600, dbits, parity, sbits);
     case BAUD_115200:
-        set_bit(regs :: CTRLA, U2X);
-        regs :: BAUD = (F_CPU / 4 / 115200 - 1) / 2;
-        break;
+        return init(115200, dbits, parity, sbits);
     }
-    _init_common(dbits, parity, sbits);
-}
+    return ERR_BAD_PARAMETER;
+};
 //------------------------------------------------------------------------------------------------
-/// void UART :: init(uint32_t rate, ...)
-/// Intialize and enable UART with corresponding parameters
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
-__inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: init(uint32_t rate,
-                                                         enum UART_DATA_BITS dbits,
-                                                         enum UART_PARITY parity,
-                                                         enum UART_STOP_BITS sbits)
+__inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _configure(uint32_t rate,
+                                                                     enum UART_DATA_BITS dbits,
+                                                                     enum UART_PARITY parity,
+                                                                     enum UART_STOP_BITS sbits)
 {
-    constexpr uint32_t UBRR_MAX = (1u << 12) - 1;
-    constexpr uint32_t min_baud_rate = F_CPU / 16 / (UBRR_MAX + 1);
-    constexpr uint32_t max_baud_rate = F_CPU / 8;
     // disable everything and set default values
     regs :: CTRLA = 0;
     regs :: CTRLB = 0;
     regs :: CTRLC = 0;
-    if(rate < min_baud_rate || rate > max_baud_rate)
+    constexpr uint32_t max_baud_error_ppm = 20000; // 2%
+    BaudConfig baud_cfg = _select_baud(rate);
+    if(baud_cfg.error_ppm > max_baud_error_ppm)
     {
-        // ATTENTION! Baud rate is out of range! Available values are:
-        // 183...1500000 baud @ 12 MHz
-        // 244...2000000 baud @ 16 MHz
-        // 305...2500000 baud @ 20 MHz
-        // 366...3000000 baud @ 24 MHz
-        return;
+        // ATTENTION! Baud rate error is too high!
+        return ERR_BAD_PARAMETER;
     }
-    if(rate <= 38400)
-    {
-        regs :: BAUD = (F_CPU / 8 / rate - 1) / 2;
-    }
-    else
+    if(baud_cfg.u2x)
     {
         set_bit(regs :: CTRLA, U2X);
-        regs :: BAUD = (F_CPU / 4 / rate - 1) / 2;
     }
-    _init_common(dbits, parity, sbits);
-}
-//------------------------------------------------------------------------------------------------
-/// void UART :: _init_common(...)
-/// Common initialisations for both init(...) methods
-template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
-__inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _init_common(enum UART_DATA_BITS dbits,
-                                                                 enum UART_PARITY parity,
-                                                                 enum UART_STOP_BITS sbits)
-{
+    regs :: BAUD = baud_cfg.ubrr;
     // data bits
     switch(dbits)
     {
@@ -147,6 +127,38 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _init_common(enum UART_DATA_
     flush_rx();
     flush_tx();
     enable();
+    return OK;
+}
+//------------------------------------------------------------------------------------------------
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline BaudConfig UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _select_baud(uint32_t rate)
+{
+    BaudConfig x1 = _calc_baud(rate, false);
+    BaudConfig x2 = _calc_baud(rate, true);
+    if(x2.error_ppm < x1.error_ppm)
+        return x2;
+    return x1;
+}
+//------------------------------------------------------------------------------------------------
+template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
+__inline BaudConfig UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _calc_baud(uint32_t rate, bool u2x)
+{
+    constexpr uint32_t UBRR_MAX = (1u << 12) - 1;
+    BaudConfig cfg = {0, 0, UINT32_MAX, u2x};
+    if(rate == 0)
+        return cfg;
+    const uint32_t divider = u2x ? 8UL : 16UL;
+    const uint64_t denom = uint64_t(rate) * divider;
+    uint64_t n = (uint64_t(F_CPU) + denom / 2) / denom;
+    if(n < 1)
+        n = 1;
+    if(n > uint64_t(UBRR_MAX) + 1)
+        n = uint64_t(UBRR_MAX) + 1;
+    cfg.ubrr = uint16_t(n - 1);
+    cfg.real_rate = uint32_t(uint64_t(F_CPU) / (uint64_t(divider) * n));
+    const uint32_t diff = (cfg.real_rate > rate) ? cfg.real_rate - rate : rate - cfg.real_rate;
+    cfg.error_ppm = uint32_t(uint64_t(diff) * 1000000ULL / rate);
+    return cfg;
 }
 //------------------------------------------------------------------------------------------------
 /// void UART :: enable_rx()
@@ -309,7 +321,7 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_interrupt()
 }
 //------------------------------------------------------------------------------------------------
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
-__inline bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _write_char(const char chr)
+bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _write_char(const char chr)
 {
     if constexpr(TX_BUF_SIZE > 0)
     {
