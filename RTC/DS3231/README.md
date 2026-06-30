@@ -5,7 +5,7 @@
 ### Summary
 `RTC_DS3231 RTC(i2c);`
 
- - Uses `bus` as a communication [I2C interface](../../interfaces/I2C)
+ - Uses `bus` as a communication [I2C](../../AVR/I2C) interface
  - Represents one DS3231-compatible RTC at the fixed I2C address (`0x68`)
  - Provides date/time access, oscillator-stop detection, hardware alarms, temperature reading, and clock outputs
 
