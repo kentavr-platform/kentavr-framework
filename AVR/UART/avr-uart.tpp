@@ -14,13 +14,13 @@ volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_head = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_tail = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
-uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_errors = 0;
+volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_errors = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_head = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_tail = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
-uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_errors = 0;
+volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_errors = 0;
 //------------------------------------------------------------------------------------------------
 /// ResultCode UART :: init(uint32_t rate, ...)
 /// Intialize and enable UART with corresponding parameters
@@ -606,7 +606,7 @@ __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: get_rx_errors()
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: get_tx_errors()
 {
-    if constexpr(RX_BUF_SIZE > 0)
+    if constexpr(TX_BUF_SIZE > 0)
     {
         return tx_errors;
     }
@@ -708,5 +708,3 @@ __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: read(uint8_t *buf, const 
     }
 }
 //------------------------------------------------------------------------------------------------
-
-

@@ -32,7 +32,7 @@ protected:
     static __inline bool _is_leap_year(uint16_t _year);
     static __inline uint8_t _days_in_month(uint16_t _year, uint8_t _month);
 private:
-    mutable char str[11];
+    mutable char str[11] = {};
 };
 //------------------------------------------------------------------------------------------------
 class DateTime : public Date
@@ -49,7 +49,7 @@ public:
     uint8_t  minute     = 0;
     uint8_t  second     = 0;
 private:
-    mutable char str[22];
+    mutable char str[22] = {};
     static constexpr uint32_t SECONDS_PER_DAY = 86400;
 };
 //------------------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ public:
     uint8_t  minute = 0;
     uint8_t  second = 0;
 private:
-    mutable char str[10];
+    mutable char str[10] = {};
 };
 //------------------------------------------------------------------------------------------------
 /**

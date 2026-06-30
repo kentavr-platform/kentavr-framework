@@ -63,6 +63,9 @@ __inline uint8_t Date :: _days_in_month(uint16_t _year, uint8_t _month)
 //------------------------------------------------------------------------------------------------
 uint8_t Date :: get_weekday() const
 {
+    if(year < 2000 || year > 2199 || !is_valid())
+        return 0;
+
     uint8_t month_index = _is_leap_year(year) ? month - 1 + 12 : month - 1;
     uint8_t sum =
         pgm_read_byte(&_weekday_year_start[year - 2000]) +
@@ -223,4 +226,3 @@ const char* Time :: to_string(enum DateTimeFormat fmt) const
     return str;
 }
 //------------------------------------------------------------------------------------------------
-

@@ -231,7 +231,7 @@ __inline ResultCode TWI <N, TX_BUF_SIZE> :: init_master(uint32_t freq)
 template <uint8_t N, uint8_t TX_BUF_SIZE>
 __inline ResultCode TWI <N, TX_BUF_SIZE> :: init_slave(const I2C_Slave_Config &config)
 {
-    if(!config.receiver_callback || !config.transmitter_callback)
+    if(config.address > 0x7F || !config.receiver_callback || !config.transmitter_callback)
     {
         disable();
         return ERR_BAD_PARAMETER;

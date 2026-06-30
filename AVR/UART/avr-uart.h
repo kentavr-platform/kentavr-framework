@@ -123,8 +123,8 @@ private:
     static uint8_t  tx_buf[TX_BUF_SIZE];
     static volatile uint8_t  rx_head, rx_tail;
     static volatile uint8_t  tx_head, tx_tail;
-    static uint8_t  rx_errors;
-    static uint8_t  tx_errors;
+    static volatile uint8_t  rx_errors;
+    static volatile uint8_t  tx_errors;
     using           regs = USART_traits <N>;
 
 };
