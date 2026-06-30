@@ -53,7 +53,7 @@ ENABLE_UART0(0, 128);
     Feel free to uncomment and modify the following lines to enable hardware I2Cs.
     See AVR/I2C for details.
                                                                                                 */
-//ENABLE_I2C0(32);
+ENABLE_I2C0(32);
 //ENABLE_I2C1(32);
 //------------------------------------------------------------------------------------------------
 #endif

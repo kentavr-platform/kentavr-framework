@@ -23,6 +23,7 @@
 #include "AVR/GPIO/avr-gpio.h"
 #include "AVR/GPIO/pins.h"
 #include "AVR/UART/avr-uart.h"
+#include "AVR/I2C/i2c.h"
 #include "AVR/EEPROM/avr-eeprom.h"
 #include "AVR/serial/serial-bit-out.h"
 

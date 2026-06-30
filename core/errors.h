@@ -6,6 +6,7 @@
 #define CONCAT(x,y) CAT(x,y)
 #define _QUOT(x) #x
 #define QUOTE(x) _QUOT(x)
+#define PRAGMA(x) _Pragma(#x)
 //------------------------------------------------------------------------------------------------
 #define ERROR_LIST      \
     ERR_(NOT_FOUND)     \
@@ -16,6 +17,8 @@
     ERR_(INVALID)       \
     ERR_(ABORTED)       \
     ERR_(BUSY)          \
+    ERR_(BAD_MODE)      \
+    ERR_(BAD_VALUE)     \
     ERR_(BAD_PARAMETER) \
     ERR_(BAD_CHECKSUM)  \
     ERR_(UNKNOWN)
