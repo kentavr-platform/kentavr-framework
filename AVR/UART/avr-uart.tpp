@@ -23,8 +23,22 @@ volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_tail = 0;
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 volatile uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_errors = 0;
 //------------------------------------------------------------------------------------------------
-/// ResultCode UART :: init(uint32_t rate, ...)
-/// Intialize and enable UART with corresponding parameters
+/**
+ * @brief Initialize and enable the UART using an arbitrary baud rate.
+ *
+ * Configures baud rate, frame format, RX/TX buffers and hardware receiver or
+ * transmitter according to the template buffer sizes. Global interrupts are
+ * enabled after successful configuration because buffered RX/TX uses ISRs.
+ *
+ * @param rate Requested baud rate in bits per second.
+ * @param dbits Number of data bits in one UART frame.
+ * @param parity Parity mode.
+ * @param sbits Number of stop bits.
+ *
+ * @return OK on success.
+ * @return ERR_BAD_PARAMETER if the requested baud rate cannot be represented
+ *         with acceptable error.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: init(uint32_t rate,
                                                                enum UART_DATA_BITS dbits,
@@ -38,9 +52,22 @@ __inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: init(uint32_t rate,
     return OK;
 };
 //------------------------------------------------------------------------------------------------
-/// ResultCode UART :: init(enum UART_BAUD_RATE rate, ...)
-/// Intialize and enable UART with corresponding parameters
-/// This method is preferred for standart rates and works faster.
+/**
+ * @brief Initialize and enable the UART using a predefined baud rate.
+ *
+ * Converts the selected UART_BAUD_RATE value to its numeric baud rate and
+ * delegates the actual setup to init(uint32_t, UART_DATA_BITS, UART_PARITY,
+ * UART_STOP_BITS).
+ *
+ * @param rate Predefined baud rate selector.
+ * @param dbits Number of data bits in one UART frame.
+ * @param parity Parity mode.
+ * @param sbits Number of stop bits.
+ *
+ * @return OK on success.
+ * @return ERR_BAD_PARAMETER if @p rate is not a supported selector or the baud
+ *         configuration error is too high.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: init(enum UART_BAUD_RATE rate,
                                                                enum UART_DATA_BITS dbits,
@@ -67,6 +94,21 @@ __inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: init(enum UART_BAUD_RA
     return ERR_BAD_PARAMETER;
 };
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Configure UART registers and reset internal driver state.
+ *
+ * Disables the UART control registers, selects the best baud mode, configures
+ * frame format, flushes enabled buffers and then enables RX/TX according to
+ * RX_BUF_SIZE and TX_BUF_SIZE.
+ *
+ * @param rate Requested baud rate in bits per second.
+ * @param dbits Number of data bits in one UART frame.
+ * @param parity Parity mode.
+ * @param sbits Number of stop bits.
+ *
+ * @return OK on success.
+ * @return ERR_BAD_PARAMETER if baud error is greater than the accepted limit.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _configure(uint32_t rate,
                                                                      enum UART_DATA_BITS dbits,
@@ -131,6 +173,16 @@ __inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _configure(uint32_t ra
     return OK;
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Select the best baud configuration for normal or double-speed mode.
+ *
+ * Calculates baud settings for both UART clock modes and returns the one with
+ * the lower baud-rate error.
+ *
+ * @param rate Requested baud rate in bits per second.
+ *
+ * @return Baud configuration with the lowest error.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline BaudConfig UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _select_baud(uint32_t rate)
 {
@@ -141,6 +193,18 @@ __inline BaudConfig UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _select_baud(uint32_t 
     return x1;
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Calculate UART baud register settings for one clock mode.
+ *
+ * Computes UBRR value, real baud rate and baud error in ppm for either normal
+ * speed or double-speed mode. Invalid zero baud rate returns a configuration
+ * with UINT32_MAX error.
+ *
+ * @param rate Requested baud rate in bits per second.
+ * @param u2x True to calculate double-speed mode, false for normal mode.
+ *
+ * @return Calculated baud configuration.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline BaudConfig UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _calc_baud(uint32_t rate, bool u2x)
 {
@@ -162,8 +226,12 @@ __inline BaudConfig UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _calc_baud(uint32_t ra
     return cfg;
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: enable_rx()
-/// Enables UART reception
+/**
+ * @brief Enable UART reception.
+ *
+ * Enables the hardware receiver and RX-complete interrupt when RX buffering is
+ * configured. For RX_BUF_SIZE == 0 this method compiles to no code.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: enable_rx()
 {
@@ -173,8 +241,12 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: enable_rx()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: enable_tx()
-/// Enables UART transmission (also sets TX pin in OUTPUT mode and HIGH level)
+/**
+ * @brief Enable UART transmission.
+ *
+ * Enables the hardware transmitter when TX buffering is configured. For
+ * TX_BUF_SIZE == 0 this method compiles to no code.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: enable_tx()
 {
@@ -184,8 +256,11 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: enable_tx()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: enable()
-/// Enables UART reception and transmission (also sets TX pin in OUTPUT mode and HIGH level)
+/**
+ * @brief Enable configured UART directions.
+ *
+ * Enables RX when RX_BUF_SIZE is non-zero and TX when TX_BUF_SIZE is non-zero.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: enable()
 {
@@ -193,8 +268,12 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: enable()
     enable_tx();
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: disable_rx()
-/// Disables UART reception
+/**
+ * @brief Disable UART reception.
+ *
+ * Disables the hardware receiver and RX-complete interrupt when RX buffering is
+ * configured. For RX_BUF_SIZE == 0 this method compiles to no code.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: disable_rx()
 {
@@ -204,8 +283,12 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: disable_rx()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: disable_tx()
-/// Disables UART transmission (also sets TX pin in OUTPUT mode and HIGH level)
+/**
+ * @brief Disable UART transmission.
+ *
+ * Disables the hardware transmitter when TX buffering is configured. For
+ * TX_BUF_SIZE == 0 this method compiles to no code.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: disable_tx()
 {
@@ -215,8 +298,11 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: disable_tx()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: disable()
-/// Disables UART reception and transmission (also sets TX pin in OUTPUT mode and HIGH level)
+/**
+ * @brief Disable configured UART directions.
+ *
+ * Disables RX when RX_BUF_SIZE is non-zero and TX when TX_BUF_SIZE is non-zero.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: disable()
 {
@@ -224,8 +310,12 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: disable()
     disable_tx();
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: flush_rx()
-/// Cleans up (flushes) receiver buffer
+/**
+ * @brief Clear the RX ring buffer and RX error counter.
+ *
+ * Resets RX head/tail indices and clears the receiver overflow counter. For
+ * RX_BUF_SIZE == 0 this method compiles to no code.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: flush_rx()
 {
@@ -237,8 +327,13 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: flush_rx()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: flush_tx()
-/// Cleans up (flushes) transmitter buffer
+/**
+ * @brief Clear the TX ring buffer and TX error counter.
+ *
+ * Disables the data-register-empty interrupt, resets TX head/tail indices and
+ * clears the transmitter overflow counter. For TX_BUF_SIZE == 0 this method
+ * compiles to no code.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: flush_tx()
 {
@@ -251,8 +346,15 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: flush_tx()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// bool UART :: tx_busy()
-/// Checks the TX line for an active transmission
+/**
+ * @brief Check whether a transmission is still active.
+ *
+ * The transmitter is considered busy while the TX ring buffer contains data or
+ * the hardware transmit-complete flag is not set.
+ *
+ * @return true if queued or hardware transmission is active.
+ * @return false if TX is disabled at compile time or idle.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_busy()
 {
@@ -266,8 +368,12 @@ __inline bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_busy()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// bool UART :: tx_wait()
-/// BLOCKING method that waits until the current transmission will be completed
+/**
+ * @brief Wait until the current transmission is complete.
+ *
+ * Blocks while tx_busy() is true. For TX_BUF_SIZE == 0 this method returns
+ * immediately.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_wait()
 {
@@ -277,8 +383,16 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_wait()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: rx_interrupt();
-/// Receiver interrupt handler (ISR)
+/**
+ * @brief Handle the UART receive interrupt.
+ *
+ * Reads the received byte from the hardware data register and appends it to the
+ * RX ring buffer. If the buffer is full, the byte is discarded and rx_errors is
+ * incremented up to 255.
+ *
+ * This method is intended to be called only from the UART RX ISR generated by
+ * ENABLE_UARTx().
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_interrupt()
 {
@@ -300,8 +414,15 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_interrupt()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: tx_interrupt();
-/// Transmitter UDRE interrupt handler (ISR)
+/**
+ * @brief Handle the UART data-register-empty interrupt.
+ *
+ * Sends the next queued byte from the TX ring buffer. If the buffer is empty,
+ * disables the UDR-empty interrupt until new data is queued.
+ *
+ * This method is intended to be called only from the UART UDRE ISR generated by
+ * ENABLE_UARTx().
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_interrupt()
 {
@@ -321,6 +442,18 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_interrupt()
     }
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Queue or directly send one byte.
+ *
+ * If the TX ring buffer is empty and the hardware data register is ready, the
+ * byte is written directly to the data register. Otherwise the byte is appended
+ * to the TX ring buffer and the UDR-empty interrupt is enabled.
+ *
+ * @param chr Byte to transmit.
+ *
+ * @return true if the byte was accepted for transmission.
+ * @return false if TX is disabled at compile time or the TX buffer is full.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _write_char(const char chr)
 {
@@ -359,10 +492,14 @@ bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _write_char(const char chr)
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: write(uint8_t data)
-/// Non-blocking write of a single byte from RAM.
-/// Does nothing (skips) if there is no free space in TX buffer
-/// at the moment of checking (best-effort, non-atomic guarantee).
+/**
+ * @brief Write one byte in non-blocking mode.
+ *
+ * Attempts to send or queue one byte. If the TX buffer is full, the byte is
+ * dropped and tx_errors is incremented by _write_char().
+ *
+ * @param data Byte to transmit.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(uint8_t data)
 {
@@ -372,10 +509,14 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(uint8_t data)
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: send(uint8_t data)
-/// BLOCKING write of a single byte from RAM.
-/// In case of full TX buffer BLOCKS (does not return) and WAITS until
-/// the buffer will become free and all the string will be placed in the buffer completely.
+/**
+ * @brief Write one byte in blocking mode.
+ *
+ * Repeats until the byte is accepted by _write_char(). For TX_BUF_SIZE == 0
+ * this method compiles to no code.
+ *
+ * @param data Byte to transmit.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: send(uint8_t data)
 {
@@ -385,10 +526,15 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: send(uint8_t data)
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: write(const char *str)
-/// Non-blocking write of a null-terminated string from RAM.
-/// Drops the whole string if it does not fit into TX buffer
-/// at the moment of checking (best-effort, non-atomic guarantee).
+/**
+ * @brief Write a RAM string in all-or-nothing non-blocking mode.
+ *
+ * Checks the currently available TX buffer space and writes the string only if
+ * the whole null-terminated string fits at that moment. The terminating null
+ * byte is not transmitted.
+ *
+ * @param str Null-terminated RAM string to transmit.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(const char *str)
 {
@@ -407,10 +553,14 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(const char *str)
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: write_all(const char *str)
-/// BLOCKING write of a null-terminated string from RAM.
-/// In case of lack buffer space this method BLOCKS (does not return) and WAITS until
-/// the buffer will become free and all the string will be placed in the buffer completely.
+/**
+ * @brief Write a full RAM string in blocking mode.
+ *
+ * Writes every byte of the null-terminated string, waiting for TX buffer space
+ * whenever needed. The terminating null byte is not transmitted.
+ *
+ * @param str Null-terminated RAM string to transmit.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(const char *str)
 {
@@ -424,10 +574,16 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(const char *str)
     }
 }
 //------------------------------------------------------------------------------------------------
-/// uint8_t UART :: write_any(const char *str)
-/// Non-blocking write of a null-terminated string from RAM.
-/// In case of lack buffer space this method writes ONLY available PART of the string.
-/// Returns the number of bytes, placed in the buffer.
+/**
+ * @brief Write as much of a RAM string as currently possible.
+ *
+ * Transmits bytes from the null-terminated string until the string ends or
+ * _write_char() rejects a byte because the TX buffer is full.
+ *
+ * @param str Null-terminated RAM string to transmit.
+ *
+ * @return Number of bytes accepted for transmission.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(const char *str)
 {
@@ -450,11 +606,15 @@ __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(const char *str
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: write(_flash(const char *str))
-/// Non-blocking write of a null-terminated string from flash memory (PROGMEM).
-/// Drops the whole string if it does not fit into TX buffer
-/// at the moment of checking (best-effort, non-atomic guarantee).
-/// Hint: always use _flash() macro for literals to save your RAM
+/**
+ * @brief Write a PROGMEM string in all-or-nothing non-blocking mode.
+ *
+ * Checks the currently available TX buffer space and writes the string only if
+ * the whole null-terminated flash string fits at that moment. The terminating
+ * null byte is not transmitted.
+ *
+ * @param fs Flash string wrapper, typically created by _flash("text").
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(FlashStringWrapper fs)
 {
@@ -475,11 +635,14 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(FlashStringWrapper fs)
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: write_all(_flash(const char *str))
-/// BLOCKING write of a null-terminated string from flash memory (PROGMEM).
-/// In case of lack buffer space this method BLOCKS (does not return) and WAITS until
-/// the buffer will become free and all the string will be placed in the buffer completely.
-/// Hint: always use _flash() macro for literals to save your RAM
+/**
+ * @brief Write a full PROGMEM string in blocking mode.
+ *
+ * Writes every byte of the null-terminated flash string, waiting for TX buffer
+ * space whenever needed. The terminating null byte is not transmitted.
+ *
+ * @param fs Flash string wrapper, typically created by _flash("text").
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(FlashStringWrapper fs)
 {
@@ -494,11 +657,16 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(FlashStringWrapper
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: write_any(_flash(const char *str))
-/// Non-blocking write of a null-terminated string from flash memory (PROGMEM).
-/// In case of lack buffer space this method writes ONLY available PART of the string.
-/// Returns the number of bytes, placed in the buffer.
-/// Hint: always use _flash() macro for literals to save your RAM
+/**
+ * @brief Write as much of a PROGMEM string as currently possible.
+ *
+ * Transmits bytes from the null-terminated flash string until the string ends
+ * or _write_char() rejects a byte because the TX buffer is full.
+ *
+ * @param fs Flash string wrapper, typically created by _flash("text").
+ *
+ * @return Number of bytes accepted for transmission.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(FlashStringWrapper fs)
 {
@@ -523,10 +691,15 @@ __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(FlashStringWrap
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: write(const uint8_t *buf, uint8_t count)
-/// Non-blocking write 'count' bytes from a buffer 'buf'.
-/// Does nothing if 'count' is greater than available TX buffer size at the moment of
-/// checking (best-effort, non-atomic guarantee).
+/**
+ * @brief Write a RAM byte buffer in all-or-nothing non-blocking mode.
+ *
+ * Checks the currently available TX buffer space and writes the buffer only if
+ * all @p count bytes fit at that moment.
+ *
+ * @param buf Pointer to the first byte to transmit.
+ * @param count Number of bytes to transmit.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(const uint8_t *buf, uint8_t count)
 {
@@ -544,10 +717,14 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write(const uint8_t *buf, ui
     }
 }
 //------------------------------------------------------------------------------------------------
-/// void UART :: write_all(const uint8_t *buf, uint8_t count)
-/// BLOCKING write 'count' bytes from a buffer 'buf'.
-/// In case of lack buffer space this method BLOCKS (does not return) and WAITS until the buffer
-/// will become free and all 'count' bytes from will be placed in the TX buffer completely.
+/**
+ * @brief Write a full RAM byte buffer in blocking mode.
+ *
+ * Writes all @p count bytes, waiting for TX buffer space whenever needed.
+ *
+ * @param buf Pointer to the first byte to transmit.
+ * @param count Number of bytes to transmit.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(const uint8_t *buf, uint8_t count)
 {
@@ -561,10 +738,17 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_all(const uint8_t *buf
     }
 }
 //------------------------------------------------------------------------------------------------
-/// uint8_t UART :: write_any(const uint8_t *buf, uint8_t count)
-/// Non-blocking write 'count' bytes from a buffer 'buf'.
-/// In case of lack buffer space this method writes ONLY available PART of the buffer.
-/// Returns the number of bytes, placed in the buffer.
+/**
+ * @brief Write as much of a RAM byte buffer as currently possible.
+ *
+ * Transmits bytes from @p buf until @p count bytes are accepted or
+ * _write_char() rejects a byte because the TX buffer is full.
+ *
+ * @param buf Pointer to the first byte to transmit.
+ * @param count Maximum number of bytes to transmit.
+ *
+ * @return Number of bytes accepted for transmission.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(const uint8_t *buf, uint8_t count)
 {
@@ -587,8 +771,15 @@ __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: write_any(const uint8_t *
     }
 }
 //------------------------------------------------------------------------------------------------
-/// uint8_t UART :: get_rx_errors()
-/// Return the number of receiver errors.
+/**
+ * @brief Return the RX overflow error counter.
+ *
+ * The counter is incremented by rx_interrupt() when a received byte cannot be
+ * stored because the RX ring buffer is full. The counter saturates at 255 and
+ * is reset by flush_rx().
+ *
+ * @return RX error count, or 0 when RX buffering is disabled.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: get_rx_errors()
 {
@@ -602,8 +793,15 @@ __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: get_rx_errors()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// uint8_t UART :: get_tx_errors()
-/// Return the number of transmitter errors.
+/**
+ * @brief Return the TX overflow error counter.
+ *
+ * The counter is incremented by _write_char() when a byte cannot be queued
+ * because the TX ring buffer is full. The counter saturates at 255 and is reset
+ * by flush_tx().
+ *
+ * @return TX error count, or 0 when TX buffering is disabled.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: get_tx_errors()
 {
@@ -617,8 +815,11 @@ __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: get_tx_errors()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// uint8_t UART :: available()
-/// Return the number of bytes, available in RX buffer.
+/**
+ * @brief Return the number of bytes currently available in the RX buffer.
+ *
+ * @return Number of queued RX bytes, or 0 when RX buffering is disabled.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: available()
 {
@@ -632,9 +833,12 @@ __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: available()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// int UART :: peek()
-/// Read the next byte from RX buffer without extracting - leave the buffer unchanged.
-/// Returns the byte or -1 in case of error (no data - empty buffer).
+/**
+ * @brief Peek the next received byte without removing it from the RX buffer.
+ *
+ * @return Next byte as an unsigned 8-bit value promoted to int.
+ * @return -1 if the RX buffer is empty or RX buffering is disabled.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline int UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: peek()
 {
@@ -656,9 +860,12 @@ __inline int UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: peek()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// int UART :: read()
-/// Extract the next byte from RX buffer.
-/// Returns the byte or -1 in case of error (no data - empty buffer).
+/**
+ * @brief Read and remove the next byte from the RX buffer.
+ *
+ * @return Next byte as an unsigned 8-bit value promoted to int.
+ * @return -1 if the RX buffer is empty or RX buffering is disabled.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline int UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: read()
 {
@@ -682,9 +889,17 @@ __inline int UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: read()
     }
 }
 //------------------------------------------------------------------------------------------------
-/// uint8_t UART :: read(uint8_t *buf, const uint8_t count)
-/// Extract next 'count' bytes from RX buffer.
-/// Returns the number of bytes read.
+/**
+ * @brief Read multiple bytes from the RX buffer.
+ *
+ * Removes up to @p count bytes from the RX ring buffer and copies them to
+ * @p buf. Reading stops early if the RX buffer becomes empty.
+ *
+ * @param buf Destination buffer.
+ * @param count Maximum number of bytes to read.
+ *
+ * @return Number of bytes copied to @p buf.
+ */
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline uint8_t UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: read(uint8_t *buf, const uint8_t count)
 {
