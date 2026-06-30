@@ -22,6 +22,9 @@
 					<Add directory="sensors/DS1820" />
 					<Add directory="interfaces/OneWire" />
 					<Add directory="AVR/EEPROM" />
+					<Add directory="AVR/I2C" />
+					<Add directory="RTC/DS3231" />
+					<Add directory="RTC" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega1284p" />
@@ -43,6 +46,9 @@
 					<Add directory="sensors/DS1820" />
 					<Add directory="interfaces/OneWire" />
 					<Add directory="AVR/EEPROM" />
+					<Add directory="AVR/I2C" />
+					<Add directory="RTC/DS3231" />
+					<Add directory="RTC" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="avr128db48" />
@@ -62,16 +68,17 @@
 			<Add option="-x c++" />
 			<Add option="-save-temps=obj" />
 			<Add option="-mmcu=$(MCU)" />
-			<Add option="-DF_CPU=16000000UL" />
 			<Add option="-DDEBUG" />
 			<Add directory="include" />
 		</Compiler>
 		<Linker>
 			<Add option="-mmcu=$(MCU)" />
-			<Add option="-nodefaultlibs" />
+			<Add option="-ffunction-sections" />
+			<Add option="-fdata-sections" />
+			<Add option="-fno-exceptions" />
+			<Add option="-fno-rtti" />
+			<Add option="-Wl,--gc-sections" />
 			<Add option="-Wl,-Map=$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).map" />
-			<Add library="c" />
-			<Add library="gcc" />
 			<Add library="$MCU" />
 		</Linker>
 		<ExtraCommands>
@@ -90,6 +97,9 @@
 		<Unit filename="AVR/GPIO/avr-gpio.h" />
 		<Unit filename="AVR/GPIO/avr-gpio.tpp" />
 		<Unit filename="AVR/GPIO/pins.h" />
+		<Unit filename="AVR/I2C/i2c-regs.h" />
+		<Unit filename="AVR/I2C/i2c.h" />
+		<Unit filename="AVR/I2C/i2c.tpp" />
 		<Unit filename="AVR/Serial/serial-bit-out.h" />
 		<Unit filename="AVR/Serial/serial-bit-out.tpp" />
 		<Unit filename="AVR/UART/avr-uart-regs.h" />
@@ -102,8 +112,14 @@
 		<Unit filename="Console/debug.h" />
 		<Unit filename="LED/led.h" />
 		<Unit filename="LED/led.tpp" />
+		<Unit filename="RTC/DS3231/DS3231.h" />
+		<Unit filename="RTC/DS3231/DS3231.tpp" />
+		<Unit filename="RTC/DateTime.cpp" />
+		<Unit filename="RTC/DateTime.h" />
 		<Unit filename="core.h" />
+		<Unit filename="core/bcd.h" />
 		<Unit filename="core/errors.h" />
+		<Unit filename="core/format.h" />
 		<Unit filename="core/nostream.h" />
 		<Unit filename="core/settings/settings.h" />
 		<Unit filename="core/settings/settings.tpp" />
@@ -114,6 +130,8 @@
 		<Unit filename="core/type_traits/is_integer.h" />
 		<Unit filename="core/type_traits/is_number.h" />
 		<Unit filename="core/type_traits/is_pointer.h" />
+		<Unit filename="core/type_traits/is_string.h" />
+		<Unit filename="core/type_traits/make_unsigned.h" />
 		<Unit filename="core/units.h" />
 		<Unit filename="interfaces/OneWire/one-wire.h" />
 		<Unit filename="interfaces/OneWire/one-wire.tpp" />

@@ -1,6 +1,8 @@
 #ifndef UNITS_H
 #define UNITS_H
 //------------------------------------------------------------------------------------------------
+void format_2d(char *&buf, uint8_t value);
+//------------------------------------------------------------------------------------------------
 struct Temperature
 {
     __inline bool is_valid()                 const { return valid; };
@@ -16,5 +18,6 @@ struct Temperature
     bool valid = false;
 };
 //------------------------------------------------------------------------------------------------
-
-#endif // UNITS_H
+__inline int32_t console_value(const Temperature &value)     { return value.millis_celsius; }
+//------------------------------------------------------------------------------------------------
+#endif

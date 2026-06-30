@@ -7,6 +7,8 @@
 #ifndef AVR_MACRO_H
 #define AVR_MACRO_H
 //------------------------------------------------------------------------------------------------
+#include <avr/pgmspace.h>
+//------------------------------------------------------------------------------------------------
 #if defined(__AVR_AVR128DA48__) || defined(__AVR_AVR128DB48__) || defined(__AVR_AVR128DD48__)
 #define AVR128DX_FAMILY
 #endif

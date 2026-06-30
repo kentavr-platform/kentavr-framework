@@ -1,6 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 //------------------------------------------------------------------------------------------------
+#include "AVR/avr-macro.h"
+//------------------------------------------------------------------------------------------------
 template <class Type>
 struct DebugDEC
 {
@@ -27,7 +29,7 @@ FlashStringWrapper console_type_name(const Type &)
 }
 //------------------------------------------------------------------------------------------------
 // Object type-namer macro:
-#define CONSOLE_TYPE_NAME(Type)                                  \
+#define SET_CONSOLE_TYPE_NAME(Type)                              \
     __inline FlashStringWrapper console_type_name(const Type &)  \
     {                                                            \
         return _flash(#Type);                                    \
