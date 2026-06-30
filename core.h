@@ -19,12 +19,12 @@
 // hardware-specific drivers
 #include "AVR/avr-macro.h"
 #include "AVR/avr-delay.h"
-#include "Console/debug.h"
+#include "console/debug.h"
 #include "AVR/GPIO/avr-gpio.h"
 #include "AVR/GPIO/pins.h"
 #include "AVR/UART/avr-uart.h"
 #include "AVR/EEPROM/avr-eeprom.h"
-#include "AVR/Serial/serial-bit-out.h"
+#include "AVR/serial/serial-bit-out.h"
 
 
 // interfaces
@@ -33,7 +33,7 @@
 
 // external drivers
 #include "LED/led.h"
-#include "Console/console.h"
+#include "console/console.h"
 #include "sensors/DS1820/DS18x20.h"
 #include "sensors/DS1820/DS1820.h"
 #include "sensors/DS18S20/DS18S20.h"
