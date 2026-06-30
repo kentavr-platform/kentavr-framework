@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------------------------
- * console.tpp
+ * Project: KentAVR Framework
  *
- * ATTENTION! This file is included from console.h and must NOT be built.
+ * File: console.tpp
  *
+ * WARNING! This file is included from console.h and must NOT be built.
 //----------------------------------------------------------------------------------------------*/
 /**
  * @brief Writes a null-terminated string followed by CRLF.

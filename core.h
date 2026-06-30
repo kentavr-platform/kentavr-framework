@@ -1,8 +1,7 @@
 /*------------------------------------------------------------------------------------------------
- * core.h
+ * Project: KentAVR Framework
  *
- *  This file contains core includes and definitions.
- *
+ * File: core.h
 //----------------------------------------------------------------------------------------------*/
 #ifndef CORE_H
 #define CORE_H

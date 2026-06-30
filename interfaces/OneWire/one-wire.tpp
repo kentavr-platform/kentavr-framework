@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------------------------
- * one-wire.tpp
+ * Project: KentAVR Framework
  *
- * ATTENTION! This file is included from one-wire.h and must NOT be built.
+ * File: one-wire.tpp
  *
+ * WARNING! This file is included from one-wire.h and must NOT be built.
 //----------------------------------------------------------------------------------------------*/
 __inline uint8_t Dallas_CRC8(const uint8_t *data, uint8_t len)
 {

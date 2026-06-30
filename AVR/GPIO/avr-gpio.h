@@ -1,8 +1,7 @@
 /*------------------------------------------------------------------------------------------------
- * AVR/avr-gpio.h
+ * Project: KentAVR Framework
  *
- *  This file contains hardware-specific GPIO implementation.
- *
+ * File: avr-gpio.h
 //----------------------------------------------------------------------------------------------*/
 #ifndef AVR_GPIO_H
 #define AVR_GPIO_H

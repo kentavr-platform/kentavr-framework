@@ -1,3 +1,8 @@
+/*------------------------------------------------------------------------------------------------
+ * Project: KentAVR Framework
+ *
+ * File: console.h
+//----------------------------------------------------------------------------------------------*/
 /**
  * @file console.h
  * @brief Lightweight ANSI-capable console utility for embedded systems.

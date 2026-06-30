@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------------------------
- * led.tpp
+ * Project: KentAVR Framework
  *
- * ATTENTION! This file is included from led.h and must NOT be built.
+ * File: led.tpp
  *
+ * WARNING! This file is included from led.h and must NOT be built.
 //----------------------------------------------------------------------------------------------*/
 /*
  *      COMMON CATHODE BiLEDs

@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------------------------
- * gpio.tpp
+ * Project: KentAVR Framework
  *
- * ATTENTION! This file is included from gpio.h and must NOT be built.
+ * File: avr-gpio.tpp
  *
+ * WARNING! This file is included from avr-gpio.h and must NOT be built.
 //----------------------------------------------------------------------------------------------*/
 template <class pin>
 __inline void GPIO <pin> :: set_mode(enum GPIO_mode mode)

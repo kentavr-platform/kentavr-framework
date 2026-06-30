@@ -3,7 +3,7 @@
  *
  * File: i2c.tpp
  *
- * ATTENTION! This file is included from i2c.h and must NOT be built.
+ * WARNING! This file is included from i2c.h and must NOT be built.
 //----------------------------------------------------------------------------------------------*/
 template <uint8_t N, uint8_t TX_BUF_SIZE>
 uint8_t TWI <N, TX_BUF_SIZE> :: tx_buf[TX_BUF_SIZE];

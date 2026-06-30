@@ -1,8 +1,7 @@
 /*------------------------------------------------------------------------------------------------
- * platform/pins.h
+ * Project: KentAVR Framework
  *
- *  This file contains hardware configuration for pins abstractions.
- *
+ * File: pins.h
 //----------------------------------------------------------------------------------------------*/
 #ifndef PLATFORM_IO_H
 #define PLATFORM_IO_H

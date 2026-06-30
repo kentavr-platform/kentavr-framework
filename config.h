@@ -1,8 +1,7 @@
 /*------------------------------------------------------------------------------------------------
- * config.h
+ * Project: KentAVR Framework
  *
- *  This file contains project's configuration
- *
+ * File: config.h
 //----------------------------------------------------------------------------------------------*/
 #ifndef CONFIG_H
 #define CONFIG_H

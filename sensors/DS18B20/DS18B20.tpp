@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------------------------
- * DS18B20.tpp
+ * Project: KentAVR Framework
  *
- * ATTENTION! This file is included from DS18B20.h and must NOT be built.
+ * File: DS18B20.tpp
  *
+ * WARNING! This file is included from DS18B20.h and must NOT be built.
 //----------------------------------------------------------------------------------------------*/
 template <class Bus>
 __inline ResultCode Sensor_DS18B20 <Bus> :: set_resolution(enum DS_Temp_Resolution bits,

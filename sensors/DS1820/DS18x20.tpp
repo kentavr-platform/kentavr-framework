@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------------------------
- * DS18x20.tpp
+ * Project: KentAVR Framework
  *
- * ATTENTION! This file is included from DS18x20.h and must NOT be built.
+ * File: DS18x20.tpp
  *
+ * WARNING! This file is included from DS18x20.h and must NOT be built.
 //----------------------------------------------------------------------------------------------*/
 /**
  * @brief Checks whether the current device's address belongs to the supported family.

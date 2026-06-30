@@ -1,19 +1,24 @@
 /*------------------------------------------------------------------------------------------------
- * led.h
+ * Project: KentAVR Framework
  *
- *  This module contains drivers for
- *   LED_C       single cathode-driven LED
- *   LED_A       single anode-driven LED
- *   RG_LED_CA   bicolor common anode red-green LED
- *   RG_LED_CC   bicolor common cathode red-green LED
- *   RB_LED_CA   bicolor common anode red-blue LED
- *   RB_LED_CC   bicolor common cathode red-blue LED
- *   GB_LED_CA   bicolor common anode green-blue LED
- *   GB_LED_CC   bicolor common cathode green-blue LED
- *   RGB_LED_CA  tricolor common anode red-green-blue (RGB) LED
- *   RGB_LED_CC  tricolor common cathode red-green-blue (RGB) LED
+ * File: led.h
+//----------------------------------------------------------------------------------------------*/
+/**
+ * @file led.h
+ * @brief LED drivers.
  *
- *----------------------------------------------------------------------------------------------*/
+ * This module contains drivers for:
+ * - LED_C       single cathode-driven LED
+ * - LED_A       single anode-driven LED
+ * - RG_LED_CA   bicolor common anode red-green LED
+ * - RG_LED_CC   bicolor common cathode red-green LED
+ * - RB_LED_CA   bicolor common anode red-blue LED
+ * - RB_LED_CC   bicolor common cathode red-blue LED
+ * - GB_LED_CA   bicolor common anode green-blue LED
+ * - GB_LED_CC   bicolor common cathode green-blue LED
+ * - RGB_LED_CA  tricolor common anode red-green-blue (RGB) LED
+ * - RGB_LED_CC  tricolor common cathode red-green-blue (RGB) LED
+ */
 #ifndef LED_H
 #define LED_H
 //------------------------------------------------------------------------------------------------

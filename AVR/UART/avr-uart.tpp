@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------------------------
- * avr-uart.tpp
+ * Project: KentAVR Framework
  *
- * ATTENTION! This file is included from avr-uart.h and must NOT be built.
+ * File: avr-uart.tpp
  *
+ * WARNING! This file is included from avr-uart.h and must NOT be built.
 //----------------------------------------------------------------------------------------------*/
 // static members initialisation
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>

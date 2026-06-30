@@ -1,8 +1,7 @@
 /*------------------------------------------------------------------------------------------------
- * AVR/avr-gpio.h
+ * Project: KentAVR Framework
  *
- *  This file contains hardware-specific macros and definitions.
- *
+ * File: avr-macro.h
 //----------------------------------------------------------------------------------------------*/
 #ifndef AVR_MACRO_H
 #define AVR_MACRO_H

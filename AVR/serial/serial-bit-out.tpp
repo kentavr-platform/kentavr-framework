@@ -1,8 +1,9 @@
 /*------------------------------------------------------------------------------------------------
- * serial-bit-out.tpp
+ * Project: KentAVR Framework
  *
- * ATTENTION! This file is included from serial-bit-out.h and must NOT be built.
+ * File: serial-bit-out.tpp
  *
+ * WARNING! This file is included from serial-bit-out.h and must NOT be built.
 //----------------------------------------------------------------------------------------------*/
 /**
  * @brief Initializes TX pin for output.

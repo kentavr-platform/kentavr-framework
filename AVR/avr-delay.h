@@ -1,9 +1,12 @@
 /*------------------------------------------------------------------------------------------------
- * AVR/avr-delay.h
+ * Project: KentAVR Framework
  *
- *  This file contains comfort macros for runtime delays.
- *
+ * File: avr-delay.h
 //----------------------------------------------------------------------------------------------*/
+/**
+ * @file avr-delay.h
+ * @brief Comfort macros for runtime delays.
+ */
 #ifndef AVR_DELAY_H
 #define AVR_DELAY_H
 //-----------------------------------------------------------------------------
