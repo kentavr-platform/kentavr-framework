@@ -6,11 +6,13 @@
 #ifndef CORE_H
 #define CORE_H
 //------------------------------------------------------------------------------------------------
-#define F_CPU 20000000UL
-//------------------------------------------------------------------------------------------------
 #include <stdint.h>
 #include <avr/interrupt.h>
-
+//------------------------------------------------------------------------------------------------
+#ifndef F_CPU
+  #error F_CPU must be defined as a compiller parameter (-DF_CPU=16000000UL or other value in Hz)
+#endif
+//------------------------------------------------------------------------------------------------
 // core modules
 #include "core/type_traits.h"
 #include "core/errors.h"
@@ -24,7 +26,6 @@
 #include "AVR/avr-delay.h"
 #include "console/debug.h"
 #include "AVR/GPIO/avr-gpio.h"
-#include "AVR/GPIO/pins.h"
 #include "AVR/UART/avr-uart.h"
 #include "AVR/I2C/i2c.h"
 #include "AVR/EEPROM/avr-eeprom.h"

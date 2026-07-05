@@ -6,31 +6,6 @@
 		<Option pch_mode="2" />
 		<Option compiler="avr-gcc" />
 		<Build>
-			<Target title="ATmega1284p">
-				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
-				<Option working_dir="" />
-				<Option object_output="." />
-				<Option type="5" />
-				<Option compiler="avr-gcc" />
-				<Compiler>
-					<Add option="-mmcu=atmega1284p" />
-					<Add option="-g" />
-					<Add option="-D__AVR_ATmega1284P__" />
-					<Add directory="./" />
-					<Add directory="Serial" />
-					<Add directory="Console" />
-					<Add directory="sensors/DS1820" />
-					<Add directory="interfaces/OneWire" />
-					<Add directory="AVR/EEPROM" />
-					<Add directory="AVR/I2C" />
-					<Add directory="RTC/DS3231" />
-					<Add directory="RTC" />
-				</Compiler>
-				<Environment>
-					<Variable name="MCU" value="atmega1284p" />
-					<Variable name="PROG" value="usbasp" />
-				</Environment>
-			</Target>
 			<Target title="AVR128DB48">
 				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
 				<Option working_dir="" />
@@ -52,6 +27,106 @@
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="avr128db48" />
+					<Variable name="PROG" value="usbasp" />
+				</Environment>
+			</Target>
+			<Target title="ATmega32u4">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D__AVR_ATmega32u4__" />
+					<Add directory="./" />
+					<Add directory="Serial" />
+					<Add directory="Console" />
+					<Add directory="sensors/DS1820" />
+					<Add directory="interfaces/OneWire" />
+					<Add directory="AVR/EEPROM" />
+					<Add directory="AVR/I2C" />
+					<Add directory="RTC/DS3231" />
+					<Add directory="RTC" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="atmega32u4" />
+					<Variable name="PROG" value="usbasp" />
+				</Environment>
+			</Target>
+			<Target title="ATmega1284p">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D__AVR_ATmega1284P__" />
+					<Add directory="./" />
+					<Add directory="Serial" />
+					<Add directory="Console" />
+					<Add directory="sensors/DS1820" />
+					<Add directory="interfaces/OneWire" />
+					<Add directory="AVR/EEPROM" />
+					<Add directory="AVR/I2C" />
+					<Add directory="RTC/DS3231" />
+					<Add directory="RTC" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="atmega1284p" />
+					<Variable name="PROG" value="usbasp" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Leonardo">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D__AVR_ATmega32u4__" />
+					<Add option="-DARDUINO_AVR_LEONARDO" />
+					<Add option="-DF_CPU=16000000UL" />
+					<Add directory="./" />
+					<Add directory="Serial" />
+					<Add directory="Console" />
+					<Add directory="sensors/DS1820" />
+					<Add directory="interfaces/OneWire" />
+					<Add directory="AVR/EEPROM" />
+					<Add directory="AVR/I2C" />
+					<Add directory="RTC/DS3231" />
+					<Add directory="RTC" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="atmega32u4" />
+					<Variable name="PROG" value="usbasp" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Pro Micro">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D__AVR_ATmega32u4__" />
+					<Add option="-DARDUINO_AVR_PRO_MICRO" />
+					<Add option="-DF_CPU=16000000UL" />
+					<Add directory="./" />
+					<Add directory="Serial" />
+					<Add directory="Console" />
+					<Add directory="sensors/DS1820" />
+					<Add directory="interfaces/OneWire" />
+					<Add directory="AVR/EEPROM" />
+					<Add directory="AVR/I2C" />
+					<Add directory="RTC/DS3231" />
+					<Add directory="RTC" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="atmega32u4" />
 					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
@@ -96,26 +171,30 @@
 		<Unit filename="AVR/EEPROM/avr-eeprom.h" />
 		<Unit filename="AVR/GPIO/avr-gpio.h" />
 		<Unit filename="AVR/GPIO/avr-gpio.tpp" />
+		<Unit filename="AVR/GPIO/boards/arduino-leonardo.h" />
 		<Unit filename="AVR/GPIO/pins.h" />
+		<Unit filename="AVR/GPIO/pins/pins_128dx48.h" />
+		<Unit filename="AVR/GPIO/pins/pins_m1284.h" />
 		<Unit filename="AVR/I2C/i2c-regs.h" />
 		<Unit filename="AVR/I2C/i2c.h" />
 		<Unit filename="AVR/I2C/i2c.tpp" />
-		<Unit filename="AVR/Serial/serial-bit-out.h" />
-		<Unit filename="AVR/Serial/serial-bit-out.tpp" />
 		<Unit filename="AVR/UART/avr-uart-regs.h" />
 		<Unit filename="AVR/UART/avr-uart.h" />
 		<Unit filename="AVR/UART/avr-uart.tpp" />
 		<Unit filename="AVR/avr-delay.h" />
 		<Unit filename="AVR/avr-macro.h" />
-		<Unit filename="Console/console.h" />
-		<Unit filename="Console/console.tpp" />
-		<Unit filename="Console/debug.h" />
+		<Unit filename="AVR/serial/serial-bit-out.h" />
+		<Unit filename="AVR/serial/serial-bit-out.tpp" />
 		<Unit filename="LED/led.h" />
 		<Unit filename="LED/led.tpp" />
 		<Unit filename="RTC/DS3231/DS3231.h" />
 		<Unit filename="RTC/DS3231/DS3231.tpp" />
 		<Unit filename="RTC/DateTime.cpp" />
 		<Unit filename="RTC/DateTime.h" />
+		<Unit filename="config.h" />
+		<Unit filename="console/console.h" />
+		<Unit filename="console/console.tpp" />
+		<Unit filename="console/debug.h" />
 		<Unit filename="core.h" />
 		<Unit filename="core/bcd.h" />
 		<Unit filename="core/errors.h" />
@@ -124,6 +203,7 @@
 		<Unit filename="core/settings/settings.h" />
 		<Unit filename="core/settings/settings.tpp" />
 		<Unit filename="core/type_traits.h" />
+		<Unit filename="core/type_traits/is_connected.h" />
 		<Unit filename="core/type_traits/is_enum.h" />
 		<Unit filename="core/type_traits/is_floating.h" />
 		<Unit filename="core/type_traits/is_function.h" />

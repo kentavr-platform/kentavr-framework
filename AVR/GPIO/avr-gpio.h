@@ -7,6 +7,7 @@
 #define AVR_GPIO_H
 //------------------------------------------------------------------------------------------------
 #include <avr/io.h>
+#include "pins.h"
 //------------------------------------------------------------------------------------------------
 enum GPIO_mode
 {
@@ -18,19 +19,6 @@ enum GPIO_mode
     OUTPUT_HIGH     = 3,
     /// Set pin as output and set low level
     OUTPUT_LOW      = 4,
-};
-//------------------------------------------------------------------------------------------------
-template <
-    volatile uint8_t port_addr,
-    volatile uint8_t dir_addr,
-    volatile uint8_t pin_addr,
-    uint8_t bit>
-struct pin
-{
-    static constexpr uint8_t PORT  = port_addr;
-    static constexpr uint8_t DDR   = dir_addr;
-    static constexpr uint8_t PIN   = pin_addr;
-    static constexpr uint8_t BIT   = bit;
 };
 //------------------------------------------------------------------------------------------------
 template <class pin>
@@ -46,6 +34,7 @@ public:
 //------------------------------------------------------------------------------------------------
 SET_CONSOLE_TEMPLATE_TYPE_NAME(GPIO);
 //------------------------------------------------------------------------------------------------
+#include "core/type_traits/is_connected.h"
 #include "avr-gpio.tpp"
 //------------------------------------------------------------------------------------------------
 #endif
