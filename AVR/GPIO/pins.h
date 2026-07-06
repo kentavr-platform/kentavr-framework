@@ -10,18 +10,20 @@ template <
     volatile uint8_t port_addr,
     volatile uint8_t dir_addr,
     volatile uint8_t pin_addr,
+    volatile uint8_t tgl_addr,
     uint8_t bit>
 struct pin
 {
     static constexpr uint8_t PORT  = port_addr;
     static constexpr uint8_t DDR   = dir_addr;
     static constexpr uint8_t PIN   = pin_addr;
+    static constexpr uint8_t TGL   = tgl_addr;
     static constexpr uint8_t BIT   = bit;
 };
 //------------------------------------------------------------------------------------------------
 struct NC {};       // Not Connected "pin"
 //------------------------------------------------------------------------------------------------
-#define DECLARE_PIN(ID, PORT, DDR, PIN, BIT) struct ID : pin <PORT, DDR, PIN, BIT> {};
+#define DECLARE_PIN(ID, PORT, DDR, PIN, TGL, BIT) struct ID : pin <PORT, DDR, PIN, TGL, BIT> {};
 //------------------------------------------------------------------------------------------------
 #if defined(__AVR_ATmega8__)
   #include "pins_m8.h"

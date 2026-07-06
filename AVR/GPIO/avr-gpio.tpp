@@ -81,15 +81,7 @@ __inline uint8_t GPIO <pin> :: read()
 template <class pin>
 __inline void GPIO <pin> :: toggle()
 {
-#if defined(__AVR_ATmega1284P__)
-    // TODO: modify this for whole the family
-    // 14.2.2 Toggling the pin
-    // Writing a logic one to PINxn toggles the value of PORTxn, independent on the value of DDRxn.
-    set_bit(_SFR_IO8(pin :: PIN), pin :: BIT);
-#elif defined(AVR128DX_FAMILY)
-    // TODO: check this and map TGL addr into pin structure
-    set_bit(_SFR_MEM8(pin :: TGL), pin :: BIT);
-#endif
+    set_bit(_SFR_IO8(pin :: TGL), pin :: BIT);
 }
 //------------------------------------------------------------------------------------------------
 
