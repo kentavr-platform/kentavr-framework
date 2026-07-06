@@ -426,7 +426,7 @@ __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: rx_interrupt()
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline void UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: tx_interrupt()
 {
-    if constexpr(TX_BUF_SIZE > 0)
+    if constexpr(TX_BUF_SIZE > 0 && regs :: exists)
     {
         if(tx_head != tx_tail)
         {

@@ -8,7 +8,12 @@
 //------------------------------------------------------------------------------------------------
 #include <avr/io.h>
 //------------------------------------------------------------------------------------------------
-
+template <uint8_t N>
+struct USART_traits
+{
+    static constexpr bool exists = false;
+};
+//------------------------------------------------------------------------------------------------
 #define DEFINE_USART_REGS(N, _RXDATA, _TXDATA, _STATUS, _CTRLA, _CTRLB, _CTRLC, _BAUD) \
 template <> \
 struct USART_traits <N> { \
@@ -19,31 +24,44 @@ struct USART_traits <N> { \
     static inline volatile uint8_t& CTRLB  = _CTRLB; \
     static inline volatile uint8_t& CTRLC  = _CTRLC; \
     static inline volatile uint16_t& BAUD  = _BAUD; \
+    static constexpr bool exists = true; \
 };
-template <uint8_t N> struct USART_traits;
+//------------------------------------------------------------------------------------------------
+#if defined(UDR0)
+  DEFINE_USART_REGS(0, UDR0, UDR0, UCSR0A, UCSR0A, UCSR0B, UCSR0C, UBRR0);
+  #define RXEN    RXEN0
+  #define TXEN    TXEN0
+  #define RXCIE   RXCIE0
+  #define UDRIE   UDRIE0
+  #define TXC     TXC0
+  #define UDRE    UDRE0
+  #define UCSZ0   UCSZ00
+  #define UCSZ1   UCSZ01
+  #define UCSZ2   UCSZ02
+  #define U2X     U2X0
+  #define USBS    USBS0
+  #define UPM0    UPM00
+  #define UPM1    UPM01
+#endif
 
-#ifdef __AVR_ATmega1284P__
-DEFINE_USART_REGS(0, UDR0, UDR0, UCSR0A, UCSR0A, UCSR0B, UCSR0C, UBRR0);  // RX = <D0>, TX = <D1>
-DEFINE_USART_REGS(1, UDR1, UDR1, UCSR1A, UCSR1A, UCSR1B, UCSR1C, UBRR1);  // RX = <D2>, TX = <D3>
-//------------------------------------------------------------------------------------------------
-// the following declarations use UART #0 bits because they are the same for UART #0 and UART #1
-#define RXEN    RXEN0
-#define TXEN    TXEN0
-#define RXCIE   RXCIE0
-#define UDRIE   UDRIE0
-#define TXC     TXC0
-#define UDRE    UDRE0
-#define UCSZ0   UCSZ00
-#define UCSZ1   UCSZ01
-#define UCSZ2   UCSZ02
-#define U2X     U2X0
-#define USBS    USBS0
-#define UPM0    UPM00
-#define UPM1    UPM01
-#endif // __AVR_ATmega1284P__
-//------------------------------------------------------------------------------------------------
-#ifdef AVR128DX_FAMILY
+#if defined(UDR1)
+  DEFINE_USART_REGS(1, UDR1, UDR1, UCSR1A, UCSR1A, UCSR1B, UCSR1C, UBRR1);
+#endif
 
-#endif // AVR128DX_FAMILY
+#if !defined(UDR0) && defined(UDR1)
+  #define RXEN    RXEN1
+  #define TXEN    TXEN1
+  #define RXCIE   RXCIE1
+  #define UDRIE   UDRIE1
+  #define TXC     TXC1
+  #define UDRE    UDRE1
+  #define UCSZ0   UCSZ10
+  #define UCSZ1   UCSZ11
+  #define UCSZ2   UCSZ12
+  #define U2X     U2X1
+  #define USBS    USBS1
+  #define UPM0    UPM10
+  #define UPM1    UPM11
+#endif
 //------------------------------------------------------------------------------------------------
-#endif // AVR_UART_REGS
+#endif

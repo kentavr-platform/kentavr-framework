@@ -135,6 +135,12 @@ private:
 };
 //------------------------------------------------------------------------------------------------
 // UART interrupt presets
+#pragma GCC diagnostic error "-Wmisspelled-isr"
+#if !defined(USART0_RX_vect) && defined(USART_RX_vect)
+  // some devices have only one USART without index
+  #define USART0_RX_vect    USART_RX_vect
+  #define USART0_UDRE_vect  USART_UDRE_vect
+#endif
 #define _SETUP_UART_RX_ISR(N)             ISR(USART##N##_RX_vect)   { UART##N :: rx_interrupt(); }
 #define _SETUP_UART_TX_ISR(N)             ISR(USART##N##_UDRE_vect) { UART##N :: tx_interrupt(); }
 
@@ -163,6 +169,7 @@ private:
 
 // main ENABLE_UART() macro
 #define _ENABLE_UART(N, RX_BUF_SIZE, TX_BUF_SIZE) \
+static_assert(USART_traits <N> :: exists, "Selected UART does not exist in this MCU"); \
 using UART##N = UART <N, RX_BUF_SIZE, TX_BUF_SIZE>; \
 _ENABLE_UART_RX_ISR(N, RX_BUF_SIZE) \
 _ENABLE_UART_TX_ISR(N, TX_BUF_SIZE)
@@ -170,6 +177,10 @@ _ENABLE_UART_TX_ISR(N, TX_BUF_SIZE)
 // platform-specific wrappers
 #define ENABLE_UART0(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(0, RX_BUF_SIZE, TX_BUF_SIZE)
 #define ENABLE_UART1(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(1, RX_BUF_SIZE, TX_BUF_SIZE)
+#define ENABLE_UART2(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(2, RX_BUF_SIZE, TX_BUF_SIZE)
+#define ENABLE_UART4(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(3, RX_BUF_SIZE, TX_BUF_SIZE)
+#define ENABLE_UART5(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(4, RX_BUF_SIZE, TX_BUF_SIZE)
+#define ENABLE_UART6(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(5, RX_BUF_SIZE, TX_BUF_SIZE)
 //------------------------------------------------------------------------------------------------
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 __inline FlashStringWrapper
