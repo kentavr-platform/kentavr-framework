@@ -40,8 +40,11 @@ FUSES =
     Feel free to uncomment and modify the following lines to enable hardware UARTs.
     See AVR/UART for details.
                                                                                                 */
-ENABLE_UART0(0, 128);
-//ENABLE_UART1(0, 128);
+// ENABLE_UART0(0, 128);
+// ENABLE_UART1(0, 128);
+// ENABLE_UART2(0, 128);
+// ENABLE_UART3(0, 128);
+
 //------------------------------------------------------------------------------------------------
 /**
     Enable settings instance and reserves EEPROM space.
@@ -57,7 +60,7 @@ ENABLE_UART0(0, 128);
     Uncomment and modify the following lines to enable it.
     See core/settings for details.
                                                                                                 */
-//ENABLE_SETTINGS(512);
+// ENABLE_SETTINGS(512);
 
 //------------------------------------------------------------------------------------------------
 /**

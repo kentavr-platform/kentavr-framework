@@ -42,13 +42,7 @@ struct USART_traits <N> { \
   #define USBS    USBS0
   #define UPM0    UPM00
   #define UPM1    UPM01
-#endif
-
-#if defined(UDR1)
-  DEFINE_USART_REGS(1, UDR1, UDR1, UCSR1A, UCSR1A, UCSR1B, UCSR1C, UBRR1);
-#endif
-
-#if !defined(UDR0) && defined(UDR1)
+#elif defined(UDR1)
   #define RXEN    RXEN1
   #define TXEN    TXEN1
   #define RXCIE   RXCIE1
@@ -62,6 +56,18 @@ struct USART_traits <N> { \
   #define USBS    USBS1
   #define UPM0    UPM10
   #define UPM1    UPM11
+#endif
+
+#if defined(UDR1)
+  DEFINE_USART_REGS(1, UDR1, UDR1, UCSR1A, UCSR1A, UCSR1B, UCSR1C, UBRR1);
+#endif
+
+#if defined(UDR2)
+  DEFINE_USART_REGS(2, UDR2, UDR2, UCSR2A, UCSR2A, UCSR2B, UCSR2C, UBRR2);
+#endif
+
+#if defined(UDR3)
+  DEFINE_USART_REGS(3, UDR3, UDR3, UCSR3A, UCSR3A, UCSR3B, UCSR3C, UBRR3);
 #endif
 //------------------------------------------------------------------------------------------------
 #endif
