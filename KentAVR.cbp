@@ -6,7 +6,7 @@
 		<Option pch_mode="2" />
 		<Option compiler="avr-gcc" />
 		<Build>
-			<Target title="AVR128DB48">
+			<Target title="ATmega88p">
 				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
 				<Option working_dir="" />
 				<Option object_output="." />
@@ -14,10 +14,10 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-D__AVR_AVR128DB48__" />
+					<Add option="-DF_CPU=16000000UL" />
 				</Compiler>
 				<Environment>
-					<Variable name="MCU" value="avr128db48" />
+					<Variable name="MCU" value="atmega88p" />
 					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
@@ -29,7 +29,7 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-D__AVR_ATmega32u4__" />
+					<Add option="-DF_CPU=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
@@ -44,7 +44,6 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-D__AVR_ATmega1284P__" />
 					<Add option="-DF_CPU=20000000UL" />
 				</Compiler>
 				<Environment>
@@ -52,7 +51,7 @@
 					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
-			<Target title="Arduino Leonardo">
+			<Target title="AVR128DB48">
 				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
 				<Option working_dir="" />
 				<Option object_output="." />
@@ -60,16 +59,14 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-D__AVR_ATmega32u4__" />
-					<Add option="-DARDUINO_AVR_LEONARDO" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DF_CPU=20000000UL" />
 				</Compiler>
 				<Environment>
-					<Variable name="MCU" value="atmega32u4" />
+					<Variable name="MCU" value="avr128db48" />
 					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
-			<Target title="Arduino Pro Micro">
+			<Target title="ATmega2560">
 				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
 				<Option working_dir="" />
 				<Option object_output="." />
@@ -77,45 +74,10 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-D__AVR_ATmega32u4__" />
-					<Add option="-DARDUINO_AVR_PRO_MICRO" />
 					<Add option="-DF_CPU=16000000UL" />
 				</Compiler>
 				<Environment>
-					<Variable name="MCU" value="atmega32u4" />
-					<Variable name="PROG" value="usbasp" />
-				</Environment>
-			</Target>
-			<Target title="Arduino Pro Mini">
-				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
-				<Option working_dir="" />
-				<Option object_output="." />
-				<Option type="5" />
-				<Option compiler="avr-gcc" />
-				<Compiler>
-					<Add option="-g" />
-					<Add option="-D__AVR_ATmega328p__" />
-					<Add option="-DARDUINO_AVR_PRO_MINI" />
-					<Add option="-DF_CPU=16000000UL" />
-				</Compiler>
-				<Environment>
-					<Variable name="MCU" value="atmega328p" />
-					<Variable name="PROG" value="usbasp" />
-				</Environment>
-			</Target>
-			<Target title="ATmega88p">
-				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
-				<Option working_dir="" />
-				<Option object_output="." />
-				<Option type="5" />
-				<Option compiler="avr-gcc" />
-				<Compiler>
-					<Add option="-g" />
-					<Add option="-D__AVR_ATmega88p__" />
-					<Add option="-DF_CPU=16000000UL" />
-				</Compiler>
-				<Environment>
-					<Variable name="MCU" value="atmega88p" />
+					<Variable name="MCU" value="atmega2560" />
 					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
@@ -127,7 +89,6 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-D__AVR_ATmega328p__" />
 					<Add option="-DARDUINO_AVR_UNO" />
 					<Add option="-DF_CPU=16000000UL" />
 				</Compiler>
@@ -144,12 +105,75 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-D__AVR_ATmega328p__" />
 					<Add option="-DARDUINO_AVR_NANO" />
 					<Add option="-DF_CPU=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega328p" />
+					<Variable name="PROG" value="usbasp" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Pro Mini">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DARDUINO_AVR_PRO_MINI" />
+					<Add option="-DF_CPU=16000000UL" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="atmega328p" />
+					<Variable name="PROG" value="usbasp" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Leonardo">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DARDUINO_AVR_LEONARDO" />
+					<Add option="-DF_CPU=16000000UL" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="atmega32u4" />
+					<Variable name="PROG" value="usbasp" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Pro Micro">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DARDUINO_AVR_PRO_MICRO" />
+					<Add option="-DF_CPU=16000000UL" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="atmega32u4" />
+					<Variable name="PROG" value="usbasp" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Mega 2560">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DARDUINO_AVR_MEGA2560" />
+					<Add option="-DF_CPU=16000000UL" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="atmega2560" />
 					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
@@ -201,6 +225,7 @@
 		<Unit filename="AVR/GPIO/avr-gpio.h" />
 		<Unit filename="AVR/GPIO/avr-gpio.tpp" />
 		<Unit filename="AVR/GPIO/boards/arduino-leonardo.h" />
+		<Unit filename="AVR/GPIO/boards/arduino-mega2560.h" />
 		<Unit filename="AVR/GPIO/boards/arduino-nano.h" />
 		<Unit filename="AVR/GPIO/boards/arduino-pro-micro.h" />
 		<Unit filename="AVR/GPIO/boards/arduino-pro-mini.h" />
@@ -208,6 +233,7 @@
 		<Unit filename="AVR/GPIO/pins.h" />
 		<Unit filename="AVR/GPIO/pins/pins_128dx48.h" />
 		<Unit filename="AVR/GPIO/pins/pins_m1284.h" />
+		<Unit filename="AVR/GPIO/pins/pins_m2560.h" />
 		<Unit filename="AVR/GPIO/pins/pins_m32u4.h" />
 		<Unit filename="AVR/GPIO/pins/pins_m8.h" />
 		<Unit filename="AVR/GPIO/pins/pins_m88.h" />
