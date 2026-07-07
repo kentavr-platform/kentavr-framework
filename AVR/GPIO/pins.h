@@ -27,7 +27,10 @@ struct NC {};       // Not Connected "pin"
 //------------------------------------------------------------------------------------------------
 #if defined(__AVR_ATmega8__)
   #include "pins_m8.h"
-#elif defined(__AVR_ATmega88__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+#elif defined(__AVR_ATmega88__) \
+  || defined(__AVR_ATmega88P__) \
+  || defined(__AVR_ATmega328__) \
+  || defined(__AVR_ATmega328P__)
   #include "pins_m88.h"
 #elif defined(__AVR_ATmega1284P__)
   #include "pins_m1284.h"

@@ -32,6 +32,17 @@ public:
     static uint8_t  read();
 };
 //------------------------------------------------------------------------------------------------
+// not connected (dummy) pin
+template <>
+struct GPIO <NC>
+{
+    static __inline void set_mode(GPIO_mode) {}
+    static __inline void write_high() {}
+    static __inline void write_low() {}
+    static __inline void toggle() {}
+    static __inline uint8_t read() { return 0; }
+};
+//------------------------------------------------------------------------------------------------
 SET_CONSOLE_TEMPLATE_TYPE_NAME(GPIO);
 //------------------------------------------------------------------------------------------------
 #include "core/type_traits/is_connected.h"
