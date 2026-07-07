@@ -43,6 +43,7 @@ struct USART_traits <N> { \
   #define UPM0    UPM00
   #define UPM1    UPM01
 #elif defined(UDR1)
+  // some MCUs do not have UART0, but have UART1
   #define RXEN    RXEN1
   #define TXEN    TXEN1
   #define RXCIE   RXCIE1
@@ -56,8 +57,23 @@ struct USART_traits <N> { \
   #define USBS    USBS1
   #define UPM0    UPM10
   #define UPM1    UPM11
+#else
+  // make dummy definitions for MCUs without a hardware UART.
+  #define RXEN    0
+  #define TXEN    0
+  #define RXCIE   0
+  #define UDRIE   0
+  #define TXC     0
+  #define UDRE    0
+  #define UCSZ0   0
+  #define UCSZ1   0
+  #define UCSZ2   0
+  #define U2X     0
+  #define USBS    0
+  #define UPM0    0
+  #define UPM1    0
 #endif
-
+//------------------------------------------------------------------------------------------------
 #if defined(UDR1)
   DEFINE_USART_REGS(1, UDR1, UDR1, UCSR1A, UCSR1A, UCSR1B, UCSR1C, UBRR1);
 #endif

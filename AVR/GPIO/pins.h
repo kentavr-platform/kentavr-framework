@@ -25,7 +25,9 @@ struct NC {};       // Not Connected "pin"
 //------------------------------------------------------------------------------------------------
 #define DECLARE_PIN(ID, PORT, DDR, PIN, TGL, BIT) struct ID : pin <PORT, DDR, PIN, TGL, BIT> {};
 //------------------------------------------------------------------------------------------------
-#if defined(__AVR_ATmega8__)
+#if defined(__AVR_ATtiny85__)
+  #include "pins_tiny85.h"
+#elif defined(__AVR_ATmega8__)
   #include "pins_m8.h"
 #elif defined(__AVR_ATmega88__) \
   || defined(__AVR_ATmega88P__) \
@@ -66,4 +68,3 @@ struct NC {};       // Not Connected "pin"
 #endif
 //------------------------------------------------------------------------------------------------
 #endif
-
