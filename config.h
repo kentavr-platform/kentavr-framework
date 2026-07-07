@@ -6,6 +6,19 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 //------------------------------------------------------------------------------------------------
+FUSES =
+{
+    .low = (0xFF            // external crystal/resonator, CKDIV8 disabled
+    ),
+    .high = (0xFF &
+        FUSE_SPIEN &        // enable SPI programming
+        FUSE_EESAVE         // preserve EEPROM from chip erase command
+    ),
+    .extended = (0xFF &
+        FUSE_BODLEVEL1
+    )
+};
+//------------------------------------------------------------------------------------------------
 /** Enable and configure hardware UARTs here
 
     All UART instances share the same driver implementation.
