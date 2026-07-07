@@ -20,6 +20,7 @@ SerialBitOut <pin, baud> :: SerialBitOut()
 {
     static_assert(baud >= 50,  "Baud rate too low");
     static_assert(baud <= F_CPU / _bit_cycles, "Baud rate is too high for this F_CPU");
+    static_assert(pin :: PORT <= 0x1F, "Extended ports (H/J/K/L) are not supported in SerialBitOut");
     GPIO <pin> :: set_mode(OUTPUT_HIGH);
 }
 //------------------------------------------------------------------------------------------------
@@ -193,4 +194,3 @@ __inline void SerialBitOut <pin, baud> :: _write_char(uint8_t data)
     delay_cycles(_bit_delay);
 }
 //------------------------------------------------------------------------------------------------
-
