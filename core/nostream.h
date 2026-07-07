@@ -11,6 +11,9 @@ struct _nostream
     // empty stream
     template <class Type>
     __inline void write(Type) {};
+    template <class Type>
+    __inline void write_all(Type) {};
+    __inline void tx_wait() {};
 };
 //------------------------------------------------------------------------------------------------
 template <class Stream>

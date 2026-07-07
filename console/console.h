@@ -45,6 +45,12 @@
  * write(FlashStringWrapper)
  * @endcode
  *
+ * Memory dump methods also require blocking line output and TX drain support:
+ * @code
+ * write_all(const char *)
+ * tx_wait()
+ * @endcode
+ *
  * Typical usage:
  *
  * @code

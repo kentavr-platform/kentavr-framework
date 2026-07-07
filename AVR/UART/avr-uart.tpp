@@ -477,7 +477,7 @@ bool UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _write_char(const char chr)
                 // TX buffer overrun detected
                 if(tx_errors != 0xFF) tx_errors++;
                 // You may add some other signals over here - for example turn on a LED at GPIO pin
-                //GPIO <B3> :: set_mode(OUTPUT_HIGH);
+                // GPIO <B3> :: set_mode(OUTPUT_HIGH);
                 return false;
             }
             tx_buf[tx_head] = chr;

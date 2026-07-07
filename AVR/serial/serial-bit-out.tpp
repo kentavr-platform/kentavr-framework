@@ -64,6 +64,19 @@ void SerialBitOut <pin, baud> :: write(const char *str)
 }
 //------------------------------------------------------------------------------------------------
 /**
+ * @brief Transmits a null-terminated string from RAM via SerialBitOut.
+ *
+ * Alias for write(const char*) because SerialBitOut is already blocking.
+ *
+ * @param str Pointer to null-terminated ASCII string in RAM.
+ */
+template <class pin, uint32_t baud>
+void SerialBitOut <pin, baud> :: write_all(const char *str)
+{
+    write(str);
+}
+//------------------------------------------------------------------------------------------------
+/**
  * @brief Transmits a null-terminated string stored in flash (PROGMEM) via SerialBitOut.
  *
  * Reads characters from program memory and transmits them via SerialBitOut.
@@ -180,7 +193,4 @@ __inline void SerialBitOut <pin, baud> :: _write_char(uint8_t data)
     delay_cycles(_bit_delay);
 }
 //------------------------------------------------------------------------------------------------
-
-
-
 

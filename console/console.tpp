@@ -877,25 +877,33 @@ __inline void Console <Stream> :: _print_dump(const void *ptr, size_t size, bool
             }
         }();
         constexpr uint8_t bytes_per_line = 16;
-        char ascii[]="|................|\r\n";
+        char line[addr_width + 2 + bytes_per_line * 3 + sizeof("|................|\r\n")];
+        char ascii[bytes_per_line];
         size_t index;
-        uint8_t ascii_pos;
         if(!size)
         {
             return;
         }
         // align size to full-line border for better ascii output
-        size = show_ascii ? ((size + bytes_per_line - 1) / bytes_per_line) * bytes_per_line : size;
+        const size_t data_size = size;
+        const size_t dump_size = show_ascii ? ((size + bytes_per_line - 1) / bytes_per_line) * bytes_per_line : size;
 
-        for(size_t k = 0; k <= (size - 1) / bytes_per_line; k++)
+        for(size_t k = 0; k <= (dump_size - 1) / bytes_per_line; k++)
         {
-            _write_hex <addr_width> ((uintptr_t)(ptr) + k * bytes_per_line);
-            stream.write(_flash(": "));
-            ascii_pos = 1;  // skip formatting chars, see ascii[] definition
+            uint8_t pos = 0;
+            uint8_t ascii_pos = 0;
+            uintptr_t addr = (uintptr_t)(ptr) + k * bytes_per_line;
+            for(uint8_t j = addr_width; j > 0; --j)
+            {
+                uint8_t nibble = (addr >> ((j - 1) * 4)) & 0x0F;
+                line[pos++] = nibble < 10 ? ('0' + nibble) : ('A' + nibble - 10);
+            }
+            line[pos++] = ':';
+            line[pos++] = ' ';
             for(size_t i = 0; i < bytes_per_line; i++)
             {
                 index = k * bytes_per_line + i;
-                if(index < size)
+                if(index < data_size)
                 {
                     uint8_t val = 0;
                     if constexpr(area == MemoryArea :: RAM)
@@ -910,7 +918,10 @@ __inline void Console <Stream> :: _print_dump(const void *ptr, size_t size, bool
                     {
                        val = eeprom_read_byte((const uint8_t*)ptr + index);
                     }
-                    _write_hex(val);
+                    uint8_t nibble = val >> 4;
+                    line[pos++] = nibble < 10 ? ('0' + nibble) : ('A' + nibble - 10);
+                    nibble = val & 0x0F;
+                    line[pos++] = nibble < 10 ? ('0' + nibble) : ('A' + nibble - 10);
                     if(show_ascii)
                     {
                         ascii[ascii_pos++] = (val >= 32 && val <= 126) ? val : '.';
@@ -918,19 +929,30 @@ __inline void Console <Stream> :: _print_dump(const void *ptr, size_t size, bool
                 }
                 else
                 {
-                    stream.write(_flash("  "));
+                    line[pos++] = ' ';
+                    line[pos++] = ' ';
+                    if(show_ascii)
+                    {
+                        ascii[ascii_pos++] = ' ';
+                    }
                 }
-                stream.write(' ');
+                line[pos++] = ' ';
             }
             if(show_ascii)
             {
-                stream.write(ascii);
+                line[pos++] = '|';
+                for(uint8_t i = 0; i < bytes_per_line; i++)
+                {
+                    line[pos++] = ascii[i];
+                }
+                line[pos++] = '|';
             }
-            else
-            {
-                print_ln();
-            }
+            line[pos++] = '\r';
+            line[pos++] = '\n';
+            line[pos] = 0;
+            stream.write_all(line);
         }
+        stream.tx_wait();
     }
 }
 //------------------------------------------------------------------------------------------------
@@ -952,7 +974,3 @@ __inline void Console <Stream> :: check_result(ResultCode code, bool show_OK)
     log(FlashStringWrapper{err_id[code]});
 }
 //------------------------------------------------------------------------------------------------
-
-
-
-

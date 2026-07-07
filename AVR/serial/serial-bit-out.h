@@ -28,7 +28,9 @@ public:
                 SerialBitOut();
     void        write(uint8_t data);
     void        write(const char *str);
+    void        write_all(const char *str);
     void        write(FlashStringWrapper fs);
+    void        tx_wait() {}
 private:
     void        _write_char(uint8_t data);
     static constexpr uint8_t _bit_cycles = 8;
