@@ -122,14 +122,7 @@ __inline void OneWireBus <pin> :: write_byte(uint8_t data)
 {
     for(uint8_t i = 0; i < 8; i++)
     {
-        if(data & 0x01)
-        {
-            _write_one();
-        }
-        else
-        {
-            _write_zero();
-        }
+        _write_bit(data & 0x01);
         data >>= 1;
     }
 }
@@ -403,6 +396,5 @@ __inline ResultCode OneWireBus <pin> :: last_error()
     return _last_error;
 }
 //------------------------------------------------------------------------------------------------
-
 
 
