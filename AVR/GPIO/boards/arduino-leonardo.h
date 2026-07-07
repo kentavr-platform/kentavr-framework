@@ -7,10 +7,10 @@
 #define ARDUINO_LEONARDO_H
 //------------------------------------------------------------------------------------------------
 // Digital pins
-using AP_0   = D2;
-using AP_1   = D3;
-using AP_2   = D1;
-using AP_3   = D0;
+using AP_0   = D2;  // RX
+using AP_1   = D3;  // TX
+using AP_2   = D1;  // SDA
+using AP_3   = D0;  // SCL
 using AP_4   = D4;
 using AP_5   = C6;
 using AP_6   = D7;
@@ -20,34 +20,35 @@ using AP_9   = B5;
 using AP_10  = B6;
 using AP_11  = B7;
 using AP_12  = D6;
-using AP_13  = C7;
-using AP_14  = F7;
-using AP_15  = F6;
-using AP_16  = F5;
-using AP_17  = F4;
-using AP_18  = F1;
-using AP_19  = F0;
+using AP_13  = C7;  // L
+using AP_14  = NC;  // not present
+using AP_15  = NC;  // not present
+using AP_16  = NC;  // not present
+using AP_17  = NC;  // not present
 
-// Analog inputs
+// Analog pins
 using AP_A0  = F7;
 using AP_A1  = F6;
 using AP_A2  = F5;
 using AP_A3  = F4;
 using AP_A4  = F1;
 using AP_A5  = F0;
-using AP_A6  = D4;
-using AP_A7  = D7;
-using AP_A8  = B4;
-using AP_A9  = B5;
-using AP_A10 = B6;
-using AP_A11 = D6;
+
+// SPI
+using AP_MISO = B3;
+using AP_SCK  = B1;
+using AP_MOSI = B2;
+
+// UART
+using AP_RX  = AP_0;
+using AP_TX  = AP_1;
 
 // I2C
-using AP_SCL = D0;
-using AP_SDA = D1;
+using AP_SDA = AP_2;
+using AP_SCL = AP_3;
 
 // LEDs
-using AP_L     = C7;
+using AP_L     = AP_13;
 using AP_RXLED = B0;
 using AP_TXLED = D5;
 //------------------------------------------------------------------------------------------------

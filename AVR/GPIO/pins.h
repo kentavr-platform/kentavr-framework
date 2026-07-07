@@ -44,19 +44,23 @@ struct NC {};       // Not Connected "pin"
 //------------------------------------------------------------------------------------------------
 // Support pin names for popular Arduino boards
 #if defined(ARDUINO_AVR_UNO)
-#  include "boards/arduino-uno.h"
+  #include "boards/arduino-uno.h"
 #elif defined(ARDUINO_AVR_NANO)
-#  include "boards/arduino-nano.h"
-#elif defined(ARDUINO_AVR_MINI)
-#  include "boards/arduino-mini.h"
-#elif defined(ARDUINO_AVR_MICRO)
-#  include "boards/arduino-micro.h"
-#elif defined(ARDUINO_AVR_PRO_MICRO)
-#  include "boards/arduino-pro-micro.h"
+  #include "boards/arduino-nano.h"
 #elif defined(ARDUINO_AVR_LEONARDO)
-#  include "boards/arduino-leonardo.h"
+  #include "boards/arduino-leonardo.h"
+#elif defined(ARDUINO_AVR_MINI)
+  #include "boards/arduino-mini.h"
+#elif defined(ARDUINO_AVR_MICRO)
+  #include "boards/arduino-micro.h"
+#elif defined(ARDUINO_AVR_PRO_MINI)
+  #include "boards/arduino-pro-mini.h"
+#elif defined(ARDUINO_AVR_PRO_MICRO)
+  #include "boards/arduino-pro-micro.h"
+#elif defined(ARDUINO_AVR_LEONARDO)
+  #include "boards/arduino-leonardo.h"
 #elif defined(ARDUINO_AVR_MEGA2560)
-#  include "boards/arduino-mega2560.h"
+  #include "boards/arduino-mega2560.h"
 #endif
 //------------------------------------------------------------------------------------------------
 #endif
