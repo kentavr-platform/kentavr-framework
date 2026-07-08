@@ -28,7 +28,7 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega88p" />
@@ -43,7 +43,7 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
@@ -58,7 +58,7 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DF_CPU=20000000UL" />
+					<Add option="-DCRYSTAL_FREQ=20000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega1284p" />
@@ -73,7 +73,7 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DF_CPU=20000000UL" />
+					<Add option="-DCRYSTAL_FREQ=20000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="avr128db48" />
@@ -88,7 +88,7 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega2560" />
@@ -104,7 +104,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DARDUINO_AVR_UNO" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega328p" />
@@ -120,7 +120,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DARDUINO_AVR_NANO" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega328p" />
@@ -136,7 +136,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DARDUINO_AVR_PRO_MINI" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega328p" />
@@ -152,7 +152,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DARDUINO_AVR_LEONARDO" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
@@ -168,7 +168,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DARDUINO_AVR_PRO_MICRO" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
@@ -184,7 +184,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DARDUINO_AVR_MEGA2560" />
-					<Add option="-DF_CPU=16000000UL" />
+					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega2560" />
@@ -235,6 +235,8 @@
 			<Add after="avr-readelf -sW $(TARGET_OUTPUT_FILE) | grep OBJECT &gt; $(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).data || true" />
 			<Add after="avr-size -C --mcu=$(MCU) -d $(TARGET_OUTPUT_FILE)" />
 		</ExtraCommands>
+		<Unit filename="AVR/avr-delay.h" />
+		<Unit filename="AVR/avr-macro.h" />
 		<Unit filename="EEPROM/avr-eeprom.h" />
 		<Unit filename="GPIO/avr-gpio.h" />
 		<Unit filename="GPIO/avr-gpio.tpp" />
@@ -255,19 +257,15 @@
 		<Unit filename="I2C/avr-i2c-regs.h" />
 		<Unit filename="I2C/avr-i2c.h" />
 		<Unit filename="I2C/avr-i2c.tpp" />
-		<Unit filename="UART/avr-uart-regs.h" />
-		<Unit filename="UART/avr-uart.h" />
-		<Unit filename="UART/avr-uart.tpp" />
-		<Unit filename="AVR/avr-delay.h" />
-		<Unit filename="AVR/avr-macro.h" />
-		<Unit filename="serial/serial-bit-out.h" />
-		<Unit filename="serial/serial-bit-out.tpp" />
 		<Unit filename="LED/led.h" />
 		<Unit filename="LED/led.tpp" />
 		<Unit filename="RTC/DS3231/DS3231.h" />
 		<Unit filename="RTC/DS3231/DS3231.tpp" />
 		<Unit filename="RTC/DateTime.cpp" />
 		<Unit filename="RTC/DateTime.h" />
+		<Unit filename="UART/avr-uart-regs.h" />
+		<Unit filename="UART/avr-uart.h" />
+		<Unit filename="UART/avr-uart.tpp" />
 		<Unit filename="config.h" />
 		<Unit filename="console/console.h" />
 		<Unit filename="console/console.tpp" />
@@ -277,8 +275,6 @@
 		<Unit filename="core/errors.h" />
 		<Unit filename="core/format.h" />
 		<Unit filename="core/nostream.h" />
-		<Unit filename="settings/settings.h" />
-		<Unit filename="settings/settings.tpp" />
 		<Unit filename="core/type_traits.h" />
 		<Unit filename="core/type_traits/is_connected.h" />
 		<Unit filename="core/type_traits/is_enum.h" />
@@ -299,6 +295,10 @@
 		<Unit filename="sensors/DS18B20/DS18B20.h" />
 		<Unit filename="sensors/DS18B20/DS18B20.tpp" />
 		<Unit filename="sensors/DS18S20/DS18S20.h" />
+		<Unit filename="serial/serial-bit-out.h" />
+		<Unit filename="serial/serial-bit-out.tpp" />
+		<Unit filename="settings/settings.h" />
+		<Unit filename="settings/settings.tpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
