@@ -31,7 +31,6 @@
 #include "EEPROM/avr-eeprom.h"
 #include "serial/serial-bit-out.h"
 
-
 // interfaces
 #include "settings/settings.h"
 #include "interfaces/OneWire/one-wire.h"
