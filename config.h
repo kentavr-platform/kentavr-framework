@@ -38,7 +38,7 @@ FUSES =
              )
 
     Feel free to uncomment and modify the following lines to enable hardware UARTs.
-    See AVR/UART for details.
+    See UART for details.
                                                                                                 */
 // ENABLE_UART0(0, 128);
 // ENABLE_UART1(0, 128);
@@ -58,7 +58,7 @@ FUSES =
 
 
     Uncomment and modify the following lines to enable it.
-    See core/settings for details.
+    See settings for details.
                                                                                                 */
 // ENABLE_SETTINGS(512);
 
@@ -66,9 +66,9 @@ FUSES =
 /**
     Enable and configure I2C busses here
     Feel free to uncomment and modify the following lines to enable hardware I2Cs.
-    See AVR/I2C for details.
+    See I2C for details.
                                                                                                 */
-ENABLE_I2C0(32);
-//ENABLE_I2C1(32);
+// ENABLE_I2C0(32);
+// ENABLE_I2C1(32);
 //------------------------------------------------------------------------------------------------
 #endif

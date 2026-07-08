@@ -14,7 +14,6 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DF_CPU=1000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="attiny85" />
@@ -207,7 +206,7 @@
 			<Add option="-mmcu=$(MCU)" />
 			<Add option="-DDEBUG" />
 			<Add directory="." />
-			<Add directory="AVR/GPIO/pins" />
+			<Add directory="GPIO/pins" />
 		</Compiler>
 		<Linker>
 			<Add option="-mmcu=$(MCU)" />
@@ -236,33 +235,33 @@
 			<Add after="avr-readelf -sW $(TARGET_OUTPUT_FILE) | grep OBJECT &gt; $(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).data || true" />
 			<Add after="avr-size -C --mcu=$(MCU) -d $(TARGET_OUTPUT_FILE)" />
 		</ExtraCommands>
-		<Unit filename="AVR/EEPROM/avr-eeprom.h" />
-		<Unit filename="AVR/GPIO/avr-gpio.h" />
-		<Unit filename="AVR/GPIO/avr-gpio.tpp" />
-		<Unit filename="AVR/GPIO/boards/arduino-leonardo.h" />
-		<Unit filename="AVR/GPIO/boards/arduino-mega2560.h" />
-		<Unit filename="AVR/GPIO/boards/arduino-nano.h" />
-		<Unit filename="AVR/GPIO/boards/arduino-pro-micro.h" />
-		<Unit filename="AVR/GPIO/boards/arduino-pro-mini.h" />
-		<Unit filename="AVR/GPIO/boards/arduino-uno.h" />
-		<Unit filename="AVR/GPIO/pins.h" />
-		<Unit filename="AVR/GPIO/pins/pins_128dx48.h" />
-		<Unit filename="AVR/GPIO/pins/pins_m1284.h" />
-		<Unit filename="AVR/GPIO/pins/pins_m2560.h" />
-		<Unit filename="AVR/GPIO/pins/pins_m32u4.h" />
-		<Unit filename="AVR/GPIO/pins/pins_m8.h" />
-		<Unit filename="AVR/GPIO/pins/pins_m88.h" />
-		<Unit filename="AVR/GPIO/pins/pins_tiny85.h" />
-		<Unit filename="AVR/I2C/i2c-regs.h" />
-		<Unit filename="AVR/I2C/i2c.h" />
-		<Unit filename="AVR/I2C/i2c.tpp" />
-		<Unit filename="AVR/UART/avr-uart-regs.h" />
-		<Unit filename="AVR/UART/avr-uart.h" />
-		<Unit filename="AVR/UART/avr-uart.tpp" />
+		<Unit filename="EEPROM/avr-eeprom.h" />
+		<Unit filename="GPIO/avr-gpio.h" />
+		<Unit filename="GPIO/avr-gpio.tpp" />
+		<Unit filename="GPIO/boards/arduino-leonardo.h" />
+		<Unit filename="GPIO/boards/arduino-mega2560.h" />
+		<Unit filename="GPIO/boards/arduino-nano.h" />
+		<Unit filename="GPIO/boards/arduino-pro-micro.h" />
+		<Unit filename="GPIO/boards/arduino-pro-mini.h" />
+		<Unit filename="GPIO/boards/arduino-uno.h" />
+		<Unit filename="GPIO/pins.h" />
+		<Unit filename="GPIO/pins/pins_128dx48.h" />
+		<Unit filename="GPIO/pins/pins_m1284.h" />
+		<Unit filename="GPIO/pins/pins_m2560.h" />
+		<Unit filename="GPIO/pins/pins_m32u4.h" />
+		<Unit filename="GPIO/pins/pins_m8.h" />
+		<Unit filename="GPIO/pins/pins_m88.h" />
+		<Unit filename="GPIO/pins/pins_tiny85.h" />
+		<Unit filename="I2C/avr-i2c-regs.h" />
+		<Unit filename="I2C/avr-i2c.h" />
+		<Unit filename="I2C/avr-i2c.tpp" />
+		<Unit filename="UART/avr-uart-regs.h" />
+		<Unit filename="UART/avr-uart.h" />
+		<Unit filename="UART/avr-uart.tpp" />
 		<Unit filename="AVR/avr-delay.h" />
 		<Unit filename="AVR/avr-macro.h" />
-		<Unit filename="AVR/serial/serial-bit-out.h" />
-		<Unit filename="AVR/serial/serial-bit-out.tpp" />
+		<Unit filename="serial/serial-bit-out.h" />
+		<Unit filename="serial/serial-bit-out.tpp" />
 		<Unit filename="LED/led.h" />
 		<Unit filename="LED/led.tpp" />
 		<Unit filename="RTC/DS3231/DS3231.h" />
@@ -278,8 +277,8 @@
 		<Unit filename="core/errors.h" />
 		<Unit filename="core/format.h" />
 		<Unit filename="core/nostream.h" />
-		<Unit filename="core/settings/settings.h" />
-		<Unit filename="core/settings/settings.tpp" />
+		<Unit filename="settings/settings.h" />
+		<Unit filename="settings/settings.tpp" />
 		<Unit filename="core/type_traits.h" />
 		<Unit filename="core/type_traits/is_connected.h" />
 		<Unit filename="core/type_traits/is_enum.h" />

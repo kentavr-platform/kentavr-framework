@@ -10,7 +10,7 @@
  - Supports typed and raw binary values
  - Updates existing values in place
 
-The module uses [EEPROM_Storage](../../AVR/EEPROM) internally.
+The module uses [EEPROM_Storage](../EEPROM) internally.
 
 
 ### Enabling

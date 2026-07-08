@@ -85,7 +85,7 @@ Declare the transmitter with:
 SerialBitOut <PIN, BAUD> stream;
 ```
 
-`PIN` must be a GPIO pin descriptor such as `D1`, `B0`, or another type defined in `AVR/GPIO/pins.h`.
+`PIN` must be a GPIO pin descriptor such as `D1`, `B0`, or another type defined in `GPIO/pins.h`.
 
 `BAUD` is a compile-time constant in bits per second:
 ```cpp

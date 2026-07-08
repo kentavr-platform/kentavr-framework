@@ -12,7 +12,7 @@
 
 The module is available through:
 ```cpp
-#include "AVR/EEPROM/avr-eeprom.h"
+#include "EEPROM/avr-eeprom.h"
 ```
 
 It is also included by `core.h`.
@@ -145,7 +145,7 @@ The API uses `ResultCode` for compatibility with higher-level storage modules.
 
 ### Settings module
 
-For structured application settings prefer the higher-level [Settings](../../core/settings) module:
+For structured application settings prefer the higher-level [Settings](../settings) module:
 
 `Settings` uses `EEPROM_Storage` internally and manages a small key-value layout
 inside a reserved EEPROM region.

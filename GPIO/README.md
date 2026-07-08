@@ -14,7 +14,7 @@
 
 ### Typical usage and definitions
 
-Pins names are compile-time definitions from `AVR/GPIO/pins.h`.
+Pins names are compile-time definitions from `GPIO/pins.h`.
 
 #### Object-like style
 ```cpp
