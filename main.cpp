@@ -2,44 +2,32 @@
 #include "core.h"
 #include "config.h"
 //------------------------------------------------------------------------------------------------
+/*  // Several useful global objects
 #ifdef DEBUG
-    SerialBitOut<D1, 2000000> debug;
+    SerialBitOut <D1, 2000000> debug;
     Console console(debug);
 #else
-    Console console;
+    Console console;    // a black-hole object with no output and zero runtime overhead
 #endif
-Settings settings(EEPROM, 0, 512);
+*/
 //------------------------------------------------------------------------------------------------
 void early_init()
 {
-    // Run this code IMMIDEATELY at reset interrupt. Use with caution - stack
-    // pointer is NOT initialized yet. Read about section(".initX") attribute
-    // for more information.
+    // Runs immediately after reset, before stack and runtime initialization.
+    // Use with extreme caution: only code that does not use the stack is safe here.
+    // See the GCC AVR documentation for section(".initX") and naked functions.
     // ...
 
-    // then continue stack and other initalizations
+    // Startup continues with stack and runtime initialization.
 }
 //------------------------------------------------------------------------------------------------
 int main()
 {
-    // debug console
-
-//    uint16_t test = 12345;
-    console.clear();
-    console.log(_flash("DEBUG READY"));
-    //settings._write_header();
-    settings.clear();
-    console.dump_eeprom(0, 512, true);
-
-
-
-
-
-//    uint8_t *ptr;
+    // Initialization and setup
 
     while(1)
     {
-
+        // main loop
 
     }
 
