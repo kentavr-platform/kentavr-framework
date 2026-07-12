@@ -54,7 +54,7 @@ int main()
 
     if(serial.init(115200) == OK)
     {
-        serial.write_all(_flash("KentAVR ready\r\n"));
+        serial.write("KentAVR ready\n");
     }
 
     while(1)
