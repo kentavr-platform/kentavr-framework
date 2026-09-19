@@ -7,12 +7,6 @@
 #define ERRORS_H
 #include <avr/pgmspace.h>
 //------------------------------------------------------------------------------------------------
-#define CAT(x,y) x ## y
-#define CONCAT(x,y) CAT(x,y)
-#define _QUOT(x) #x
-#define QUOTE(x) _QUOT(x)
-#define PRAGMA(x) _Pragma(#x)
-//------------------------------------------------------------------------------------------------
 #define ERROR_LIST      \
     ERR_(NOT_FOUND)     \
     ERR_(NO_MORE)       \

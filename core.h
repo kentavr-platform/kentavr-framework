@@ -26,8 +26,9 @@
 #endif
 //------------------------------------------------------------------------------------------------
 // core modules
-#include "core/type_traits.h"
+#include "core/macro.h"
 #include "core/errors.h"
+#include "core/type_traits.h"
 #include "core/units.h"
 #include "core/format.h"
 #include "core/nostream.h"

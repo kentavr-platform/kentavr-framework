@@ -274,6 +274,7 @@
 		<Unit filename="core/bcd.h" />
 		<Unit filename="core/errors.h" />
 		<Unit filename="core/format.h" />
+		<Unit filename="core/macro.h" />
 		<Unit filename="core/nostream.h" />
 		<Unit filename="core/type_traits.h" />
 		<Unit filename="core/type_traits/is_connected.h" />
