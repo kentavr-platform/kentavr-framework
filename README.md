@@ -42,7 +42,7 @@ KentAVR does not try to hide the microcontroller. Registers, interrupts, buffers
 ## Example
 
 ```cpp
-#include "core.h"
+#include "Framework/core.h"
 #include "config.h"
 
 GPIO <B5> led;
