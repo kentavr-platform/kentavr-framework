@@ -30,6 +30,42 @@ FUSES =
     )
 };
 //------------------------------------------------------------------------------------------------
+/**
+    Enable settings instance and reserves EEPROM space.
+
+    Allocates an EEPROM object of exactly Size bytes and creates a
+    global 'settings' storage instance using that region.
+
+ ENABLE_SETTINGS(SETTINGS_SIZE);
+                 SETTINGS_SIZE  -- EEPROM size reserved for settings storage
+                                   (header + data + index)
+
+
+    Uncomment and modify the following lines to enable it.
+    See settings for details.
+                                                                                                */
+// ENABLE_SETTINGS(512);
+
+//------------------------------------------------------------------------------------------------
+/**
+    Select hardware timers used by the application.
+
+    Enable a timer here before using TimerN in application code. The timer still
+    has to be configured and started explicitly where it is used.
+
+ ENABLE_TIMER0;
+ ENABLE_TIMER1;
+ ...
+                                                                                                */
+// ENABLE_TIMER0;
+// ENABLE_TIMER1;
+// ENABLE_TIMER2;
+// ENABLE_TIMER3;
+// ENABLE_TIMER4;
+// ENABLE_TIMER5;
+
+//------------------------------------------------------------------------------------------------
+
 /** Enable and configure hardware UARTs here
 
     All UART instances share the same driver implementation.
@@ -56,22 +92,6 @@ FUSES =
 // ENABLE_UART2(0, 128);
 // ENABLE_UART3(0, 128);
 
-//------------------------------------------------------------------------------------------------
-/**
-    Enable settings instance and reserves EEPROM space.
-
-    Allocates an EEPROM object of exactly Size bytes and creates a
-    global settings storage instance using that region.
-
- ENABLE_SETTINGS(SETTINGS_SIZE);
-                 SETTINGS_SIZE  -- EEPROM size reserved for settings storage
-                                   (header + data + index)
-
-
-    Uncomment and modify the following lines to enable it.
-    See settings for details.
-                                                                                                */
-// ENABLE_SETTINGS(512);
 
 //------------------------------------------------------------------------------------------------
 /**
