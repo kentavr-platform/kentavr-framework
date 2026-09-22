@@ -39,10 +39,12 @@
 #include "AVR/avr-delay.h"
 #include "console/debug.h"
 #include "GPIO/avr-gpio.h"
+#include "timer/avr-timer.h"
 #include "UART/avr-uart.h"
 #include "I2C/avr-i2c.h"
 #include "EEPROM/avr-eeprom.h"
 #include "serial/serial-bit-out.h"
+
 
 // interfaces
 #include "settings/settings.h"

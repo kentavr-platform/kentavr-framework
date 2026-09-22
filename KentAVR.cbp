@@ -300,6 +300,10 @@
 		<Unit filename="serial/serial-bit-out.tpp" />
 		<Unit filename="settings/settings.h" />
 		<Unit filename="settings/settings.tpp" />
+		<Unit filename="timer/avr-timer-isr.h" />
+		<Unit filename="timer/avr-timer-regs.h" />
+		<Unit filename="timer/avr-timer.h" />
+		<Unit filename="timer/avr-timer.tpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
