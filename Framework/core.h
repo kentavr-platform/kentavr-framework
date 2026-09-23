@@ -52,6 +52,7 @@
 
 // external drivers
 #include "Devices/LED/led.h"
+#include "Devices/Servo/servo.h"
 #include "Services/Console/console.h"
 #include "Devices/Sensors/DS1820/DS18x20.h"
 #include "Devices/Sensors/DS1820/DS1820.h"

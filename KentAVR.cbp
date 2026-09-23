@@ -257,6 +257,8 @@
 		<Unit filename="Framework/AVR/I2C/avr-i2c.tpp" />
 		<Unit filename="Framework/Devices/LED/led.h" />
 		<Unit filename="Framework/Devices/LED/led.tpp" />
+		<Unit filename="Framework/Devices/Servo/servo.h" />
+		<Unit filename="Framework/Devices/Servo/servo.tpp" />
 		<Unit filename="Framework/Devices/RTC/DS3231/DS3231.h" />
 		<Unit filename="Framework/Devices/RTC/DS3231/DS3231.tpp" />
 		<Unit filename="Framework/Devices/RTC/DateTime.cpp" />
