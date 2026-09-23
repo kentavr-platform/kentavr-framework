@@ -25,11 +25,12 @@ template <class pin>
 struct GPIO
 {
 public:
-    static void     set_mode(enum GPIO_mode);
-    static void     write_high();
-    static void     write_low();
-    static void     toggle();
-    static uint8_t  read();
+    static void         set_mode(enum GPIO_mode);
+    static GPIO_mode    get_mode();
+    static void         write_high();
+    static void         write_low();
+    static void         toggle();
+    static uint8_t      read();
 };
 //------------------------------------------------------------------------------------------------
 // not connected (dummy) pin
@@ -40,6 +41,7 @@ struct GPIO <NC>
     static __inline void write_high() {}
     static __inline void write_low() {}
     static __inline void toggle() {}
+    static __inline GPIO_mode get_mode() { return INPUT_OPEN; }
     static __inline uint8_t read() { return 0; }
 };
 //------------------------------------------------------------------------------------------------

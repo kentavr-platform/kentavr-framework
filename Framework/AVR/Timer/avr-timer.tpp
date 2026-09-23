@@ -15,6 +15,7 @@ Timer <N> :: Timer()
  * @brief Setup a callback function on compare match for this channel.
  *
  * Passing nullptr removes the handler. Pending match events are discarded.
+ * The interrupt remains enabled while an output disconnection is pending.
  * Global interrupts must be enabled.
  *
  * @param callback Function to call, or nullptr to disable the interrupt.
@@ -37,7 +38,7 @@ void Timer <N> :: Compare <channel> :: on_match(typename Timer <N> :: Callback c
             // TIFRn flags are cleared by writing one (W1C).
             regs :: INT_FLAGS = _bit(regs :: compare_a_flag_bit);
 
-            if(callback)
+            if(callback || disconnecting)
                 set_bit(regs :: INT_MASK, regs :: compare_a_interrupt_bit);
             else
                 clr_bit(regs :: INT_MASK, regs :: compare_a_interrupt_bit);
@@ -47,7 +48,7 @@ void Timer <N> :: Compare <channel> :: on_match(typename Timer <N> :: Callback c
             // TIFRn flags are cleared by writing one (W1C).
             regs :: INT_FLAGS = _bit(regs :: compare_b_flag_bit);
 
-            if(callback)
+            if(callback || disconnecting)
                 set_bit(regs :: INT_MASK, regs :: compare_b_interrupt_bit);
             else
                 clr_bit(regs :: INT_MASK, regs :: compare_b_interrupt_bit);
@@ -57,7 +58,7 @@ void Timer <N> :: Compare <channel> :: on_match(typename Timer <N> :: Callback c
             // TIFRn flags are cleared by writing one (W1C).
             regs :: INT_FLAGS = _bit(regs :: compare_c_flag_bit);
 
-            if(callback)
+            if(callback || disconnecting)
                 set_bit(regs :: INT_MASK, regs :: compare_c_interrupt_bit);
             else
                 clr_bit(regs :: INT_MASK, regs :: compare_c_interrupt_bit);
@@ -99,10 +100,11 @@ void Timer <N> :: Compare <channel> :: set_match(typename Timer <N> :: Type valu
  * whether the OC pin is toggled, cleared, or set on a compare match. Select
  * TIMER_OUTPUT_DISCONNECTED to return the pin to normal GPIO operation.
  *
- * @attention The corresponding OC pin must be configured as an OUTPUT through
- * its GPIO Data Direction Register (DDR) separately. This method configures the
- * timer output behavior but does NOT enable the physical pin output driver.
- * You may use 'GPIO <D6> :: set_mode(OUTPUT...);' for this.
+ * Connecting the channel configures its MCU-specific OC pin as OUTPUT_LOW, or
+ * OUTPUT_HIGH for inverted PWM. Disconnecting PWM waits for the output to
+ * return to its idle level. Other output modes are disconnected immediately.
+ *
+ * @warning Global interrupts must be enabled before requesting disconnection.
  *
  * @param mode Required output behavior for this compare channel.
  */
@@ -116,10 +118,76 @@ void Timer <N> :: Compare <channel> :: set_output(enum Timer_compare_output mode
 
     if constexpr(regs :: exists)
     {
+        if(mode == TIMER_OUTPUT_DISCONNECTED)
+        {
+            if(disconnecting)
+            {
+                // Pending disconnection already requested
+                return;
+            }
+
+            if(!pwm_output)
+            {
+                disconnect_output();
+                return;
+            }
+
+            // Disconnecting PWM immediately may cause a cutted final pulse.
+            // Let the compare ISR disconnect the pin after it returns to its idle level.
+            disconnecting = true;
+            if constexpr(channel == Timer <N> :: A)
+            {
+                regs :: INT_FLAGS = _bit(regs :: compare_a_flag_bit);   // clear pending interrupt
+                set_bit(regs :: INT_MASK, regs :: compare_a_interrupt_bit);
+            }
+            else if constexpr(channel == Timer <N> :: B)
+            {
+                regs :: INT_FLAGS = _bit(regs :: compare_b_flag_bit);   // clear pending interrupt
+                set_bit(regs :: INT_MASK, regs :: compare_b_interrupt_bit);
+            }
+            else if constexpr(regs :: has_compare_c)
+            {
+                regs :: INT_FLAGS = _bit(regs :: compare_c_flag_bit);   // clear pending interrupt
+                set_bit(regs :: INT_MASK, regs :: compare_c_interrupt_bit);
+            }
+            return;
+        }
+
+        if(disconnecting)
+        {
+            // Reconnect was requested during pending disconnecting
+            if(!match_callback)
+            {
+                // Disable useless interrupt
+                if constexpr(channel == Timer <N> :: A)
+                    clr_bit(regs :: INT_MASK, regs :: compare_a_interrupt_bit);
+                else if constexpr(channel == Timer <N> :: B)
+                    clr_bit(regs :: INT_MASK, regs :: compare_b_interrupt_bit);
+                else if constexpr(regs :: has_compare_c)
+                    clr_bit(regs :: INT_MASK, regs :: compare_c_interrupt_bit);
+            }
+        }
+
+        disconnecting = false;
         constexpr uint8_t mode_bit_0 = 6 - channel * 2;
         constexpr uint8_t mode_bit_1 = mode_bit_0 + 1;
+        using Output_pin = typename Timer_output_pin <N, channel> :: Type;
 
         clr_bits(regs :: CONTROL_A, mode_bit_0, mode_bit_1);
+
+        if constexpr(connected <Output_pin>)
+        {
+            if(mode == TIMER_OUTPUT_PWM_INVERTED)
+            {
+                idle_level = LEVEL_HIGH;
+                GPIO <Output_pin> :: set_mode(OUTPUT_HIGH);
+            }
+            else
+            {
+                idle_level = LEVEL_LOW;
+                GPIO <Output_pin> :: set_mode(OUTPUT_LOW);
+            }
+        }
 
         switch(mode)
         {
@@ -134,10 +202,69 @@ void Timer <N> :: Compare <channel> :: set_output(enum Timer_compare_output mode
         case TIMER_OUTPUT_PWM_INVERTED:
             set_bits(regs :: CONTROL_A, mode_bit_1, mode_bit_0);
             break;
-        case TIMER_OUTPUT_DISCONNECTED:
         default:
             break;
         }
+
+        if(mode == TIMER_OUTPUT_PWM || mode == TIMER_OUTPUT_PWM_INVERTED)
+            pwm_output = true;
+        else
+            pwm_output = false;
+    }
+}
+//------------------------------------------------------------------------------------------------
+/** @brief Disconnect the OC pin without waiting for a compare match. */
+template <uint8_t N>
+template <uint8_t channel>
+void Timer <N> :: Compare <channel> :: disconnect_output()
+{
+    if constexpr(channel != Timer <N> :: C || regs :: has_compare_c)
+    {
+        constexpr uint8_t mode_bit_0 = 6 - channel * 2;
+        constexpr uint8_t mode_bit_1 = mode_bit_0 + 1;
+        clr_bits(regs :: CONTROL_A, mode_bit_0, mode_bit_1);
+
+        using Output_pin = typename Timer_output_pin <N, channel> :: Type;
+        if constexpr(connected <Output_pin>)
+            GPIO <Output_pin> :: set_mode(INPUT_OPEN);
+
+        disconnecting = false;
+        pwm_output = false;
+
+        if(!match_callback)
+        {
+            if constexpr(channel == Timer <N> :: A)
+                clr_bit(regs :: INT_MASK, regs :: compare_a_interrupt_bit);
+            else if constexpr(channel == Timer <N> :: B)
+                clr_bit(regs :: INT_MASK, regs :: compare_b_interrupt_bit);
+            else if constexpr(regs :: has_compare_c)
+                clr_bit(regs :: INT_MASK, regs :: compare_c_interrupt_bit);
+        }
+    }
+}
+//------------------------------------------------------------------------------------------------
+/** @brief Dispatch the compare callback and complete a pending synchronized disconnect. */
+template <uint8_t N>
+template <uint8_t channel>
+void Timer <N> :: Compare <channel> :: match_interrupt()
+{
+    if(match_callback)
+        match_callback();
+
+    if(disconnecting)
+    {
+        // Disconnecting PWM immediately may cause a cutted final pulse.
+        // So we should wait for it's compleetion.
+        using Output_pin = typename Timer_output_pin <N, channel> :: Type;
+        if constexpr(connected <Output_pin>)
+        {
+            // Disconnect only after the output returns to its idle level.
+            if(GPIO <Output_pin> :: get_mode() != INPUT_OPEN
+               && GPIO <Output_pin> :: read() != idle_level)
+                return;
+        }
+
+        disconnect_output();
     }
 }
 //------------------------------------------------------------------------------------------------
@@ -176,7 +303,7 @@ void Timer <N> :: Compare <channel> :: force_match_output()
  * @param edge Capture edge and optional noise filter.
  */
 template <uint8_t N>
-void Timer <N> :: Capture_input :: on_pin_change(typename Timer <N> :: Callback callback,
+void Timer <N> :: Capture :: on_pin_change(typename Timer <N> :: Callback callback,
                                                  enum Timer_capture_edge edge)
 {
     static_assert(regs :: exists, "Selected timer does not exist in this MCU");
@@ -224,7 +351,7 @@ void Timer <N> :: Capture_input :: on_pin_change(typename Timer <N> :: Callback 
  * @param value Capture value.
  */
 template <uint8_t N>
-void Timer <N> :: Capture_input :: set_value(typename Timer <N> :: Type value)
+void Timer <N> :: Capture :: set_value(typename Timer <N> :: Type value)
 {
     static_assert(regs :: exists, "Selected timer does not exist in this MCU");
     static_assert(regs :: has_capture, "Selected timer does not have Input Capture");
@@ -239,7 +366,7 @@ void Timer <N> :: Capture_input :: set_value(typename Timer <N> :: Type value)
  * @return Current capture value.
  */
 template <uint8_t N>
-typename Timer <N> :: Type Timer <N> :: Capture_input :: get_value()
+typename Timer <N> :: Type Timer <N> :: Capture :: get_value()
 {
     static_assert(regs :: exists, "Selected timer does not exist in this MCU");
     static_assert(regs :: has_capture, "Selected timer does not have Input Capture");
@@ -500,7 +627,7 @@ void Timer <N> :: start()
 }
 //------------------------------------------------------------------------------------------------
 /**
- * @brief Stops counting while preserving the current counter value.
+ * @brief Stops counting, preserves the counter and disconnects compare outputs.
  *
  * @attention The timer prescaler continues running even while the counter is stopped.
  * After resume(), the first counter increment may therefore occur before a complete
@@ -517,6 +644,9 @@ __inline void Timer <N> :: stop()
                  regs :: clock_bit_0,
                  regs :: clock_bit_1,
                  regs :: clock_bit_2);
+        Compare_A.disconnect_output();
+        Compare_B.disconnect_output();
+        Compare_C.disconnect_output();
     }
 
 }
@@ -607,8 +737,8 @@ void Timer <N> :: clear(bool reset_prescaler)
  *
  * Stops the timer, disconnects compare outputs, clears waveform configuration,
  * counter, compare and capture registers, disables this timer's interrupts,
- * clears its pending flags and removes every registered callback. GPIO direction
- * and output registers are not part of the timer and remain unchanged.
+ * clears its pending flags and removes every registered callback. Available OC
+ * pins are immediately configured as INPUT_OPEN.
  */
 template <uint8_t N>
 void Timer <N> :: reset()
@@ -621,6 +751,10 @@ void Timer <N> :: reset()
         {
             regs :: CONTROL_A = 0;
             regs :: CONTROL_B = 0;
+
+            Compare_A.disconnect_output();
+            Compare_B.disconnect_output();
+            Compare_C.disconnect_output();
 
             uint8_t interrupt_mask = _bit(regs :: overflow_interrupt_bit)
                                    | _bit(regs :: compare_a_interrupt_bit)

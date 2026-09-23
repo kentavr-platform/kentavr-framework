@@ -18,7 +18,7 @@ The compiller will prevent using timers, that are not present in your MCU.
 1. Enable the timer in `config.h`.
 2. Select a mode with `set_mode(...)` and a clock with `set_clock(...)`.
 3. Set TOP and compare values if the selected mode needs them.
-4. Configure any hardware output pin as an output.
+4. Configure the compare output if required.
 5. Call `start()`.
 
 `set_mode(...)` and `set_clock(...)` return `OK` or `ERR_BAD_PARAMETER`.
@@ -40,7 +40,6 @@ if(timer.set_mode(TIMER_MODE_PHASE_PWM_CAPTURE) == OK &&
     timer.Capture.set_value(96);          // TOP
     timer.Compare_B.set_match(25);        // duty cycle
     timer.Compare_B.set_output(TIMER_OUTPUT_PWM);
-    GPIO <B2> :: set_mode(OUTPUT_LOW);    // OC1B on ATmega328P
     timer.start();
 }
 ```
@@ -80,14 +79,17 @@ Connect a compare channel to its OC pin with `set_output(...)`:
 ```cpp
 timer.Compare_B.set_match(25);
 timer.Compare_B.set_output(TIMER_OUTPUT_PWM);
-GPIO <B2> :: set_mode(OUTPUT_LOW);
 ```
 
 `TIMER_OUTPUT_PWM` produces non-inverted PWM;
 `TIMER_OUTPUT_PWM_INVERTED` produces inverted PWM. In non-PWM modes, choose
 `TIMER_OUTPUT_TOGGLE_ON_MATCH`, `TIMER_OUTPUT_CLEAR_ON_MATCH`, or
-`TIMER_OUTPUT_SET_ON_MATCH`. Use `TIMER_OUTPUT_DISCONNECTED` to return control
-of the pin to GPIO. The timer does not set the pin direction automatically.
+`TIMER_OUTPUT_SET_ON_MATCH`. Connecting a channel automatically configures its
+OC pin as `OUTPUT_LOW`, or `OUTPUT_HIGH` for `TIMER_OUTPUT_PWM_INVERTED`. Use
+`TIMER_OUTPUT_DISCONNECTED` to return control of the pin to GPIO and configure
+it as `INPUT_OPEN`. PWM disconnection occurs after the output returns to its
+idle level and requires global interrupts to be enabled. Non-PWM outputs are
+disconnected immediately.
 
 
 ### Callbacks
@@ -117,16 +119,15 @@ enable_interrupts();
 ```
 
 Callbacks run in interrupt context. Passing `nullptr` removes a callback and
-disables its interrupt. Input capture can select a rising or falling edge,
-with or without the noise filter. The capture callback responds to the
-timer's input capture pin.
-
+disables its interrupt unless an output disconnection is pending. Input
+capture can select a rising or falling edge, with or without the noise filter.
+The capture callback responds to the timer's input capture pin.
 
 ### Counter control
 
 ```cpp
 timer.start();           // clear the counter and run
-timer.stop();            // stop, preserving the counter
+timer.stop();            // stop, preserve the counter and disconnect outputs
 timer.resume();          // continue from the preserved value
 timer.clear();           // clear the counter
 timer.reset();           // restore the timer and callbacks to reset state
@@ -134,5 +135,7 @@ timer.reset();           // restore the timer and callbacks to reset state
 
 Use `set_counter(...)` and `get_counter()` to write or read the counter.
 `clear(true)` also resets the timer prescaler; on some MCUs this affects other
-timers sharing that prescaler. `stop()` does not reset the prescaler, so the
-first tick after `resume()` may arrive sooner than a full prescaler interval.
+timers sharing that prescaler. `stop()` immediately returns compare pins to
+`INPUT_OPEN` and does not reset the prescaler, so the first tick after `resume()`
+may arrive sooner than a full prescaler interval. Configure compare outputs
+again before `resume()` when they are still required.

@@ -30,3 +30,10 @@ DECLARE_PIN( D5,   0x0B,  0x0A,  0x09,  0x09,  5)
 DECLARE_PIN( D6,   0x0B,  0x0A,  0x09,  0x09,  6)
 DECLARE_PIN( D7,   0x0B,  0x0A,  0x09,  0x09,  7)
 //------------------------------------------------------------------------------------------------
+DECLARE_TIMER_OUTPUT_PIN(0, 0, D6)
+DECLARE_TIMER_OUTPUT_PIN(0, 1, D5)
+DECLARE_TIMER_OUTPUT_PIN(1, 0, B1)
+DECLARE_TIMER_OUTPUT_PIN(1, 1, B2)
+DECLARE_TIMER_OUTPUT_PIN(2, 0, B3)
+DECLARE_TIMER_OUTPUT_PIN(2, 1, D3)
+//------------------------------------------------------------------------------------------------

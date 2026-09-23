@@ -39,6 +39,22 @@ __inline void GPIO <pin> :: set_mode(enum GPIO_mode mode)
 }
 //------------------------------------------------------------------------------------------------
 /**
+ * @brief Get the current GPIO direction and output latch mode.
+ *
+ * @return Current GPIO mode derived from the DDR and PORT registers.
+ */
+template <class pin>
+__inline GPIO_mode GPIO <pin> :: get_mode()
+{
+    const uint8_t level = test_bit(_SFR_IO8(pin :: PORT), pin :: BIT);
+
+    if(test_bit(_SFR_IO8(pin :: DDR), pin :: BIT))
+        return level ? OUTPUT_HIGH : OUTPUT_LOW;
+
+    return level ? INPUT_PULLUP : INPUT_OPEN;
+}
+//------------------------------------------------------------------------------------------------
+/**
  * @brief Drive the GPIO output high or enable the input pull-up.
  *
  * Sets the PORT bit associated with the template pin. The exact electrical
@@ -84,5 +100,4 @@ __inline void GPIO <pin> :: toggle()
     set_bit(_SFR_IO8(pin :: TGL), pin :: BIT);
 }
 //------------------------------------------------------------------------------------------------
-
 

@@ -83,17 +83,22 @@ private:
     class Compare
     {
     public:
+        using Timer_type = Timer <N>;
         void on_match(Callback callback);
         void set_match(Type value);
         void set_output(enum Timer_compare_output mode);
         void force_match_output();
-        void match_interrupt() { if(match_callback) match_callback(); }
+        void match_interrupt();
     private:
         friend class Timer <N>;
+        void disconnect_output();
         Callback match_callback = nullptr;
+        volatile bool disconnecting = false;
+        volatile bool pwm_output = false;
+        volatile uint8_t idle_level = LEVEL_LOW;
     };
 
-    class Capture_input
+    class Capture
     {
     public:
         void set_value(Type value);
@@ -109,7 +114,7 @@ public:
     inline static Compare <A> Compare_A;
     inline static Compare <B> Compare_B;
     inline static Compare <C> Compare_C;
-    inline static Capture_input Capture;
+    inline static Capture Capture;
 
     Timer();
     ResultCode set_mode(enum Timer_mode mode);

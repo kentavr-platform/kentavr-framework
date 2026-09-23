@@ -6,6 +6,9 @@
 #ifndef PINS_H
 #define PINS_H
 //------------------------------------------------------------------------------------------------
+#define LEVEL_LOW  0
+#define LEVEL_HIGH 1
+//------------------------------------------------------------------------------------------------
 template <
     volatile uint8_t port_addr,
     volatile uint8_t dir_addr,
@@ -24,6 +27,14 @@ struct pin
 struct NC {};       // Not Connected "pin"
 //------------------------------------------------------------------------------------------------
 #define DECLARE_PIN(ID, PORT, DDR, PIN, TGL, BIT) struct ID : pin <PORT, DDR, PIN, TGL, BIT> {};
+//------------------------------------------------------------------------------------------------
+template <uint8_t timer, uint8_t channel>
+struct Timer_output_pin
+{
+    using Type = NC;
+};
+#define DECLARE_TIMER_OUTPUT_PIN(TIMER, CHANNEL, PIN) \
+template <> struct Timer_output_pin <TIMER, CHANNEL> { using Type = PIN; };
 //------------------------------------------------------------------------------------------------
 #if defined(__AVR_ATtiny85__)
   #include "pins/pins_tiny85.h"
