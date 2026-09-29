@@ -6,6 +6,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 //------------------------------------------------------------------------------------------------
+#if defined(__AVR_ATmega8__)
+FUSES =
+{
+    .low  = 0xEF,
+    .high = 0xC9
+};
+#else
 FUSES =
 {
     .low = (0xFF
@@ -29,6 +36,7 @@ FUSES =
         & FUSE_BODLEVEL1
     )
 };
+#endif
 //------------------------------------------------------------------------------------------------
 /**
     Enable settings instance and reserves EEPROM space.

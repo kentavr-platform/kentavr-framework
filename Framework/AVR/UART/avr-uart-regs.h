@@ -57,7 +57,7 @@ struct USART_traits <N> { \
   #define USBS    USBS1
   #define UPM0    UPM10
   #define UPM1    UPM11
-#else
+#elif !defined(UDR)
   // make dummy definitions for MCUs without a hardware UART.
   #define RXEN    0
   #define TXEN    0

@@ -91,6 +91,18 @@ struct Timer_regs <N>                                                           
   #define TIFR0 TIFR
 #endif
 //------------------------------------------------------------------------------------------------
+#if !defined(TIMSK1) && defined(TIMSK)
+  #define TIMSK1 TIMSK
+#endif
+//------------------------------------------------------------------------------------------------
+#if !defined(TIFR1) && defined(TIFR)
+  #define TIFR1 TIFR
+#endif
+//------------------------------------------------------------------------------------------------
+#if !defined(ICIE1) && defined(TICIE1)
+  #define ICIE1 TICIE1
+#endif
+//------------------------------------------------------------------------------------------------
 #if defined(WGM01) && defined(OCR0B)
   #if defined(TCCR0C)
     #define TIMER0_FORCE_CONTROL TCCR0C
