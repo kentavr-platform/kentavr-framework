@@ -42,6 +42,9 @@ struct I2C_Slave_Config
                 (enum I2C_Slave_Action action, uint8_t *data) = nullptr ;
 };
 //------------------------------------------------------------------------------------------------
+template <class TWI_type>
+struct TWI_dispatcher;
+//------------------------------------------------------------------------------------------------
 template <uint8_t N, uint8_t TX_BUF_SIZE>
 class TWI
 {
@@ -56,9 +59,8 @@ public:
                                  void (*callback)(ResultCode result) = nullptr);
     static ResultCode       receive(uint8_t address, void *data, uint8_t size,
                                     void (*callback)(ResultCode result) = nullptr);
-    static void             interrupt();
-
 private:
+    static void             interrupt();
     using regs = I2C_traits <N>;
     static void             _reset();
     static void             _start();
@@ -85,9 +87,29 @@ private:
         void (*callback)(ResultCode result) = nullptr;
     } master;
     static I2C_Slave_Config slave;
+
+    template <class>
+    friend struct TWI_dispatcher;
 };
 //------------------------------------------------------------------------------------------------
-#define _SETUP_TWI_ISR(VECT, BUS) ISR(VECT) { I2C##BUS :: interrupt(); }
+/**
+ * Compile-time friend proxy which keeps TWI :: interrupt() private.
+ * The inline call is optimized away and adds no runtime dispatch overhead.
+ */
+template <class TWI_type>
+struct TWI_dispatcher
+{
+    static void interrupt()
+    {
+        TWI_type :: interrupt();
+    }
+};
+//------------------------------------------------------------------------------------------------
+#define _SETUP_TWI_ISR(VECT, BUS)                                                \
+  ISR(VECT)                                                                      \
+  {                                                                              \
+      TWI_dispatcher <I2C##BUS> :: interrupt();                                  \
+  }
 
 #if defined(TWI_vect)
   #define _ENABLE_TWI_ISR_0() _SETUP_TWI_ISR(TWI_vect, 0)
@@ -99,9 +121,9 @@ private:
   #define _ENABLE_TWI_ISR_1() _SETUP_TWI_ISR(TWI1_vect, 1)
 #endif
 
-#define _ENABLE_I2C(N, TX_BUF_SIZE) \
-using I2C##N = TWI <N, TX_BUF_SIZE>; \
-_ENABLE_TWI_ISR_##N()
+#define _ENABLE_I2C(N, TX_BUF_SIZE)    \
+  using I2C##N = TWI <N, TX_BUF_SIZE>; \
+  _ENABLE_TWI_ISR_##N()
 
 // I2C0
 #if defined(I2C0_SUPPORTED)
@@ -126,4 +148,3 @@ __inline FlashStringWrapper console_type_name(const TWI <N, TX_BUF_SIZE> &)
 #include "avr-i2c.tpp"
 //------------------------------------------------------------------------------------------------
 #endif
-

@@ -64,6 +64,9 @@ enum Timer_capture_edge
 };
 //------------------------------------------------------------------------------------------------
 template <uint8_t N>
+struct Timer_dispatcher;
+//------------------------------------------------------------------------------------------------
+template <uint8_t N>
 class Timer
 {
 private:
@@ -88,9 +91,10 @@ private:
         void set_match(Type value);
         void set_output(enum Timer_compare_output mode);
         void force_match_output();
-        void match_interrupt();
     private:
+        void match_interrupt();
         friend class Timer <N>;
+        friend struct Timer_dispatcher <N>;
         void disconnect_output();
         Callback match_callback = nullptr;
         volatile bool disconnecting = false;
@@ -104,9 +108,10 @@ private:
         void set_value(Type value);
         Type get_value();
         void on_pin_change(Callback callback, enum Timer_capture_edge edge);
-        void capture_interrupt() { if(pin_change_callback) pin_change_callback(); }
     private:
+        void capture_interrupt() { if(pin_change_callback) pin_change_callback(); }
         friend class Timer <N>;
+        friend struct Timer_dispatcher <N>;
         Callback pin_change_callback = nullptr;
     };
 
@@ -127,7 +132,43 @@ public:
     void resume();
     void reset();
     Type get_counter();
+
+private:
     static void overflow_interrupt() { if(overflow_callback) overflow_callback(); }
+    friend struct Timer_dispatcher <N>;
+};
+//------------------------------------------------------------------------------------------------
+/**
+ * Compile-time friend proxy which keeps Timer interrupt handlers private.
+ * The inline calls are optimized away and add no runtime dispatch overhead.
+ */
+template <uint8_t N>
+struct Timer_dispatcher
+{
+    static void compare_a_interrupt()
+    {
+        Timer <N> :: Compare_A.match_interrupt();
+    }
+
+    static void compare_b_interrupt()
+    {
+        Timer <N> :: Compare_B.match_interrupt();
+    }
+
+    static void compare_c_interrupt()
+    {
+        Timer <N> :: Compare_C.match_interrupt();
+    }
+
+    static void overflow_interrupt()
+    {
+        Timer <N> :: overflow_interrupt();
+    }
+
+    static void capture_interrupt()
+    {
+        Timer <N> :: Capture.capture_interrupt();
+    }
 };
 //------------------------------------------------------------------------------------------------
 #include "avr-timer-isr.h"

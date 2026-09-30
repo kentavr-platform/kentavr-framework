@@ -53,6 +53,9 @@ struct BaudConfig
     bool u2x;
 };
 //------------------------------------------------------------------------------------------------
+template <class UART_type>
+struct UART_dispatcher;
+//------------------------------------------------------------------------------------------------
 template <uint8_t N, uint16_t RX_BUF_SIZE, uint16_t TX_BUF_SIZE>
 class UART
 {
@@ -108,10 +111,10 @@ public:
     static void     write    (const uint8_t *buf, uint8_t count);
     static void     write_all(const uint8_t *buf, uint8_t count);
     static uint8_t  write_any(const uint8_t *buf, uint8_t count);
+private:
     //              interrupts handlers
     static void     rx_interrupt();
     static void     tx_interrupt();
-private:
     //              internal routines
     static BaudConfig _calc_baud(uint32_t rate, bool u2x);
     static BaudConfig _select_baud(uint32_t rate);
@@ -132,17 +135,49 @@ private:
     static volatile uint8_t  tx_errors;
     using           regs = USART_traits <N>;
 
+    template <class>
+    friend struct UART_dispatcher;
+
+};
+//------------------------------------------------------------------------------------------------
+/**
+ * Compile-time friend proxy which keeps UART interrupt handlers private.
+ * The inline calls are optimized away and add no runtime dispatch overhead.
+ */
+template <class UART_type>
+struct UART_dispatcher
+{
+    static void rx_interrupt()
+    {
+        UART_type :: rx_interrupt();
+    }
+
+    static void tx_interrupt()
+    {
+        UART_type :: tx_interrupt();
+    }
 };
 //------------------------------------------------------------------------------------------------
 // UART interrupt presets
 #pragma GCC diagnostic error "-Wmisspelled-isr"
+
 #if !defined(USART0_RX_vect) && defined(USART_RX_vect)
   // some devices have only one USART without index
   #define USART0_RX_vect    USART_RX_vect
   #define USART0_UDRE_vect  USART_UDRE_vect
 #endif
-#define _SETUP_UART_RX_ISR(N)             ISR(USART##N##_RX_vect)   { UART##N :: rx_interrupt(); }
-#define _SETUP_UART_TX_ISR(N)             ISR(USART##N##_UDRE_vect) { UART##N :: tx_interrupt(); }
+
+#define _SETUP_UART_RX_ISR(N)                                                   \
+  ISR(USART##N##_RX_vect)                                                       \
+  {                                                                             \
+      UART_dispatcher <UART##N> :: rx_interrupt();                              \
+  }
+
+#define _SETUP_UART_TX_ISR(N)                                                   \
+  ISR(USART##N##_UDRE_vect)                                                     \
+  {                                                                             \
+      UART_dispatcher <UART##N> :: tx_interrupt();                              \
+  }
 
 #define _ENABLE_UART_RX_ISR(N, BUF_SIZE)     _ENABLE_UART_RX_ISR_##BUF_SIZE(N)
 #define _ENABLE_UART_TX_ISR(N, BUF_SIZE)     _ENABLE_UART_TX_ISR_##BUF_SIZE(N)
@@ -168,11 +203,11 @@ private:
 #define _ENABLE_UART_TX_ISR_256(N)              _SETUP_UART_TX_ISR(N)
 
 // main ENABLE_UART() macro
-#define _ENABLE_UART(N, RX_BUF_SIZE, TX_BUF_SIZE) \
-static_assert(USART_traits <N> :: exists, "Selected UART does not exist in this MCU"); \
-using UART##N = UART <N, RX_BUF_SIZE, TX_BUF_SIZE>; \
-_ENABLE_UART_RX_ISR(N, RX_BUF_SIZE) \
-_ENABLE_UART_TX_ISR(N, TX_BUF_SIZE)
+#define _ENABLE_UART(N, RX_BUF_SIZE, TX_BUF_SIZE)                                         \
+  static_assert(USART_traits <N> :: exists, "Selected UART does not exist in this MCU");  \
+  using UART##N = UART <N, RX_BUF_SIZE, TX_BUF_SIZE>;                                     \
+  _ENABLE_UART_RX_ISR(N, RX_BUF_SIZE)                                                     \
+  _ENABLE_UART_TX_ISR(N, TX_BUF_SIZE)
 
 // platform-specific wrappers
 #define ENABLE_UART0(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(0, RX_BUF_SIZE, TX_BUF_SIZE)

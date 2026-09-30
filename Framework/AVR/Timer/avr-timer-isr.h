@@ -35,19 +35,19 @@
 #endif
 //------------------------------------------------------------------------------------------------
 #define _ENABLE_TIMER_COMPA_ISR(N) \
-ISR(TIMER##N##_COMPA_vect) { Timer##N :: Compare_A.match_interrupt(); }
+ISR(TIMER##N##_COMPA_vect) { Timer_dispatcher <N> :: compare_a_interrupt(); }
 
 #define _ENABLE_TIMER_COMPB_ISR(N) \
-ISR(TIMER##N##_COMPB_vect) { Timer##N :: Compare_B.match_interrupt(); }
+ISR(TIMER##N##_COMPB_vect) { Timer_dispatcher <N> :: compare_b_interrupt(); }
 
 #define _ENABLE_TIMER_COMPC_ISR(N) \
-ISR(TIMER##N##_COMPC_vect) { Timer##N :: Compare_C.match_interrupt(); }
+ISR(TIMER##N##_COMPC_vect) { Timer_dispatcher <N> :: compare_c_interrupt(); }
 
 #define _ENABLE_TIMER_OVF_ISR(N) \
-ISR(TIMER##N##_OVF_vect) { Timer##N :: overflow_interrupt(); }
+ISR(TIMER##N##_OVF_vect) { Timer_dispatcher <N> :: overflow_interrupt(); }
 
 #define _ENABLE_TIMER_CAPTURE_ISR(N) \
-ISR(TIMER##N##_CAPT_vect) { Timer##N :: Capture.capture_interrupt(); }
+ISR(TIMER##N##_CAPT_vect) { Timer_dispatcher <N> :: capture_interrupt(); }
 
 #if defined(TIMER0_COMPA_vect)
   #define _ENABLE_TIMER0_COMPA_ISR _ENABLE_TIMER_COMPA_ISR(0)
@@ -213,4 +213,3 @@ ISR(TIMER##N##_CAPT_vect) { Timer##N :: Capture.capture_interrupt(); }
   _ENABLE_TIMER##N##_COMPC_ISR
 //------------------------------------------------------------------------------------------------
 #endif
-
