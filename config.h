@@ -73,6 +73,28 @@ FUSES =
 // ENABLE_TIMER5;
 
 //------------------------------------------------------------------------------------------------
+/**
+    Select external interrupt lines used by the application.
+
+    Enable an INTn line here before installing its callback with
+    GPIO <pin> :: on_change(). The physical GPIO pin is fixed by the selected
+    MCU. Callback storage and the interrupt vector are generated only for
+    enabled lines.
+
+ ENABLE_INT0;
+ ENABLE_INT1;
+ ...
+                                                                                                */
+// ENABLE_INT0;
+// ENABLE_INT1;
+// ENABLE_INT2;
+// ENABLE_INT3;
+// ENABLE_INT4;
+// ENABLE_INT5;
+// ENABLE_INT6;
+// ENABLE_INT7;
+
+//------------------------------------------------------------------------------------------------
 
 /** Enable and configure hardware UARTs here
 

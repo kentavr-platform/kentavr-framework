@@ -252,6 +252,8 @@
 		<Unit filename="Framework/AVR/avr-macro.h" />
 		<Unit filename="Framework/AVR/EEPROM/avr-eeprom.h" />
 		<Unit filename="Framework/AVR/GPIO/avr-gpio.h" />
+		<Unit filename="Framework/AVR/Interrupt/avr-int.h" />
+		<Unit filename="Framework/AVR/Interrupt/README.md" />
 		<Unit filename="Framework/AVR/GPIO/avr-gpio.tpp" />
 		<Unit filename="Framework/AVR/GPIO/boards/arduino-leonardo.h" />
 		<Unit filename="Framework/AVR/GPIO/boards/arduino-mega2560.h" />

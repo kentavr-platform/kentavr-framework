@@ -100,4 +100,29 @@ __inline void GPIO <pin> :: toggle()
     set_bit(_SFR_IO8(pin :: TGL), pin :: BIT);
 }
 //------------------------------------------------------------------------------------------------
+template <class pin>
+void GPIO <pin> :: on_change(INT_callback new_callback, INT_mode mode)
+{
+    using interrupt = INT_traits_for_pin <pin>;
+    static_assert(interrupt :: exists,
+                  "This pin has no external INT in this MCU (see AVR/GPIO/pins/...)");
 
+    if constexpr(interrupt :: exists)
+    {
+        static_assert(GPIO_INT <pin> :: enabled,
+                      "External INT is not enabled for this pin (see config.h)");
+
+        clr_bit(interrupt :: MASK, interrupt :: mask_bit);
+        callback = new_callback;
+        if(callback == nullptr)
+            return;
+
+        uint8_t control = interrupt :: CONTROL;
+        clr_bits(control, interrupt :: sense_bit_0, interrupt :: sense_bit_1);
+        control |= mode << interrupt :: sense_bit_0;
+        interrupt :: CONTROL = control;
+        interrupt :: FLAGS = _bit(interrupt :: flag_bit);
+        set_bit(interrupt :: MASK, interrupt :: mask_bit);
+    }
+}
+//------------------------------------------------------------------------------------------------

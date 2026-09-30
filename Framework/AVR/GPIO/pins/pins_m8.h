@@ -34,3 +34,6 @@ DECLARE_TIMER_OUTPUT_PIN(1, 0, B1)
 DECLARE_TIMER_OUTPUT_PIN(1, 1, B2)
 DECLARE_TIMER_OUTPUT_PIN(2, 0, B3)
 //------------------------------------------------------------------------------------------------
+DECLARE_INT_PIN(0, D2, MCUCR, ISC00, GICR, INT0, GIFR, INTF0)
+DECLARE_INT_PIN(1, D3, MCUCR, ISC10, GICR, INT1, GIFR, INTF1)
+//------------------------------------------------------------------------------------------------

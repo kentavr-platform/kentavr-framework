@@ -28,13 +28,45 @@ struct NC {};       // Not Connected "pin"
 //------------------------------------------------------------------------------------------------
 #define DECLARE_PIN(ID, PORT, DDR, PIN, TGL, BIT) struct ID : pin <PORT, DDR, PIN, TGL, BIT> {};
 //------------------------------------------------------------------------------------------------
+template <uint8_t N>
+struct INT_traits
+{
+    static constexpr bool exists = false;
+    using pin = NC;
+};
+
+template <class pin>
+struct INT_traits_for_pin
+{
+    static constexpr bool exists = false;
+};
+
+#define DECLARE_INT_PIN(N, PIN, CONTROL_REG, SENSE_BIT, MASK_REG, MASK_BIT, FLAG_REG, FLAG_BIT) \
+  template <>                                                                     \
+  struct INT_traits <N>                                                           \
+  {                                                                               \
+      using pin = PIN;                                                            \
+      static inline volatile uint8_t &CONTROL = CONTROL_REG;                      \
+      static inline volatile uint8_t &MASK = MASK_REG;                            \
+      static inline volatile uint8_t &FLAGS = FLAG_REG;                           \
+      static constexpr uint8_t sense_bit_0 = SENSE_BIT;                           \
+      static constexpr uint8_t sense_bit_1 = SENSE_BIT + 1;                       \
+      static constexpr uint8_t mask_bit = MASK_BIT;                               \
+      static constexpr uint8_t flag_bit = FLAG_BIT;                               \
+      static constexpr bool exists = true;                                        \
+  };                                                                              \
+  template <>                                                                     \
+  struct INT_traits_for_pin <PIN> : INT_traits <N>                                \
+  {};
+//------------------------------------------------------------------------------------------------
 template <uint8_t timer, uint8_t channel>
 struct Timer_output_pin
 {
     using Type = NC;
 };
+
 #define DECLARE_TIMER_OUTPUT_PIN(TIMER, CHANNEL, PIN) \
-template <> struct Timer_output_pin <TIMER, CHANNEL> { using Type = PIN; };
+  template <> struct Timer_output_pin <TIMER, CHANNEL> { using Type = PIN; };
 //------------------------------------------------------------------------------------------------
 #if defined(__AVR_ATtiny85__)
   #include "pins/pins_tiny85.h"

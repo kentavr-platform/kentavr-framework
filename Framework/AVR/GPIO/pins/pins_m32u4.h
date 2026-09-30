@@ -42,3 +42,9 @@ DECLARE_TIMER_OUTPUT_PIN(1, 1, B6)
 DECLARE_TIMER_OUTPUT_PIN(1, 2, B7)
 DECLARE_TIMER_OUTPUT_PIN(3, 0, C6)
 //------------------------------------------------------------------------------------------------
+DECLARE_INT_PIN(0, D0, EICRA, ISC00, EIMSK, INT0, EIFR, INTF0)
+DECLARE_INT_PIN(1, D1, EICRA, ISC10, EIMSK, INT1, EIFR, INTF1)
+DECLARE_INT_PIN(2, D2, EICRA, ISC20, EIMSK, INT2, EIFR, INTF2)
+DECLARE_INT_PIN(3, D3, EICRA, ISC30, EIMSK, INT3, EIFR, INTF3)
+DECLARE_INT_PIN(6, E6, EICRB, ISC60, EIMSK, INT6, EIFR, INTF6)
+//------------------------------------------------------------------------------------------------
