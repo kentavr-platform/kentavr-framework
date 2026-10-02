@@ -92,12 +92,25 @@ __inline uint8_t GPIO <pin> :: read()
 /**
  * @brief Toggle the GPIO output latch.
  *
- * Uses the MCU-specific hardware toggle mechanism without reading port's value.
+ * Uses the MCU-specific hardware toggle register when available. On older
+ * devices without this feature, reads the output latch and changes only the
+ * selected bit with an atomic SBI or CBI instruction.
  */
 template <class pin>
 __inline void GPIO <pin> :: toggle()
 {
-    set_bit(_SFR_IO8(pin :: TGL), pin :: BIT);
+    if constexpr(pin :: TGL == NONE)
+    {
+        if(test_bit(_SFR_IO8(pin :: PORT), pin :: BIT))
+            clr_bit(_SFR_IO8(pin :: PORT), pin :: BIT);
+        else
+            set_bit(_SFR_IO8(pin :: PORT), pin :: BIT);
+    }
+    else
+    {
+        set_bit(_SFR_IO8(pin :: TGL), pin :: BIT);
+    }
+
 }
 //------------------------------------------------------------------------------------------------
 template <class pin>
