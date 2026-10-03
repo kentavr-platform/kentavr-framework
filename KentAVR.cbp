@@ -50,6 +50,21 @@
 					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
+			<Target title="ATmega328p">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DCRYSTAL_FREQ=12000000UL" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="atmega328p" />
+					<Variable name="PROG" value="usbasp" />
+				</Environment>
+			</Target>
 			<Target title="ATmega32u4">
 				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
 				<Option working_dir="" />
@@ -59,6 +74,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
+					<Add option="-DINTERRUPT_CONTROL_ENDPOINT" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
@@ -168,6 +184,7 @@
 					<Add option="-g" />
 					<Add option="-DARDUINO_AVR_LEONARDO" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
+					<Add option="-DINTERRUPT_CONTROL_ENDPOINT" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
@@ -182,8 +199,11 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-include AVR/USB/avr-usb-config.h" />
 					<Add option="-DARDUINO_AVR_PRO_MICRO" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
+					<Add option="-DF_USB=F_CPU" />
+					<Add option="-DINTERRUPT_CONTROL_ENDPOINT" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
@@ -216,10 +236,12 @@
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
 			<Add option="-std=c++17" />
-			<Add option="-x c++" />
 			<Add option="-save-temps=obj" />
 			<Add option="-mmcu=$(MCU)" />
+			<Add option="-Wa,-I,Framework" />
+			<Add option="-Wno-unused-parameter" />
 			<Add option="-DDEBUG" />
+			<Add directory="Framework" />
 		</Compiler>
 		<Linker>
 			<Add option="-mmcu=$(MCU)" />
@@ -248,12 +270,8 @@
 			<Add after="avr-readelf -sW $(TARGET_OUTPUT_FILE) | grep OBJECT &gt; $(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).data || true" />
 			<Add after="avr-size -C --mcu=$(MCU) -d $(TARGET_OUTPUT_FILE)" />
 		</ExtraCommands>
-		<Unit filename="Framework/AVR/avr-delay.h" />
-		<Unit filename="Framework/AVR/avr-macro.h" />
 		<Unit filename="Framework/AVR/EEPROM/avr-eeprom.h" />
 		<Unit filename="Framework/AVR/GPIO/avr-gpio.h" />
-		<Unit filename="Framework/AVR/Interrupt/avr-int.h" />
-		<Unit filename="Framework/AVR/Interrupt/README.md" />
 		<Unit filename="Framework/AVR/GPIO/avr-gpio.tpp" />
 		<Unit filename="Framework/AVR/GPIO/boards/arduino-leonardo.h" />
 		<Unit filename="Framework/AVR/GPIO/boards/arduino-mega2560.h" />
@@ -265,34 +283,811 @@
 		<Unit filename="Framework/AVR/GPIO/pins/pins_128dx48.h" />
 		<Unit filename="Framework/AVR/GPIO/pins/pins_m1284.h" />
 		<Unit filename="Framework/AVR/GPIO/pins/pins_m2560.h" />
+		<Unit filename="Framework/AVR/GPIO/pins/pins_m328.h" />
+		<Unit filename="Framework/AVR/GPIO/pins/pins_m328p.h" />
 		<Unit filename="Framework/AVR/GPIO/pins/pins_m32u4.h" />
 		<Unit filename="Framework/AVR/GPIO/pins/pins_m8.h" />
 		<Unit filename="Framework/AVR/GPIO/pins/pins_m88.h" />
+		<Unit filename="Framework/AVR/GPIO/pins/pins_m88p.h" />
 		<Unit filename="Framework/AVR/GPIO/pins/pins_tiny85.h" />
 		<Unit filename="Framework/AVR/I2C/avr-i2c-regs.h" />
 		<Unit filename="Framework/AVR/I2C/avr-i2c.h" />
 		<Unit filename="Framework/AVR/I2C/avr-i2c.tpp" />
-		<Unit filename="Framework/Devices/LED/led.h" />
-		<Unit filename="Framework/Devices/LED/led.tpp" />
-		<Unit filename="Framework/Devices/Servo/servo.h" />
-		<Unit filename="Framework/Devices/Servo/servo.tpp" />
-		<Unit filename="Framework/Devices/RTC/DS3231/DS3231.h" />
-		<Unit filename="Framework/Devices/RTC/DS3231/DS3231.tpp" />
-		<Unit filename="Framework/Devices/RTC/DateTime.cpp" />
-		<Unit filename="Framework/Devices/RTC/DateTime.h" />
+		<Unit filename="Framework/AVR/Timer/avr-timer-isr.h" />
+		<Unit filename="Framework/AVR/Timer/avr-timer-regs.h" />
+		<Unit filename="Framework/AVR/Timer/avr-timer.h" />
+		<Unit filename="Framework/AVR/Timer/avr-timer.tpp" />
 		<Unit filename="Framework/AVR/UART/avr-uart-regs.h" />
 		<Unit filename="Framework/AVR/UART/avr-uart.h" />
 		<Unit filename="Framework/AVR/UART/avr-uart.tpp" />
-		<Unit filename="config.h" />
-		<Unit filename="Framework/Services/Console/console.h" />
-		<Unit filename="Framework/Services/Console/console.tpp" />
-		<Unit filename="Framework/Services/Console/debug.h" />
-		<Unit filename="Framework/core.h" />
+		<Unit filename="Framework/AVR/USB/LUFA/Common/ArchitectureSpecific.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Common/Architectures.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Common/Attributes.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Common/BoardTypes.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Common/Common.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Common/CompilerSpecific.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Common/Endianness.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/AndroidAccessoryClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/AudioClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/CCIDClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/CDCClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/AndroidAccessoryClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/AudioClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/CCIDClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/CDCClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/HIDClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/HIDParser.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/HIDParser.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/HIDReportData.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/MIDIClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/MassStorageClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/PrinterClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/RNDISClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Common/StillImageClassCommon.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/AudioClassDevice.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/AudioClassDevice.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/CCIDClassDevice.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/CCIDClassDevice.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/CDCClassDevice.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/CDCClassDevice.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/HIDClassDevice.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/HIDClassDevice.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/MIDIClassDevice.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/MIDIClassDevice.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/MassStorageClassDevice.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/MassStorageClassDevice.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/PrinterClassDevice.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/PrinterClassDevice.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/RNDISClassDevice.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Device/RNDISClassDevice.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/HIDClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/AndroidAccessoryClassHost.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/AndroidAccessoryClassHost.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/AudioClassHost.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/AudioClassHost.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/CDCClassHost.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/CDCClassHost.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/HIDClassHost.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/HIDClassHost.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/MIDIClassHost.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/MIDIClassHost.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/MassStorageClassHost.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/MassStorageClassHost.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/PrinterClassHost.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/PrinterClassHost.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/RNDISClassHost.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/RNDISClassHost.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/StillImageClassHost.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/Host/StillImageClassHost.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/MIDIClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/MassStorageClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/PrinterClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/RNDISClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Class/StillImageClass.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Device_AVR8.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Device_AVR8.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/EndpointStream_AVR8.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/EndpointStream_AVR8.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Endpoint_AVR8.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Endpoint_AVR8.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Host_AVR8.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Host_AVR8.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/OTG_AVR8.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/PipeStream_AVR8.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/PipeStream_AVR8.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Pipe_AVR8.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Pipe_AVR8.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Template/Template_Endpoint_Control_R.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Template/Template_Endpoint_Control_W.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Template/Template_Endpoint_RW.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/Template/Template_Pipe_RW.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/USBController_AVR8.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/USBController_AVR8.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/USBInterrupt_AVR8.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/AVR8/USBInterrupt_AVR8.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/ConfigDescriptors.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/ConfigDescriptors.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/Device.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/DeviceStandardReq.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/DeviceStandardReq.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/Endpoint.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/EndpointStream.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/Events.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/Events.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/Host.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/HostStandardReq.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/HostStandardReq.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/OTG.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/Pipe.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/PipeStream.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/StdDescriptors.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/StdRequestType.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Device_UC3.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Device_UC3.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/EndpointStream_UC3.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/EndpointStream_UC3.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Endpoint_UC3.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Endpoint_UC3.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Host_UC3.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Host_UC3.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/PipeStream_UC3.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/PipeStream_UC3.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Pipe_UC3.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Pipe_UC3.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Template/Template_Endpoint_Control_R.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Template/Template_Endpoint_Control_W.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Template/Template_Endpoint_RW.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/Template/Template_Pipe_RW.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/USBController_UC3.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/USBController_UC3.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/USBInterrupt_UC3.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/UC3/USBInterrupt_UC3.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/USBController.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/USBInterrupt.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/USBMode.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/USBTask.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/USBTask.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/Device_XMEGA.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/Device_XMEGA.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/EndpointStream_XMEGA.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/EndpointStream_XMEGA.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/Endpoint_XMEGA.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/Endpoint_XMEGA.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/Host_XMEGA.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/PipeStream_XMEGA.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/Pipe_XMEGA.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/Template/Template_Endpoint_Control_R.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/Template/Template_Endpoint_Control_W.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/Template/Template_Endpoint_RW.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/USBController_XMEGA.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/USBController_XMEGA.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/USBInterrupt_XMEGA.c">
+			<Option compilerVar="CC" />
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/Core/XMEGA/USBInterrupt_XMEGA.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/LUFA/Drivers/USB/USB.h">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
+		<Unit filename="Framework/AVR/USB/avr-usb-config.h" />
+		<Unit filename="Framework/AVR/USB/avr-usb.h" />
+		<Unit filename="Framework/AVR/avr-delay.h" />
+		<Unit filename="Framework/AVR/avr-macro.h" />
 		<Unit filename="Framework/Core/bcd.h" />
 		<Unit filename="Framework/Core/errors.h" />
 		<Unit filename="Framework/Core/format.h" />
 		<Unit filename="Framework/Core/macro.h" />
 		<Unit filename="Framework/Core/nostream.h" />
+		<Unit filename="Framework/Core/oscillator.h" />
 		<Unit filename="Framework/Core/type_traits.h" />
 		<Unit filename="Framework/Core/type_traits/is_connected.h" />
 		<Unit filename="Framework/Core/type_traits/is_enum.h" />
@@ -304,23 +1099,36 @@
 		<Unit filename="Framework/Core/type_traits/is_string.h" />
 		<Unit filename="Framework/Core/type_traits/make_unsigned.h" />
 		<Unit filename="Framework/Core/units.h" />
-		<Unit filename="Framework/Interfaces/OneWire/one-wire.h" />
-		<Unit filename="Framework/Interfaces/OneWire/one-wire.tpp" />
-		<Unit filename="main.cpp" />
+		<Unit filename="Framework/Devices/LED/led.h" />
+		<Unit filename="Framework/Devices/LED/led.tpp" />
+		<Unit filename="Framework/Devices/RTC/DS3231/DS3231.h" />
+		<Unit filename="Framework/Devices/RTC/DS3231/DS3231.tpp" />
+		<Unit filename="Framework/Devices/RTC/DateTime.cpp" />
+		<Unit filename="Framework/Devices/RTC/DateTime.h" />
 		<Unit filename="Framework/Devices/Sensors/DS1820/DS1820.h" />
 		<Unit filename="Framework/Devices/Sensors/DS1820/DS18x20.h" />
 		<Unit filename="Framework/Devices/Sensors/DS1820/DS18x20.tpp" />
 		<Unit filename="Framework/Devices/Sensors/DS18B20/DS18B20.h" />
 		<Unit filename="Framework/Devices/Sensors/DS18B20/DS18B20.tpp" />
 		<Unit filename="Framework/Devices/Sensors/DS18S20/DS18S20.h" />
+		<Unit filename="Framework/Devices/Servo/servo.h" />
+		<Unit filename="Framework/Devices/Servo/servo.tpp" />
+		<Unit filename="Framework/Interfaces/OneWire/one-wire.h" />
+		<Unit filename="Framework/Interfaces/OneWire/one-wire.tpp" />
 		<Unit filename="Framework/Interfaces/Serial/serial-bit-out.h" />
 		<Unit filename="Framework/Interfaces/Serial/serial-bit-out.tpp" />
+		<Unit filename="Framework/Interfaces/SerialUSB/README.md" />
+		<Unit filename="Framework/Interfaces/SerialUSB/serial-usb-config.h" />
+		<Unit filename="Framework/Interfaces/SerialUSB/serial-usb.cpp" />
+		<Unit filename="Framework/Interfaces/SerialUSB/serial-usb.h" />
+		<Unit filename="Framework/Services/Console/console.h" />
+		<Unit filename="Framework/Services/Console/console.tpp" />
+		<Unit filename="Framework/Services/Console/debug.h" />
 		<Unit filename="Framework/Services/Settings/settings.h" />
 		<Unit filename="Framework/Services/Settings/settings.tpp" />
-		<Unit filename="Framework/AVR/Timer/avr-timer-isr.h" />
-		<Unit filename="Framework/AVR/Timer/avr-timer-regs.h" />
-		<Unit filename="Framework/AVR/Timer/avr-timer.h" />
-		<Unit filename="Framework/AVR/Timer/avr-timer.tpp" />
+		<Unit filename="Framework/core.h" />
+		<Unit filename="config.h" />
+		<Unit filename="main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
