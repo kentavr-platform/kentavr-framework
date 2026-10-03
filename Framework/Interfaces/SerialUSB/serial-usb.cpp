@@ -32,7 +32,7 @@ namespace
 
     typedef struct
     {
-        USB_Descriptor_Configuration_Header_t configuration;
+        USB_Descriptor_Configuration_Header_t  configuration;
         USB_Descriptor_Interface_t             control_interface;
         USB_CDC_Descriptor_FunctionalHeader_t  cdc_header;
         struct ATTR_PACKED

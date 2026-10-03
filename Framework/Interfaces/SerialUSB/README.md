@@ -1,10 +1,57 @@
 # SerialUSB
 
-`SerialUSB` is a ready-to-use CDC ACM stream for USB-capable AVR microcontrollers.
-It is built on LUFA, which provides the USB device stack, CDC class handling,
-and low-level USB driver.
+## USB CDC ACM serial interface
 
-You may use it as a `Console` transport as well:
+### Summary
+
+ - Provides a byte stream between the AVR and a USB host using CDC-ACM
+ - Uses [LUFA](https://github.com/abcminiuser/lufa) for the USB device stack,
+   CDC class, and low-level USB driver
+ - Owns the USB descriptors and LUFA event callbacks
+ - Handles EP0 through LUFA's control-endpoint interrupt
+ - Flushes CDC output from the USB Start-of-Frame interrupt
+ - Can be used as a `Console` transport
+
+### Limitations
+
+ - Requires an AVR MCU with a hardware USB controller supported by LUFA
+ - Global interrupts must be enabled after `init()`
+
+### Typical usage
+
+```cpp
+SerialUSB usb;
+
+int main()
+{
+    usb.init();
+    enable_interrupts();
+
+    while(!usb.DTR()) {}
+
+    usb.write_all(_flash("USB ready\r\n"));
+
+    while(true)
+    {
+        // LUFA handles USB events through interrupts.
+    }
+}
+```
+
+`init()` must be called once before `enable_interrupts()`. There is no
+application polling call for EP0 or the CDC IN endpoint. Waiting for `DTR()` is
+optional and is useful when output should begin only after the host opens the
+serial port.
+
+The CDC baud rate is host-provided line-encoding metadata; it does not set the
+USB bus speed.
+
+### Console transport
+
+`SerialUSB` provides the stream methods required by `Console`:
+
+`Console` is for formatted output; receive host input directly through the
+`SerialUSB` methods described below.
 
 ```cpp
 SerialUSB usb;
@@ -15,28 +62,21 @@ int main()
     usb.init();
     enable_interrupts();
 
-    // Wait until the host opens the CDC serial port.
-    while (!usb.DTR()) {}
+    while(!usb.DTR()) {}
 
     console.clear();
     console.log(_flash("USB console ready"));
 
-    while (true)
+    while(true)
     {
-        // Application work; LUFA services USB through its interrupts.
+        // Application work.
     }
 }
 ```
 
-Call `init()` once before enabling global interrupts. EP0 control requests are
-handled by LUFA's control-endpoint ISR, and the CDC IN endpoint is flushed from
-the USB Start-of-Frame interrupt (once per millisecond). There is no USB polling
-call in the application loop. `connected()` reports whether the host selected
-the USB configuration; `DTR()` additionally waits for the host to assert DTR
-on the CDC port.
+### Reading
 
-The stream provides `write(...)`, `write_all(...)`, and `tx_wait()` for
-`Console`. For input, use `available()`, `peek()`, and `read(...)`:
+Use `available()`, `peek()`, and `read()` to receive bytes from the host:
 
 ```cpp
 if(usb.available())
@@ -44,16 +84,19 @@ if(usb.available())
     int data = usb.read();
     if(data >= 0)
     {
-        // Process the received byte.
+        usb.write((char) data);
     }
 }
 ```
 
-`peek()` returns the next byte without logically removing it. `read()` returns
-`-1` when no byte is available; `read(buffer, count)` reads up to `count` bytes
-and returns the number read. Input is accepted after the device is configured
-and the host sets a non-zero CDC line-encoding baud rate.
+`available()` reports bytes currently in the CDC OUT packet, including a byte
+held by `peek()`. `peek()` returns the next byte without logically consuming
+it. `read()` returns the byte as an `int`, or `-1` if none is available.
+`read(buffer, count)` reads up to `count` bytes and returns the number read.
 
-Writes are not queued for later if the device is not configured or the host has
-not set a non-zero CDC line-encoding baud rate. In that state LUFA returns a
-disconnected endpoint status and sends no data.
+### Writing
+
+`write(...)` supports a single byte, RAM strings, PROGMEM strings, and RAM byte
+buffers. `write_all(...)` supports strings and buffers, using the same LUFA CDC
+stream write operation. `tx_wait()` submits the partial CDC IN packet;
+otherwise LUFA flushes it from the Start-of-Frame interrupt.
