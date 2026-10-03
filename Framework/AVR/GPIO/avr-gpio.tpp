@@ -113,8 +113,16 @@ __inline void GPIO <pin> :: toggle()
 
 }
 //------------------------------------------------------------------------------------------------
+/**
+ * @brief Configure and enable the pin's external interrupt.
+ *
+ * Clears the pending flag before enabling the line. The application defines
+ * its ISR and enables global interrupts separately.
+ *
+ * @param mode External interrupt trigger mode.
+ */
 template <class pin>
-void GPIO <pin> :: on_change(INT_callback new_callback, INT_mode mode)
+__inline void GPIO <pin> :: enable_int(INT_mode mode)
 {
     using interrupt = INT_traits_for_pin <pin>;
     static_assert(interrupt :: exists,
@@ -122,20 +130,98 @@ void GPIO <pin> :: on_change(INT_callback new_callback, INT_mode mode)
 
     if constexpr(interrupt :: exists)
     {
-        static_assert(GPIO_INT <pin> :: enabled,
-                      "External INT is not enabled for this pin (see config.h)");
-
         clr_bit(interrupt :: MASK, interrupt :: mask_bit);
-        callback = new_callback;
-        if(callback == nullptr)
-            return;
 
         uint8_t control = interrupt :: CONTROL;
         clr_bits(control, interrupt :: sense_bit_0, interrupt :: sense_bit_1);
-        control |= mode << interrupt :: sense_bit_0;
+        if(test_bit(mode, 0))
+            set_bit(control, interrupt :: sense_bit_0);
+        if(test_bit(mode, 1))
+            set_bit(control, interrupt :: sense_bit_1);
         interrupt :: CONTROL = control;
         interrupt :: FLAGS = _bit(interrupt :: flag_bit);
         set_bit(interrupt :: MASK, interrupt :: mask_bit);
+    }
+}
+//------------------------------------------------------------------------------------------------
+/** @brief Disable the pin's external interrupt without changing its GPIO mode. */
+template <class pin>
+__inline void GPIO <pin> :: disable_int()
+{
+    using interrupt = INT_traits_for_pin <pin>;
+    static_assert(interrupt :: exists,
+                  "This pin has no external INT in this MCU (see AVR/GPIO/pins/...)");
+
+    if constexpr(interrupt :: exists)
+    {
+        clr_bit(interrupt :: MASK, interrupt :: mask_bit);
+    }
+}
+//------------------------------------------------------------------------------------------------
+/**
+ * @brief Enable pin-change interrupt for this pin.
+ *
+ * Clears the group flag only when no other pin in the group is enabled.
+ * The application defines the shared ISR and enables global interrupts.
+ */
+template <class pin>
+__inline void GPIO <pin> :: enable_pcint()
+{
+    using PCINT = PCINT_traits <pin>;
+    static_assert(PCINT :: exists,
+                  "This pin has no PCINT in this MCU (see AVR/GPIO/pins/...)");
+
+    if constexpr(PCINT :: exists)
+    {
+        if(PCINT :: MASK == 0)
+            PCINT :: FLAGS = _bit(PCINT :: flag_bit);
+        set_bit(PCINT :: MASK, PCINT :: mask_bit);
+        set_bit(PCINT :: CONTROL, PCINT :: control_bit);
+    }
+}
+//------------------------------------------------------------------------------------------------
+/**
+ * @brief Claim exclusive use of the PCINT group for this pin.
+ *
+ * Disables PCINT for every other pin in the group, clears the pending flag,
+ * and enables the group.
+ * @warning Further calling enable_pcint() for another pin in this group
+ * will cancel this exclusive use.
+ */
+template <class pin>
+__inline void GPIO <pin> :: claim_pcint()
+{
+    using PCINT = PCINT_traits <pin>;
+    static_assert(PCINT :: exists,
+                  "This pin has no PCINT in this MCU (see AVR/GPIO/pins/...)");
+
+    if constexpr(PCINT :: exists)
+    {
+        PCINT :: MASK = 0;
+        set_bit(PCINT :: MASK, PCINT :: mask_bit);
+        // W1C: direct write clears only this group's flag, without RMW.
+        PCINT :: FLAGS = _bit(PCINT :: flag_bit);
+        set_bit(PCINT :: CONTROL, PCINT :: control_bit);
+    }
+}
+//------------------------------------------------------------------------------------------------
+/**
+ * @brief Disable pin-change interrupt for this pin.
+ *
+ * Disables the shared group only when its last enabled pin is removed.
+ */
+template <class pin>
+__inline void GPIO <pin> :: disable_pcint()
+{
+    using PCINT = PCINT_traits <pin>;
+    static_assert(PCINT :: exists,
+                  "This pin has no PCINT in this MCU (see AVR/GPIO/pins/...)");
+
+    if constexpr(PCINT :: exists)
+    {
+        clr_bit(PCINT :: MASK, PCINT :: mask_bit);
+        if(PCINT :: MASK == 0)
+            clr_bit(PCINT :: CONTROL, PCINT :: control_bit);
     }
 }
 //------------------------------------------------------------------------------------------------

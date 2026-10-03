@@ -30,10 +30,12 @@ DECLARE_PIN( D5,   0x12,  0x11,  0x10,  NONE,  5)
 DECLARE_PIN( D6,   0x12,  0x11,  0x10,  NONE,  6)
 DECLARE_PIN( D7,   0x12,  0x11,  0x10,  NONE,  7)
 //------------------------------------------------------------------------------------------------
-DECLARE_TIMER_OUTPUT_PIN(1, 0, B1)
-DECLARE_TIMER_OUTPUT_PIN(1, 1, B2)
-DECLARE_TIMER_OUTPUT_PIN(2, 0, B3)
+//                       pin | timer | channel
+DECLARE_TIMER_OUTPUT_PIN( B1,    1,    0)
+DECLARE_TIMER_OUTPUT_PIN( B2,    1,    1)
+DECLARE_TIMER_OUTPUT_PIN( B3,    2,    0)
 //------------------------------------------------------------------------------------------------
-DECLARE_INT_PIN(0, D2, MCUCR, ISC00, GICR, INT0, GIFR, INTF0)
-DECLARE_INT_PIN(1, D3, MCUCR, ISC10, GICR, INT1, GIFR, INTF1)
+//               pin | INT# | control | sense | mask reg | mask bit | flag reg | flag bit
+DECLARE_INT_PIN( D2,     0,   MCUCR,    ISC00,  GICR,      INT0,      GIFR,      INTF0)
+DECLARE_INT_PIN( D3,     1,   MCUCR,    ISC10,  GICR,      INT1,      GIFR,      INTF1)
 //------------------------------------------------------------------------------------------------

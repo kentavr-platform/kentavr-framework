@@ -39,7 +39,6 @@
 #include "AVR/avr-delay.h"
 #include "Services/Console/debug.h"
 #include "AVR/GPIO/avr-gpio.h"
-#include "AVR/Interrupt/avr-int.h"
 #include "AVR/Timer/avr-timer.h"
 #include "AVR/UART/avr-uart.h"
 #include "AVR/I2C/avr-i2c.h"

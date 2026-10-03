@@ -7,6 +7,7 @@
 #define AVR_GPIO_H
 //------------------------------------------------------------------------------------------------
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include "pins.h"
 //------------------------------------------------------------------------------------------------
 enum GPIO_mode
@@ -29,8 +30,6 @@ enum INT_mode
     INT_RISING
 };
 //------------------------------------------------------------------------------------------------
-using INT_callback = void (*)();
-//------------------------------------------------------------------------------------------------
 template <class pin>
 struct GPIO
 {
@@ -41,14 +40,11 @@ public:
     static void         write_low();
     static void         toggle();
     static uint8_t      read();
-    static void         on_change(INT_callback new_callback, INT_mode mode = INT_ANY_CHANGE);
-
-private:
-    static void         interrupt()  { if(callback) callback(); }
-    static inline INT_callback callback = nullptr;
-
-    template <uint8_t>
-    friend struct INT_dispatcher;
+    static inline void  enable_int(INT_mode mode = INT_ANY_CHANGE);
+    static inline void  disable_int();
+    static inline void  enable_pcint();
+    static inline void  claim_pcint();
+    static inline void  disable_pcint();
 };
 //------------------------------------------------------------------------------------------------
 // not connected (dummy) pin
@@ -61,18 +57,12 @@ struct GPIO <NC>
     static __inline void toggle() {}
     static __inline GPIO_mode get_mode() { return INPUT_OPEN; }
     static __inline uint8_t read() { return 0; }
-    static __inline void on_change(INT_callback, INT_mode = INT_ANY_CHANGE) {}
-    static __inline void interrupt() {}
+    static __inline void enable_int(INT_mode) {}
+    static __inline void disable_int() {}
+    static __inline void enable_pcint() {}
+    static __inline void claim_pcint() {}
+    static __inline void disable_pcint() {}
 };
-//------------------------------------------------------------------------------------------------
-template <class pin>
-struct GPIO_INT
-{
-    static constexpr bool enabled = false;
-};
-
-template <uint8_t N>
-struct INT_dispatcher;
 //------------------------------------------------------------------------------------------------
 SET_CONSOLE_TEMPLATE_TYPE_NAME(GPIO);
 //------------------------------------------------------------------------------------------------

@@ -41,23 +41,44 @@ struct INT_traits_for_pin
     static constexpr bool exists = false;
 };
 
-#define DECLARE_INT_PIN(N, PIN, CONTROL_REG, SENSE_BIT, MASK_REG, MASK_BIT, FLAG_REG, FLAG_BIT) \
-  template <>                                                                     \
-  struct INT_traits <N>                                                           \
-  {                                                                               \
-      using pin = PIN;                                                            \
-      static inline volatile uint8_t &CONTROL = CONTROL_REG;                      \
-      static inline volatile uint8_t &MASK = MASK_REG;                            \
-      static inline volatile uint8_t &FLAGS = FLAG_REG;                           \
-      static constexpr uint8_t sense_bit_0 = SENSE_BIT;                           \
-      static constexpr uint8_t sense_bit_1 = SENSE_BIT + 1;                       \
-      static constexpr uint8_t mask_bit = MASK_BIT;                               \
-      static constexpr uint8_t flag_bit = FLAG_BIT;                               \
-      static constexpr bool exists = true;                                        \
-  };                                                                              \
-  template <>                                                                     \
-  struct INT_traits_for_pin <PIN> : INT_traits <N>                                \
+#define DECLARE_INT_PIN(PIN, N, CONTROL_REG, SENSE_BIT, MASK_REG, MASK_BIT, FLAG_REG, FLAG_BIT) \
+  template <>                                                                                   \
+  struct INT_traits <N>                                                                         \
+  {                                                                                             \
+      using pin = PIN;                                                                          \
+      static inline volatile uint8_t &CONTROL = CONTROL_REG;                                    \
+      static inline volatile uint8_t &MASK = MASK_REG;                                          \
+      static inline volatile uint8_t &FLAGS = FLAG_REG;                                         \
+      static constexpr uint8_t sense_bit_0 = SENSE_BIT;                                         \
+      static constexpr uint8_t sense_bit_1 = SENSE_BIT + 1;                                     \
+      static constexpr uint8_t mask_bit = MASK_BIT;                                             \
+      static constexpr uint8_t flag_bit = FLAG_BIT;                                             \
+      static constexpr bool exists = true;                                                      \
+  };                                                                                            \
+  template <>                                                                                   \
+  struct INT_traits_for_pin <PIN> : INT_traits <N>                                              \
   {};
+//------------------------------------------------------------------------------------------------
+#define PCINT_VECTOR(PIN)    PCINT_VECTOR_##PIN
+//------------------------------------------------------------------------------------------------
+template <class pin>
+struct PCINT_traits
+{
+    static constexpr bool exists = false;
+};
+
+#define DECLARE_PCINT_PIN(PIN, CONTROL_REG, CONTROL_BIT, MASK_REG, MASK_BIT, FLAG_REG, FLAG_BIT) \
+  template <>                                                                                    \
+  struct PCINT_traits <PIN>                                                                      \
+  {                                                                                              \
+      static inline volatile uint8_t &CONTROL = CONTROL_REG;                                     \
+      static inline volatile uint8_t &MASK = MASK_REG;                                           \
+      static inline volatile uint8_t &FLAGS = FLAG_REG;                                          \
+      static constexpr uint8_t control_bit = CONTROL_BIT;                                        \
+      static constexpr uint8_t mask_bit = MASK_BIT;                                              \
+      static constexpr uint8_t flag_bit = FLAG_BIT;                                              \
+      static constexpr bool exists = true;                                                       \
+  };
 //------------------------------------------------------------------------------------------------
 template <uint8_t timer, uint8_t channel>
 struct Timer_output_pin
@@ -65,18 +86,21 @@ struct Timer_output_pin
     using Type = NC;
 };
 
-#define DECLARE_TIMER_OUTPUT_PIN(TIMER, CHANNEL, PIN) \
+#define DECLARE_TIMER_OUTPUT_PIN(PIN, TIMER, CHANNEL) \
   template <> struct Timer_output_pin <TIMER, CHANNEL> { using Type = PIN; };
 //------------------------------------------------------------------------------------------------
 #if defined(__AVR_ATtiny85__)
   #include "pins/pins_tiny85.h"
 #elif defined(__AVR_ATmega8__)
   #include "pins/pins_m8.h"
-#elif defined(__AVR_ATmega88__) \
-  || defined(__AVR_ATmega88P__) \
-  || defined(__AVR_ATmega328__) \
-  || defined(__AVR_ATmega328P__)
+#elif defined(__AVR_ATmega88__)
   #include "pins/pins_m88.h"
+#elif defined(__AVR_ATmega88P__)
+  #include "pins/pins_m88p.h"
+#elif defined(__AVR_ATmega328__)
+  #include "pins/pins_m328.h"
+#elif defined(__AVR_ATmega328P__)
+  #include "pins/pins_m328p.h"
 #elif defined(__AVR_ATmega32U4__)
   #include "pins/pins_m32u4.h"
 #elif defined(__AVR_ATmega1284P__)

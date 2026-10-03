@@ -35,16 +35,36 @@ DECLARE_PIN( F5,   0x11,  0x10,  0x0F,  0x0F,  5)
 DECLARE_PIN( F6,   0x11,  0x10,  0x0F,  0x0F,  6)
 DECLARE_PIN( F7,   0x11,  0x10,  0x0F,  0x0F,  7)
 //------------------------------------------------------------------------------------------------
-DECLARE_TIMER_OUTPUT_PIN(0, 0, B7)
-DECLARE_TIMER_OUTPUT_PIN(0, 1, D0)
-DECLARE_TIMER_OUTPUT_PIN(1, 0, B5)
-DECLARE_TIMER_OUTPUT_PIN(1, 1, B6)
-DECLARE_TIMER_OUTPUT_PIN(1, 2, B7)
-DECLARE_TIMER_OUTPUT_PIN(3, 0, C6)
+//                       pin | timer | channel
+DECLARE_TIMER_OUTPUT_PIN( B7,    0,    0)
+DECLARE_TIMER_OUTPUT_PIN( D0,    0,    1)
+DECLARE_TIMER_OUTPUT_PIN( B5,    1,    0)
+DECLARE_TIMER_OUTPUT_PIN( B6,    1,    1)
+DECLARE_TIMER_OUTPUT_PIN( B7,    1,    2)
+DECLARE_TIMER_OUTPUT_PIN( C6,    3,    0)
 //------------------------------------------------------------------------------------------------
-DECLARE_INT_PIN(0, D0, EICRA, ISC00, EIMSK, INT0, EIFR, INTF0)
-DECLARE_INT_PIN(1, D1, EICRA, ISC10, EIMSK, INT1, EIFR, INTF1)
-DECLARE_INT_PIN(2, D2, EICRA, ISC20, EIMSK, INT2, EIFR, INTF2)
-DECLARE_INT_PIN(3, D3, EICRA, ISC30, EIMSK, INT3, EIFR, INTF3)
-DECLARE_INT_PIN(6, E6, EICRB, ISC60, EIMSK, INT6, EIFR, INTF6)
+//               pin | INT# | control | sense | mask reg | mask bit | flag reg | flag bit
+DECLARE_INT_PIN( D0,     0,   EICRA,    ISC00,  EIMSK,     INT0,      EIFR,      INTF0)
+DECLARE_INT_PIN( D1,     1,   EICRA,    ISC10,  EIMSK,     INT1,      EIFR,      INTF1)
+DECLARE_INT_PIN( D2,     2,   EICRA,    ISC20,  EIMSK,     INT2,      EIFR,      INTF2)
+DECLARE_INT_PIN( D3,     3,   EICRA,    ISC30,  EIMSK,     INT3,      EIFR,      INTF3)
+DECLARE_INT_PIN( E6,     6,   EICRB,    ISC60,  EIMSK,     INT6,      EIFR,      INTF6)
 //------------------------------------------------------------------------------------------------
+//                pin | control | sense | mask reg | mask bit | flag reg | flag bit
+DECLARE_PCINT_PIN( B0,  PCICR,    PCIE0,  PCMSK0,    PCINT0,    PCIFR,     PCIF0)
+DECLARE_PCINT_PIN( B1,  PCICR,    PCIE0,  PCMSK0,    PCINT1,    PCIFR,     PCIF0)
+DECLARE_PCINT_PIN( B2,  PCICR,    PCIE0,  PCMSK0,    PCINT2,    PCIFR,     PCIF0)
+DECLARE_PCINT_PIN( B3,  PCICR,    PCIE0,  PCMSK0,    PCINT3,    PCIFR,     PCIF0)
+DECLARE_PCINT_PIN( B4,  PCICR,    PCIE0,  PCMSK0,    PCINT4,    PCIFR,     PCIF0)
+DECLARE_PCINT_PIN( B5,  PCICR,    PCIE0,  PCMSK0,    PCINT5,    PCIFR,     PCIF0)
+DECLARE_PCINT_PIN( B6,  PCICR,    PCIE0,  PCMSK0,    PCINT6,    PCIFR,     PCIF0)
+DECLARE_PCINT_PIN( B7,  PCICR,    PCIE0,  PCMSK0,    PCINT7,    PCIFR,     PCIF0)
+//------------------------------------------------------------------------------------------------
+#define PCINT_VECTOR_B0   PCINT0_vect
+#define PCINT_VECTOR_B1   PCINT0_vect
+#define PCINT_VECTOR_B2   PCINT0_vect
+#define PCINT_VECTOR_B3   PCINT0_vect
+#define PCINT_VECTOR_B4   PCINT0_vect
+#define PCINT_VECTOR_B5   PCINT0_vect
+#define PCINT_VECTOR_B6   PCINT0_vect
+#define PCINT_VECTOR_B7   PCINT0_vect
