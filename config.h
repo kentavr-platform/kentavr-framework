@@ -1,42 +1,11 @@
 /*------------------------------------------------------------------------------------------------
- * Project: KentAVR Framework
+ * Project:
+ * Based on KentAVR Framework (https://github.com/kentavr-platform/kentavr-framework)
  *
  * File: config.h
 //----------------------------------------------------------------------------------------------*/
 #ifndef CONFIG_H
 #define CONFIG_H
-//------------------------------------------------------------------------------------------------
-#if defined(__AVR_ATmega8__)
-FUSES =
-{
-    .low  = 0xEF,
-    .high = 0xC9
-};
-#else
-FUSES =
-{
-    .low = (0xFF
-        & FUSE_SUT0         // slow (65ms) startup
-    #if defined(INTERNAL_CLOCK_8MHZ)
-        & FUSE_CKSEL0
-        & FUSE_CKSEL2
-        & FUSE_CKSEL3
-    #elif defined(EXTERNAL_CLOCK)
-        & FUSE_CKSEL0
-        & FUSE_CKSEL1
-        & FUSE_CKSEL2
-        & FUSE_CKSEL3
-    #endif
-    ),
-    .high = (0xFF
-        & FUSE_SPIEN        // enable SPI programming
-        & FUSE_EESAVE       // preserve EEPROM from chip erase command
-    ),
-    .extended = (0xFF
-        & FUSE_BODLEVEL1
-    )
-};
-#endif
 //------------------------------------------------------------------------------------------------
 /**
     Enable settings instance and reserves EEPROM space.
@@ -73,29 +42,6 @@ FUSES =
 // ENABLE_TIMER5;
 
 //------------------------------------------------------------------------------------------------
-/**
-    Select external interrupt lines used by the application.
-
-    Enable an INTn line here before installing its callback with
-    GPIO <pin> :: on_change(). The physical GPIO pin is fixed by the selected
-    MCU. Callback storage and the interrupt vector are generated only for
-    enabled lines.
-
- ENABLE_INT0;
- ENABLE_INT1;
- ...
-                                                                                                */
-// ENABLE_INT0;
-// ENABLE_INT1;
-// ENABLE_INT2;
-// ENABLE_INT3;
-// ENABLE_INT4;
-// ENABLE_INT5;
-// ENABLE_INT6;
-// ENABLE_INT7;
-
-//------------------------------------------------------------------------------------------------
-
 /** Enable and configure hardware UARTs here
 
     All UART instances share the same driver implementation.
