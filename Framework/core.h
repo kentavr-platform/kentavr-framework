@@ -10,22 +10,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 //------------------------------------------------------------------------------------------------
-#ifdef F_CPU
-  #error ! F_CPU should not be defined directly
-#endif
-//------------------------------------------------------------------------------------------------
-#if defined(CRYSTAL_FREQ)
-  #define F_CPU             CRYSTAL_FREQ        // external crystal or ceramic resonator
-#elif defined(EXTERNAL_CLOCK)
-  #define F_CPU             EXTERNAL_CLOCK      // external clock source
-#elif defined(INTERNAL_CLOCK_8MHZ)
-  #define F_CPU             8000000UL           // internal RC clock generator
-#else
-  #error ! Define CRYSTAL_FREQ=, EXTERNAL_CLOCK= or INTERNAL_CLOCK_8MHZ
-  #define F_CPU
-#endif
-//------------------------------------------------------------------------------------------------
 // core modules
+#include "Core/oscillator.h"
 #include "Core/macro.h"
 #include "Core/errors.h"
 #include "Core/type_traits.h"
@@ -42,13 +28,17 @@
 #include "AVR/Timer/avr-timer.h"
 #include "AVR/UART/avr-uart.h"
 #include "AVR/I2C/avr-i2c.h"
-#include "AVR/EEPROM/avr-eeprom.h"
-#include "Interfaces/Serial/serial-bit-out.h"
+#include "AVR/USB/avr-usb.h"
 
+
+
+#include "AVR/EEPROM/avr-eeprom.h"
+#include "Services/Settings/settings.h"
 
 // interfaces
-#include "Services/Settings/settings.h"
 #include "Interfaces/OneWire/one-wire.h"
+#include "Interfaces/Serial/serial-bit-out.h"
+#include "Interfaces/SerialUSB/serial-usb.h"
 
 // external drivers
 #include "Devices/LED/led.h"
