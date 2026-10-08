@@ -1,15 +1,21 @@
-//------------------------------------------------------------------------------------------------
-#include "core.h"
+/*------------------------------------------------------------------------------------------------
+ * Project:
+ *
+ * Based on KentAVR Framework (https://github.com/kentavr-platform/kentavr-framework)
+ *
+ * File: main.cpp
+//----------------------------------------------------------------------------------------------*/
+#include "KentAVR/core.h"
 #include "config.h"
 //------------------------------------------------------------------------------------------------
-/*  // Several useful global objects
 #ifdef DEBUG
-    SerialBitOut <D1, 2000000> debug;
-    Console console(debug);
+    // static SerialBitOut <B4, 1000000> debug; Console console(debug);
+    // static UART0 uart;                       Console console(uart);
+    // static SerialUSB usb;                    Console console(usb);
 #else
     Console console;    // a black-hole object with no output and zero runtime overhead
 #endif
-*/
+
 //------------------------------------------------------------------------------------------------
 void early_init()
 {
@@ -23,12 +29,19 @@ void early_init()
 //------------------------------------------------------------------------------------------------
 int main()
 {
-    // Initialization and setup
+    // uart.init();
+    // usb.init();
+
+
+    // enable_interrupts();
+
+    // console.log("== RESET ==");
+
 
     while(1)
     {
         // main loop
-
+        
     }
 
     return 0;

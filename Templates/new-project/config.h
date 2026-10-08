@@ -1,5 +1,6 @@
 /*------------------------------------------------------------------------------------------------
  * Project:
+ *
  * Based on KentAVR Framework (https://github.com/kentavr-platform/kentavr-framework)
  *
  * File: config.h
@@ -29,10 +30,6 @@
 
     Enable a timer here before using TimerN in application code. The timer still
     has to be configured and started explicitly where it is used.
-
- ENABLE_TIMER0;
- ENABLE_TIMER1;
- ...
                                                                                                 */
 // ENABLE_TIMER0;
 // ENABLE_TIMER1;
@@ -68,7 +65,6 @@
 // ENABLE_UART2(0, 128);
 // ENABLE_UART3(0, 128);
 
-
 //------------------------------------------------------------------------------------------------
 /**
     Enable and configure I2C busses here
@@ -77,5 +73,6 @@
                                                                                                 */
 // ENABLE_I2C0(32);
 // ENABLE_I2C1(32);
+
 //------------------------------------------------------------------------------------------------
 #endif
