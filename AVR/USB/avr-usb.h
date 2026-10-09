@@ -6,7 +6,10 @@
 #ifndef AVR_USB_H
 #define AVR_USB_H
 //------------------------------------------------------------------------------------------------
-#include "avr-usb-config.h"
-#include "LUFA/Drivers/USB/USB.h"
+#if defined(USB_COM_vect)
+  #define HW_USB_SUPPORTED
+  #include "avr-usb-config.h"
+  #include "LUFA/Drivers/USB/USB.h"
+#endif
 //------------------------------------------------------------------------------------------------
 #endif
