@@ -7,6 +7,7 @@
 #include "serial-usb.h"
 #include "serial-usb-config.h"
 //------------------------------------------------------------------------------------------------
+#ifdef ENABLE_USB
 #define SERIAL_USB_CONTROL_INTERFACE       0
 #define SERIAL_USB_DATA_INTERFACE          1
 #define SERIAL_USB_NOTIFICATION_ENDPOINT   (ENDPOINT_DIR_IN  | 1)
@@ -396,3 +397,5 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t value,
     return descriptor_size;
 }
 //------------------------------------------------------------------------------------------------
+#endif // ENABLE_USB
+
