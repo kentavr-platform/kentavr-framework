@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Project" />
+		<Option title="KentAVR" />
 		<Option pch_mode="2" />
 		<Option compiler="avr-gcc" />
 		<Build>
@@ -1117,7 +1117,11 @@
 		<Unit filename="KentAVR/Interfaces/Serial/serial-bit-out.h" />
 		<Unit filename="KentAVR/Interfaces/Serial/serial-bit-out.tpp" />
 		<Unit filename="KentAVR/Interfaces/SerialUSB/serial-usb-config.h" />
-		<Unit filename="KentAVR/Interfaces/SerialUSB/serial-usb.cpp" />
+		<Unit filename="KentAVR/Interfaces/SerialUSB/serial-usb.cpp">
+			<Option target="ATmega32u4" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Pro Micro" />
+		</Unit>
 		<Unit filename="KentAVR/Interfaces/SerialUSB/serial-usb.h" />
 		<Unit filename="KentAVR/Services/Console/console.h" />
 		<Unit filename="KentAVR/Services/Console/console.tpp" />
