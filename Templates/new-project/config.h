@@ -75,4 +75,27 @@
 // ENABLE_I2C1(32);
 
 //------------------------------------------------------------------------------------------------
+/**
+    Enable and configure hardware SPI peripherals here.
+    Feel free to uncomment and modify the following lines to enable hardware SPI.
+
+ ENABLE_SPIx(
+              TX_BUF_SIZE,  -- size in bytes of the internal transmit buffer (required)
+             )
+
+ ENABLE_USART_SPIx(
+                    TX_BUF_SIZE,  -- size in bytes of the internal transmit buffer (required)
+                   )
+
+    Each enabled SPI instance reserves TX_BUF_SIZE bytes of RAM.
+    USART_SPI uses USART N in master SPI mode; do not enable UART N at the same time.
+                                                                                                */
+// ENABLE_SPI0(32);
+// ENABLE_SPI1(32);
+
+// ENABLE_USART_SPI0(32);
+// ENABLE_USART_SPI1(32);
+// ENABLE_USART_SPI2(32);
+// ENABLE_USART_SPI3(32);
+//------------------------------------------------------------------------------------------------
 #endif
