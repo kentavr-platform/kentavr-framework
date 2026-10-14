@@ -294,7 +294,7 @@ __inline ResultCode TWI <N, TX_BUF_SIZE> :: send(uint8_t address,
     if(busy)
         return ERR_BUSY;
 
-    if(!data || !size)
+    if(!data || !size || size > TX_BUF_SIZE)
         return ERR_BAD_PARAMETER;
 
     busy = true;
@@ -302,24 +302,17 @@ __inline ResultCode TWI <N, TX_BUF_SIZE> :: send(uint8_t address,
     master.index = 0;
     master.size = size;
     master.tries_left = max_tries;
+    master.callback = callback;
     if(callback)
     {
         // non-blocking mode
-        if(size > TX_BUF_SIZE)
-        {
-            busy = false;
-            return ERR_BAD_PARAMETER;
-        }
         memcpy(tx_buf, data, size);
         master.buf = tx_buf;
-        master.callback = callback;
         _start();
         return OK;
     }
-    else
-    {
-        master.callback = nullptr;      // clear potentiall previous callback
-    }
+
+    // blocking mode
     master.buf = (uint8_t*) data;
     _start();
     wait();
@@ -387,10 +380,9 @@ __inline ResultCode TWI <N, TX_BUF_SIZE> :: receive(uint8_t address,
         _start();
         return OK;
     }
-    else
-    {
-        master.callback = nullptr;      // clear potentiall previous callback
-    }
+
+    // blocking mode
+    master.callback = nullptr;      // clear potentiall previous callback
     _start();
     wait();
     return master.result;
