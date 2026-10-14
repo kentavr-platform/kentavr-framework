@@ -101,6 +101,15 @@ DECLARE_PIN( L5,   0xEB,  0xEA,  0xE9,  0xE9,  5)
 DECLARE_PIN( L6,   0xEB,  0xEA,  0xE9,  0xE9,  6)
 DECLARE_PIN( L7,   0xEB,  0xEA,  0xE9,  0xE9,  7)
 //------------------------------------------------------------------------------------------------
+//                N | MOSI | MISO | SCK | SS
+DECLARE_SPI_PINS( 0,  B2,    B3,    B1,   B0)
+//------------------------------------------------------------------------------------------------
+//                      N | MOSI | MISO | SCK
+DECLARE_USART_SPI_PINS( 0,  E1,    E0,    E2)
+DECLARE_USART_SPI_PINS( 1,  D3,    D2,    D5)
+DECLARE_USART_SPI_PINS( 2,  H1,    H0,    H2)
+DECLARE_USART_SPI_PINS( 3,  J1,    J0,    J2)
+//------------------------------------------------------------------------------------------------
 //                       pin | timer | channel
 DECLARE_TIMER_OUTPUT_PIN( B7,    0,    0)
 DECLARE_TIMER_OUTPUT_PIN( G5,    0,    1)

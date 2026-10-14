@@ -40,6 +40,13 @@ DECLARE_PIN( D5,   0x0B,  0x0A,  0x09,  0x09,  5)
 DECLARE_PIN( D6,   0x0B,  0x0A,  0x09,  0x09,  6)
 DECLARE_PIN( D7,   0x0B,  0x0A,  0x09,  0x09,  7)
 //------------------------------------------------------------------------------------------------
+//                N | MOSI | MISO | SCK | SS
+DECLARE_SPI_PINS( 0,  B5,    B6,    B7,   B4)
+//------------------------------------------------------------------------------------------------
+//                      N | MOSI | MISO | SCK
+DECLARE_USART_SPI_PINS( 0,  D1,    D0,    B0)
+DECLARE_USART_SPI_PINS( 1,  D3,    D2,    D4)
+//------------------------------------------------------------------------------------------------
 //                       pin | timer | channel
 DECLARE_TIMER_OUTPUT_PIN( B3,    0,    0)
 DECLARE_TIMER_OUTPUT_PIN( B4,    0,    1)

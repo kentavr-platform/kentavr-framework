@@ -28,6 +28,44 @@ struct NC {};       // Not Connected "pin"
 //------------------------------------------------------------------------------------------------
 #define DECLARE_PIN(ID, PORT, DDR, PIN, TGL, BIT) struct ID : pin <PORT, DDR, PIN, TGL, BIT> {};
 //------------------------------------------------------------------------------------------------
+// Physical signals for the hardware SPI peripheral N: MOSI, MISO, SCK, SS.
+template <uint8_t N>
+struct SPI_pins
+{
+    using MOSI = NC;
+    using MISO = NC;
+    using SCK  = NC;
+    using SS   = NC;
+};
+
+#define DECLARE_SPI_PINS(N, _MOSI, _MISO, _SCK, _SS)    \
+  template <>                                           \
+  struct SPI_pins <N>                                   \
+  {                                                     \
+      using MOSI = _MOSI;                               \
+      using MISO = _MISO;                               \
+      using SCK  = _SCK;                                \
+      using SS   = _SS;                                 \
+  };
+//------------------------------------------------------------------------------------------------
+// USART pins used in master SPI mode: MOSI (TXD), MISO (RXD), and SCK (XCK).
+template <uint8_t N>
+struct USART_SPI_pins
+{
+    using MOSI = NC;
+    using MISO = NC;
+    using SCK  = NC;
+};
+
+#define DECLARE_USART_SPI_PINS(N, _MOSI, _MISO, _SCK)   \
+  template <>                                           \
+  struct USART_SPI_pins <N>                             \
+  {                                                     \
+      using MOSI = _MOSI;                               \
+      using MISO = _MISO;                               \
+      using SCK  = _SCK;                                \
+  };
+//------------------------------------------------------------------------------------------------
 template <uint8_t N>
 struct INT_traits
 {
@@ -86,8 +124,12 @@ struct Timer_output_pin
     using Type = NC;
 };
 
-#define DECLARE_TIMER_OUTPUT_PIN(PIN, TIMER, CHANNEL) \
-  template <> struct Timer_output_pin <TIMER, CHANNEL> { using Type = PIN; };
+#define DECLARE_TIMER_OUTPUT_PIN(PIN, TIMER, CHANNEL)   \
+  template <>                                           \
+  struct Timer_output_pin <TIMER, CHANNEL>              \
+  {                                                     \
+      using Type = PIN;                                 \
+  };
 //------------------------------------------------------------------------------------------------
 #if defined(__AVR_ATtiny85__)
   #include "pins/pins_tiny85.h"

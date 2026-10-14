@@ -8,6 +8,8 @@
 //------------------------------------------------------------------------------------------------
 #include "Core/oscillator.h"
 //------------------------------------------------------------------------------------------------
+//#define ENABLE_USB        // comment this line to exclude entire USB code from the build
+//------------------------------------------------------------------------------------------------
 #define ARCH              ARCH_AVR8
 #define USB_DEVICE_ONLY   // no other device drivers from LUFA library
 #define F_USB             F_CPU

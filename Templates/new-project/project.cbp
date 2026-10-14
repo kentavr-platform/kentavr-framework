@@ -240,6 +240,7 @@
 			<Add option="-Wno-unused-parameter" />
 			<Add option="-DDEBUG" />
 			<Add directory="KentAVR" />
+			<Add directory="." />
 		</Compiler>
 		<Linker>
 			<Add option="-mmcu=$(MCU)" />
@@ -291,6 +292,13 @@
 		<Unit filename="KentAVR/AVR/I2C/avr-i2c-regs.h" />
 		<Unit filename="KentAVR/AVR/I2C/avr-i2c.h" />
 		<Unit filename="KentAVR/AVR/I2C/avr-i2c.tpp" />
+		<Unit filename="KentAVR/AVR/SPI/avr-spi-common.h" />
+		<Unit filename="KentAVR/AVR/SPI/avr-spi-regs.h" />
+		<Unit filename="KentAVR/AVR/SPI/avr-spi.h" />
+		<Unit filename="KentAVR/AVR/SPI/avr-spi.tpp" />
+		<Unit filename="KentAVR/AVR/SPI/avr-usart-spi-regs.h" />
+		<Unit filename="KentAVR/AVR/SPI/avr-usart-spi.h" />
+		<Unit filename="KentAVR/AVR/SPI/avr-usart-spi.tpp" />
 		<Unit filename="KentAVR/AVR/Timer/avr-timer-isr.h" />
 		<Unit filename="KentAVR/AVR/Timer/avr-timer-regs.h" />
 		<Unit filename="KentAVR/AVR/Timer/avr-timer.h" />
@@ -1080,6 +1088,7 @@
 		<Unit filename="KentAVR/AVR/USB/avr-usb.h" />
 		<Unit filename="KentAVR/AVR/avr-delay.h" />
 		<Unit filename="KentAVR/AVR/avr-macro.h" />
+		<Unit filename="KentAVR/AVR/avr-mcu.h" />
 		<Unit filename="KentAVR/Core/bcd.h" />
 		<Unit filename="KentAVR/Core/errors.h" />
 		<Unit filename="KentAVR/Core/format.h" />
@@ -1112,6 +1121,8 @@
 		<Unit filename="KentAVR/Devices/Sensors/DS18S20/DS18S20.h" />
 		<Unit filename="KentAVR/Devices/Servo/servo.h" />
 		<Unit filename="KentAVR/Devices/Servo/servo.tpp" />
+		<Unit filename="KentAVR/Interfaces/AVR-ISP/avr-isp.h" />
+		<Unit filename="KentAVR/Interfaces/AVR-ISP/avr-isp.tpp" />
 		<Unit filename="KentAVR/Interfaces/OneWire/one-wire.h" />
 		<Unit filename="KentAVR/Interfaces/OneWire/one-wire.tpp" />
 		<Unit filename="KentAVR/Interfaces/Serial/serial-bit-out.h" />
@@ -1128,6 +1139,7 @@
 		<Unit filename="KentAVR/Services/Console/debug.h" />
 		<Unit filename="KentAVR/Services/Settings/settings.h" />
 		<Unit filename="KentAVR/Services/Settings/settings.tpp" />
+		<Unit filename="KentAVR/core.c" />
 		<Unit filename="KentAVR/core.h" />
 		<Unit filename="config.h" />
 		<Unit filename="main.cpp" />
