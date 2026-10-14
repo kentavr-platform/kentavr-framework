@@ -43,4 +43,13 @@ DECLARE_PIN( F2,   0x15,  0x14,  0x16,  0x04A7,  2)
 DECLARE_PIN( F3,   0x15,  0x14,  0x16,  0x04A7,  3)
 DECLARE_PIN( F4,   0x15,  0x14,  0x16,  0x04A7,  4)
 DECLARE_PIN( F5,   0x15,  0x14,  0x16,  0x04A7,  5)
+//                N | MOSI | MISO | SCK | SS
+DECLARE_SPI_PINS( 0,  A4,    A5,    A6,   A7)
+DECLARE_SPI_PINS( 1,  C0,    C1,    C2,   C3)
+//------------------------------------------------------------------------------------------------
+//                      N | MOSI | MISO | SCK
+DECLARE_USART_SPI_PINS( 0,  A0,    A1,    A2)
+DECLARE_USART_SPI_PINS( 1,  C0,    C1,    C2)
+DECLARE_USART_SPI_PINS( 2,  F0,    F1,    F2)
+DECLARE_USART_SPI_PINS( 3,  B0,    B1,    B2)
 //------------------------------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 #define CORE_H
 //------------------------------------------------------------------------------------------------
 #include <stdint.h>
-#include <avr/io.h>
+#include "AVR/avr-mcu.h"
 #include <avr/interrupt.h>
 //------------------------------------------------------------------------------------------------
 // core modules
@@ -29,6 +29,8 @@
 #include "AVR/Timer/avr-timer.h"
 #include "AVR/UART/avr-uart.h"
 #include "AVR/I2C/avr-i2c.h"
+#include "AVR/SPI/avr-spi.h"
+#include "AVR/SPI/avr-usart-spi.h"
 #include "AVR/USB/avr-usb.h"
 
 
@@ -40,6 +42,7 @@
 #include "Interfaces/OneWire/one-wire.h"
 #include "Interfaces/Serial/serial-bit-out.h"
 #include "Interfaces/SerialUSB/serial-usb.h"
+#include "Interfaces/AVR-ISP/avr-isp.h"
 
 // external drivers
 #include "Devices/LED/led.h"
