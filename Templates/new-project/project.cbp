@@ -1140,6 +1140,7 @@
 		<Unit filename="KentAVR/Services/Settings/settings.h" />
 		<Unit filename="KentAVR/Services/Settings/settings.tpp" />
 		<Unit filename="KentAVR/core.c" />
+		<Unit filename="KentAVR/Core/isr.cpp" />
 		<Unit filename="KentAVR/core.h" />
 		<Unit filename="config.h" />
 		<Unit filename="main.cpp" />

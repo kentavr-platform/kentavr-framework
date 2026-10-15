@@ -59,9 +59,15 @@ private:
   #define SPI0_INT_vect  SPI_STC_vect
 #endif
 
+#ifdef ISR_HANDLERS_MODULE
+  #define _SETUP_SPI_ISR(VECT, N) ISR(VECT) { SPI_dispatcher <SPI##N> :: interrupt(); }
+#else
+  #define _SETUP_SPI_ISR(VECT, N)
+#endif
+
 #define _ENABLE_SPI(N, TX_BUF_SIZE)                                                         \
   using SPI##N = SPI <N, TX_BUF_SIZE>;                                                      \
-  ISR(SPI##N##_INT_vect) { SPI_dispatcher <SPI##N> :: interrupt(); }
+  _SETUP_SPI_ISR(SPI##N##_INT_vect, N)
 
 #if defined(SPI0_SUPPORTED)
   #define ENABLE_SPI0(TX_BUF_SIZE) _ENABLE_SPI(0, TX_BUF_SIZE)
