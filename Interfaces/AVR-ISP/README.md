@@ -55,7 +55,8 @@ isp.leave_programming_mode();
 `init()` configures the SPI master in mode 0, MSB first, and releases target
 RESET. `enter_programming_mode()` asserts RESET and sends the programming-enable
 instruction. Call it before accessing the target. `leave_programming_mode()`
-releases RESET.
+releases RESET. Call `forget_target()` before using the same driver instance
+with a different target.
 
 
 ### Target operations
@@ -73,7 +74,8 @@ The API also provides `write_fuse()`, `write_eeprom()`, `chip_erase()`, and
 `command()` for a raw four-byte ISP instruction. `chip_erase()` resets the
 target and re-enters programming mode after the erase.
 
-`read_flash()` and `read_eeprom()` use byte addresses. `write_flash_page()`
+`read_flash()` and `read_eeprom()` use byte addresses. Flash reads fetch each
+word's low and high bytes in one continuous SPI transfer. `write_flash_page()`
 writes one complete page; `address` must be page-aligned and `page_size` must
 be the target's actual power-of-two page size in bytes. Erase the target before
 writing Flash when required by its existing contents.
@@ -100,8 +102,14 @@ signal is driven by `RST_PIN`; it is separate from the SPI peripheral's SS pin.
  - ISP operations use blocking, interrupt-driven SPI transfers. Global
    interrupts must be enabled; do not call these methods from an ISR.
  - Reserve the selected SPI peripheral for the entire programming session.
- - The driver uses fixed 20 ms waits after Flash, EEPROM, and fuse writes and
-   chip erase. Target programming times must fit within those waits.
+ - Flash and EEPROM writes use the ISP `RDY/BSY` command (`F0 00 00 00`) for
+   recognized classic megaAVR and tinyAVR targets. Recognition uses the full
+   three-byte signature; unknown signatures retain the fixed 20 ms wait. This
+   includes ATmega16/32/64/128, ATmega164/324/644/1284, ATmega48/88/168/328,
+   ATmega640/1280/1281/2560/2561, USB and CAN variants, and the listed classic
+   tinyAVR ISP families. Devices without the documented `0xF0` instruction,
+   such as ATmega8/A, keep the fixed wait. Fuse and chip-erase operations also
+   retain the fixed 20 ms wait.
 
 `command()` requires four-byte command and response buffers. Operations that
 access the target return `ERR_BAD_MODE` until programming mode has been entered.
