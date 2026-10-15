@@ -134,6 +134,7 @@ private:
     static volatile uint8_t  rx_errors;
     static volatile uint8_t  tx_errors;
     using           regs = USART_traits <N>;
+    using           pins = UART_pins <N>;
 
     template <class>
     friend struct UART_dispatcher;

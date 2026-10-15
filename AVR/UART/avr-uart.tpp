@@ -169,6 +169,7 @@ __inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _configure(uint32_t ra
     }
     flush_rx();
     flush_tx();
+    GPIO <typename pins :: RX_PIN> :: set_mode(INPUT_PULLUP);
     enable();
     return OK;
 }
