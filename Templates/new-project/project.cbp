@@ -1092,7 +1092,9 @@
 		<Unit filename="KentAVR/Core/bcd.h" />
 		<Unit filename="KentAVR/Core/errors.h" />
 		<Unit filename="KentAVR/Core/format.h" />
-		<Unit filename="KentAVR/Core/fuses.h" />
+		<Unit filename="KentAVR/Core/fuses.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="KentAVR/Core/macro.h" />
 		<Unit filename="KentAVR/Core/nostream.h" />
 		<Unit filename="KentAVR/Core/oscillator.h" />
@@ -1139,7 +1141,9 @@
 		<Unit filename="KentAVR/Services/Console/debug.h" />
 		<Unit filename="KentAVR/Services/Settings/settings.h" />
 		<Unit filename="KentAVR/Services/Settings/settings.tpp" />
-		<Unit filename="KentAVR/core.c" />
+		<Unit filename="KentAVR/Core/startup.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="KentAVR/Core/isr.cpp" />
 		<Unit filename="KentAVR/core.h" />
 		<Unit filename="config.h" />

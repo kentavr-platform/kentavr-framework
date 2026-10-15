@@ -11,7 +11,6 @@
 #include <avr/interrupt.h>
 //------------------------------------------------------------------------------------------------
 // core modules
-#include "Core/fuses.h"
 #include "Core/oscillator.h"
 #include "Core/macro.h"
 #include "Core/errors.h"
