@@ -80,8 +80,11 @@ private:
     friend struct SPI_dispatcher;
 };
 //------------------------------------------------------------------------------------------------
-#define _SETUP_USART_SPI_ISR(VECT, N)                                            \
-  ISR(VECT) { SPI_dispatcher <USART_SPI##N> :: interrupt(); }
+#ifdef ISR_HANDLERS_MODULE
+  #define _SETUP_USART_SPI_ISR(VECT, N) ISR(VECT) { SPI_dispatcher <USART_SPI##N> :: interrupt(); }
+#else
+  #define _SETUP_USART_SPI_ISR(VECT, N)
+#endif
 
 #if defined(USART_SPI0_SUPPORTED) && defined(USART0_TXC_vect)
   #define _ENABLE_USART_SPI_ISR_0() _SETUP_USART_SPI_ISR(USART0_TXC_vect, 0)

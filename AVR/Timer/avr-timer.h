@@ -178,11 +178,18 @@ struct Timer_dispatcher
   using Timer##N = Timer <N>;           \
   static_assert(Timer_regs <N> :: exists, "Timer" #N " does not exist in this MCU");
 
+#ifdef ISR_HANDLERS_MODULE
+  #define _ENABLE_TIMER_ISRS(N)         \
+    _ENABLE_TIMER##N##_OVF_ISR          \
+    _ENABLE_TIMER_COMPARE_ISR(N)        \
+    _ENABLE_TIMER##N##_CAPTURE_ISR
+#else
+  #define _ENABLE_TIMER_ISRS(N)
+#endif
+
 #define _ENABLE_TIMER(N)                \
   _DECLARE_TIMER_TYPE(N)                \
-  _ENABLE_TIMER##N##_OVF_ISR            \
-  _ENABLE_TIMER_COMPARE_ISR(N)          \
-  _ENABLE_TIMER##N##_CAPTURE_ISR
+  _ENABLE_TIMER_ISRS(N)
 
 #define ENABLE_TIMER0 _ENABLE_TIMER(0)
 #define ENABLE_TIMER1 _ENABLE_TIMER(1)

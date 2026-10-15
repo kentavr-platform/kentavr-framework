@@ -202,11 +202,18 @@ struct UART_dispatcher
 #define _ENABLE_UART_TX_ISR_128(N)              _SETUP_UART_TX_ISR(N)
 #define _ENABLE_UART_TX_ISR_256(N)              _SETUP_UART_TX_ISR(N)
 
+#if defined(ISR_HANDLERS_MODULE)
+  #define _ENABLE_UART_ISRS(N, RX_BUF_SIZE, TX_BUF_SIZE)    \
+    _ENABLE_UART_RX_ISR(N, RX_BUF_SIZE)                     \
+    _ENABLE_UART_TX_ISR(N, TX_BUF_SIZE)
+#else
+  #define _ENABLE_UART_ISRS(N, RX_BUF_SIZE, TX_BUF_SIZE)
+#endif
+
 // main ENABLE_UART() macro
 #define _ENABLE_UART(N, RX_BUF_SIZE, TX_BUF_SIZE)                                         \
   using UART##N = UART <N, RX_BUF_SIZE, TX_BUF_SIZE>;                                     \
-  _ENABLE_UART_RX_ISR(N, RX_BUF_SIZE)                                                     \
-  _ENABLE_UART_TX_ISR(N, TX_BUF_SIZE)
+  _ENABLE_UART_ISRS(N, RX_BUF_SIZE, TX_BUF_SIZE)
 
 #if defined(UART0_SUPPORTED)
   #define ENABLE_UART0(RX_BUF_SIZE, TX_BUF_SIZE) _ENABLE_UART(0, RX_BUF_SIZE, TX_BUF_SIZE)
