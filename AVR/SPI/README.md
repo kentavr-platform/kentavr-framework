@@ -81,9 +81,10 @@ SPI0 :: receive(rx, sizeof(rx));       // transmits 0xFF while receiving
 SPI0 :: duplex(tx, rx, sizeof(tx));
 ```
 
-Blocking transfers read TX data directly from the caller's buffer. TX and RX
-buffers must remain valid until the call returns. Global interrupts must be
-enabled, and blocking transfers must not be called from an ISR.
+Blocking transfers poll the SPI peripheral. They read TX data directly from
+the caller's buffer, and TX and RX buffers must remain valid until the call
+returns. Blocking transfers do not depend on the SPI interrupt and must not be
+called from an ISR. Non-blocking transfers require global interrupts.
 
 
 ### Non-blocking transfers

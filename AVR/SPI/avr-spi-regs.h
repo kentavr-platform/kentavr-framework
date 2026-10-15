@@ -51,6 +51,7 @@ struct SPI_traits <N>                                           \
     static constexpr uint8_t PRESCALE         = _PRESCALE;      \
     static constexpr uint8_t DOUBLE           = _DOUBLE;        \
     static constexpr uint8_t INTERRUPT        = _INTERRUPT;     \
+    static constexpr uint8_t TRANSFER_COMPLETE = SPIF;          \
     SPI_POWER_CONTROL_REGS                                      \
 };
 //------------------------------------------------------------------------------------------------
@@ -70,6 +71,7 @@ struct SPI_traits <N>                                           \
     static constexpr uint8_t PRESCALE         = SPI_PRESC_0_bp; \
     static constexpr uint8_t DOUBLE           = SPI_CLK2X_bp;   \
     static constexpr uint8_t INTERRUPT        = SPI_IE_bp;      \
+    static constexpr uint8_t TRANSFER_COMPLETE = SPI_IF_bp;     \
     static constexpr uint8_t SS_DISABLE       = SPI_SSD_bp;     \
     SPI_POWER_CONTROL_REGS                                      \
 };

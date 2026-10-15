@@ -47,6 +47,7 @@ private:
                                   bool master, uint8_t prescaler, bool double_speed);
     static ResultCode   transfer(const uint8_t *tx, uint8_t *data, uint16_t size,
                                  void (*callback)(ResultCode));
+    static ResultCode   polling_transfer(const uint8_t *tx, uint8_t *rx, uint16_t size);
     static void         _start();
     static void         complete(ResultCode result);
     static void         interrupt();
