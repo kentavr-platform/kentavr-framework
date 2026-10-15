@@ -1147,6 +1147,7 @@
 		<Unit filename="KentAVR/Core/isr.cpp" />
 		<Unit filename="KentAVR/core.h" />
 		<Unit filename="config.h" />
+		<Unit filename="usb-config.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
