@@ -53,10 +53,15 @@ isp.leave_programming_mode();
 ```
 
 `init()` configures the SPI master in mode 0, MSB first, and releases target
-RESET. `enter_programming_mode()` asserts RESET and sends the programming-enable
-instruction. Call it before accessing the target. `leave_programming_mode()`
-releases RESET. Call `forget_target()` before using the same driver instance
-with a different target.
+RESET. If the requested rate is below the selected peripheral's minimum,
+`LowSpeedSPI` bit-bangs the same MOSI, MISO, and SCK pins in mode 0. The
+requested frequency is an upper bound; GPIO and interrupt overhead can make
+the actual low-speed clock slower. `enter_programming_mode()` asserts RESET
+and sends the programming-enable instruction. Call it before accessing the
+target. `leave_programming_mode()` releases RESET and, when `LowSpeedSPI` is
+active, returns MOSI, MISO, and SCK to high-impedance inputs. A later call to
+`enter_programming_mode()` claims those pins again. Call `forget_target()` before
+using the same driver instance with a different target.
 
 
 ### Target operations
@@ -97,10 +102,12 @@ signal is driven by `RST_PIN`; it is separate from the SPI peripheral's SS pin.
 
 ### Timing and requirements
 
- - Choose an SCK frequency allowed by the target and the selected peripheral.
-   The peripheral selects a supported rate no higher than the requested rate.
- - ISP operations use blocking, interrupt-driven SPI transfers. Global
-   interrupts must be enabled; do not call these methods from an ISR.
+ - Choose an SCK frequency allowed by the target. The hardware peripheral
+   selects a supported rate no higher than the requested rate; lower requests
+   use `LowSpeedSPI` GPIO transfers.
+ - ISP operations are blocking. Do not call them from an ISR. Hardware SPI
+   polling and `LowSpeedSPI` do not require enabled interrupts, though an ISR
+   can stretch low-speed SCK periods.
  - Reserve the selected SPI peripheral for the entire programming session.
  - Flash and EEPROM writes use the ISP `RDY/BSY` command (`F0 00 00 00`) for
    recognized classic megaAVR and tinyAVR targets. Recognition uses the full

@@ -40,6 +40,12 @@ template <uint8_t N, uint16_t TX_BUF_SIZE>
 class USART_SPI
 {
 public:
+    using pins = USART_SPI_pins <N>;
+    static constexpr uint32_t min_master_frequency =
+        USART_SPI_traits <N> :: max_divider
+            ? (F_CPU - 1UL) / (2UL * USART_SPI_traits <N> :: max_divider) + 1UL
+            : 0;
+
     static ResultCode   init_master(uint32_t frequency,
                                     SPI_Clock_Mode clock_mode = SPI_CLOCK_MODE_0,
                                     SPI_Bit_Order bit_order = SPI_MSB_FIRST);
@@ -56,7 +62,6 @@ public:
                                void (*callback)(ResultCode result) = nullptr);
 private:
     using regs = USART_SPI_traits <N>;
-    using pins = USART_SPI_pins <N>;
     static inline volatile SPI_Mode mode = SPI_DISABLED;
     static inline volatile bool busy = false;
     static inline uint8_t tx_buf[TX_BUF_SIZE];

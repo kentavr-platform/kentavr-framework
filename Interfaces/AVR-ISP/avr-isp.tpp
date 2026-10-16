@@ -3,6 +3,79 @@
  * File: avr-isp.tpp
  * Included from avr-isp.h; do not compile separately.
 //----------------------------------------------------------------------------------------------*/
+/** Configure GPIO timing for a low-speed, mode 0, MSB-first ISP transfer. */
+template <class SPI, class RST_PIN>
+void AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: init(uint32_t frequency)
+{
+    const uint32_t half_period_us = (500000UL + frequency - 1UL) / frequency;
+    // Scope calibration: about 2 us fixed overhead and 25% per-loop overhead.
+    delay_microseconds = (half_period_us - 2UL) * 3UL / 4UL;
+    enable();
+}
+//------------------------------------------------------------------------------------------------
+/** Claim the SPI pins for software transfers. */
+template <class SPI, class RST_PIN>
+void AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: enable()
+{
+    GPIO <typename pins :: MOSI> :: set_mode(OUTPUT_LOW);
+    GPIO <typename pins :: MISO> :: set_mode(INPUT_OPEN);
+    GPIO <typename pins :: SCK>  :: set_mode(OUTPUT_LOW);
+}
+//------------------------------------------------------------------------------------------------
+/** Release the SPI pins to their high-impedance input state. */
+template <class SPI, class RST_PIN>
+void AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: disable()
+{
+    GPIO <typename pins :: MOSI> :: set_mode(INPUT_OPEN);
+    GPIO <typename pins :: MISO> :: set_mode(INPUT_OPEN);
+    GPIO <typename pins :: SCK>  :: set_mode(INPUT_OPEN);
+}
+//------------------------------------------------------------------------------------------------
+/** Wait at least one requested half-period; loop overhead can slow SCK further. */
+template <class SPI, class RST_PIN>
+void AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: delay_half_period()
+{
+    for(uint32_t us = delay_microseconds; us; --us)
+    {
+        udelay(1);
+    }
+}
+//------------------------------------------------------------------------------------------------
+/** Transfer bytes by bit-banging the SPI pins in mode 0, MSB first. */
+template <class SPI, class RST_PIN>
+ResultCode AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: duplex(const uint8_t *tx, uint8_t *rx,
+                                                            uint16_t size)
+{
+    if(!size || (!tx && !rx))
+        return ERR_BAD_PARAMETER;
+
+    for(uint16_t i = 0; i < size; ++i)
+    {
+        uint8_t tx_byte = tx ? tx[i] : 0xFF;
+        uint8_t rx_byte = 0;
+
+        for(uint8_t bit = 0; bit < 8; ++bit)
+        {
+            if(tx_byte & 0x80)
+                GPIO <typename pins :: MOSI> :: write_high();
+            else
+                GPIO <typename pins :: MOSI> :: write_low();
+
+            delay_half_period();
+            GPIO <typename pins :: SCK> :: write_high();
+            delay_half_period();
+            if(rx)
+                rx_byte = uint8_t((rx_byte << 1) | (GPIO <typename pins :: MISO> :: read() != 0));
+            GPIO <typename pins :: SCK> :: write_low();
+            tx_byte <<= 1;
+        }
+
+        if(rx)
+            rx[i] = rx_byte;
+    }
+    return OK;
+}
+//------------------------------------------------------------------------------------------------
 /**
  * @class AVR_ISP
  * @brief In-System Programming session over an SPI master interface.
@@ -11,22 +84,47 @@
  * transfers; command and response buffers passed to command() must each hold
  * exactly four bytes. Flash addresses exposed by this interface are byte
  * addresses. Page geometry remains the responsibility of the caller.
- * Calls wait for interrupt-driven SPI transfers and require enabled interrupts;
- * do not call them from an ISR. Reserve the SPI bus for the entire session.
+ * Calls are blocking and must not be made from an ISR. The hardware SPI path
+ * polls the peripheral; LowSpeedSPI toggles GPIO pins and can be stretched by
+ * interrupts. Reserve the SPI bus for the entire session.
  * Flash and EEPROM writes use RDY/BSY polling for recognized ISP targets;
  * other programming operations and unrecognized targets use a fixed 20 ms wait.
  * Include through core.h so GPIO and the target pin types are available.
  *
- * @tparam SPI SPI peripheral type configured as master.
+ * @tparam SPI SPI peripheral type whose pin mapping and minimum master rate
+ *             are exposed to the ISP driver.
  * @tparam RST_PIN GPIO pin connected to the target RESET line.
  */
 /** Configure the SPI master rate and release the target from reset. */
 template <class SPI, class RST_PIN>
 ResultCode AVR_ISP <SPI, RST_PIN> :: init(uint32_t frequency)
 {
-    if(active) return ERR_BUSY;
-    ResultCode result = SPI :: init_master(frequency, SPI_CLOCK_MODE_0, SPI_MSB_FIRST);
-    if(result != OK) return result;
+    if(active)
+        return ERR_BUSY;
+
+    if(frequency == 0)
+            return ERR_BAD_PARAMETER;
+
+    if(frequency < SPI :: min_master_frequency)
+    {
+        if(SPI :: is_busy())
+            return ERR_BUSY;
+        SPI :: disable();
+        LowSpeedSPI :: init(frequency);
+        low_speed = true;
+    }
+    else
+    {
+        if(SPI :: is_busy())
+            return ERR_BUSY;
+        LowSpeedSPI :: disable();
+        low_speed = false;
+        initialized = false;
+        ResultCode result = SPI :: init_master(frequency, SPI_CLOCK_MODE_0, SPI_MSB_FIRST);
+        if(result != OK)
+            return result;
+    }
+
     GPIO <RST_PIN> :: set_mode(OUTPUT_HIGH);
     initialized = true;
     extended_address = 0;
@@ -46,6 +144,9 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: enter_programming_mode()
     if(SPI :: is_busy())
         return ERR_BUSY;
 
+    if(low_speed)
+        LowSpeedSPI :: enable();
+
     const uint8_t request[4] = {0xAC, 0x53, 0, 0};
     uint8_t response[4];
     ResultCode result = ERR_REJECTED;
@@ -57,7 +158,7 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: enter_programming_mode()
         GPIO <RST_PIN> :: write_low();
         mdelay(reset_wait_ms);
         extended_address = 0;
-        result = SPI :: duplex(request, response, 4);
+        result = exchange(request, response, 4);
         if(result != OK)
             break;
         if(response[2] == 0x53)
@@ -68,6 +169,8 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: enter_programming_mode()
         result = ERR_REJECTED;
     }
     GPIO <RST_PIN> :: write_high();
+    if(low_speed)
+        LowSpeedSPI :: disable();
     return result;
 }
 //------------------------------------------------------------------------------------------------
@@ -77,6 +180,10 @@ void AVR_ISP <SPI, RST_PIN> :: leave_programming_mode()
 {
     if(initialized)
         GPIO <RST_PIN> :: write_high();
+
+    if(low_speed)
+        LowSpeedSPI :: disable();
+
     active = false;
     extended_address = 0;
 }
@@ -102,7 +209,7 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: command(const uint8_t request[4], uint8_t r
     // Save before transfer: callers may use the same buffer for TX and RX.
     const bool extended = (request[0] == 0x4D);
     const uint8_t bank = request[2];
-    ResultCode result = SPI :: duplex(request, response, 4);
+    ResultCode result = exchange(request, response, 4);
     if(result == OK && extended)
         extended_address = bank;
     if(result == OK && request[0] == 0x30 && request[1] == 0 && request[2] < 3)
@@ -120,6 +227,14 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: command(const uint8_t request[4], uint8_t r
         }
     }
     return result;
+}
+//------------------------------------------------------------------------------------------------
+template <class SPI, class RST_PIN>
+ResultCode AVR_ISP <SPI, RST_PIN> :: exchange(const uint8_t *tx, uint8_t *rx, uint16_t size)
+{
+    if(low_speed)
+        return LowSpeedSPI :: duplex(tx, rx, size);
+    return SPI :: duplex(tx, rx, size);
 }
 //------------------------------------------------------------------------------------------------
 template <class SPI, class RST_PIN>
@@ -374,7 +489,7 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: read_flash(uint32_t address, uint8_t *data,
             0x28, address_high, address_low, 0
         };
         uint8_t response[8];
-        result = SPI :: duplex(request, response, sizeof(request));
+        result = exchange(request, response, sizeof(request));
         if(result != OK)
             return result;
 

@@ -32,6 +32,19 @@ public:
     ResultCode  write_eeprom(uint16_t address, const uint8_t *data, uint16_t size);
 
 private:
+    class LowSpeedSPI
+    {
+    public:
+        static void init(uint32_t frequency);
+        static void enable();
+        static void disable();
+        static ResultCode duplex(const uint8_t *tx, uint8_t *rx, uint16_t size);
+    private:
+        static inline uint32_t delay_microseconds = 0;
+        static void delay_half_period();
+        using pins = typename SPI :: pins;
+    };
+
     bool initialized = false;
     bool active = false;
     uint8_t extended_address = 0;
@@ -41,7 +54,9 @@ private:
     static constexpr uint8_t reset_wait_ms = 20;
     static constexpr uint8_t programming_wait_ms = 20;
     static constexpr uint8_t enable_attempts = 3;
+    bool low_speed = false;
     ResultCode instruction(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t *value = nullptr);
+    ResultCode exchange(const uint8_t *tx, uint8_t *rx, uint16_t size);
     bool supports_rdy_bsy() const;
     ResultCode wait_for_programming_operation();
     ResultCode select_address(uint32_t address);
