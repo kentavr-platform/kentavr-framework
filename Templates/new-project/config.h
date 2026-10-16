@@ -70,6 +70,10 @@
     Enable and configure I2C busses here
     Feel free to uncomment and modify the following lines to enable hardware I2Cs.
     See I2C for details.
+
+ ENABLE_I2Cx(
+              TX_BUF_SIZE,  -- size in bytes of the internal transmit buffer (required)
+             )
                                                                                                 */
 // ENABLE_I2C0(32);
 // ENABLE_I2C1(32);
@@ -87,15 +91,19 @@
                     TX_BUF_SIZE,  -- size in bytes of the internal transmit buffer (required)
                    )
 
-    Each enabled SPI instance reserves TX_BUF_SIZE bytes of RAM.
-    USART_SPI uses USART N in master SPI mode; do not enable UART N at the same time.
-                                                                                                */
-// ENABLE_SPI0(32);
-// ENABLE_SPI1(32);
+    Enabled SPI instance reserves TX_BUF_SIZE bytes of RAM. A non-zero buffer size is useful
+    for non-blocking calls (calbacks) only. A buffer size of 0 (zero) saves your RAM and
+    disables non-blocking SPI calls.
 
-// ENABLE_USART_SPI0(32);
-// ENABLE_USART_SPI1(32);
-// ENABLE_USART_SPI2(32);
-// ENABLE_USART_SPI3(32);
+    Warning: USART_SPI and UART share the same hardware instance. Do not enable UART N and
+    USART_SPI N at the same time.
+                                                                                                */
+// ENABLE_SPI0(0);
+// ENABLE_SPI1(0);
+
+// ENABLE_USART_SPI0(0);
+// ENABLE_USART_SPI1(0);
+// ENABLE_USART_SPI2(0);
+// ENABLE_USART_SPI3(0);
 //------------------------------------------------------------------------------------------------
 #endif

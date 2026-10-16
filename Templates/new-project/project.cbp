@@ -14,11 +14,11 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega8__" />
 					<Add option="-DCRYSTAL_FREQ=12000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega8" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="ATtiny85">
@@ -29,10 +29,10 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATtiny85__" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="attiny85" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="ATmega88p">
@@ -43,11 +43,11 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega88P__" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega88p" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="ATmega328p">
@@ -58,11 +58,11 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega328P__" />
 					<Add option="-DCRYSTAL_FREQ=12000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega328p" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="ATmega32u4">
@@ -73,12 +73,12 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega32U4__" />
 					<Add option="-include AVR/USB/avr-usb-config.h" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="ATmega1284p">
@@ -89,11 +89,11 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega1284P__" />
 					<Add option="-DCRYSTAL_FREQ=20000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega1284p" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="AVR128DB48">
@@ -104,11 +104,12 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_AVR128DB48__" />
 					<Add option="-DCRYSTAL_FREQ=20000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="avr128db48" />
-					<Variable name="PROG" value="usbasp" />
+					<Variable name="PROG" value="xplainedmini_updi" />
 				</Environment>
 			</Target>
 			<Target title="ATmega2560">
@@ -119,11 +120,11 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega2560__" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega2560" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="Arduino Uno">
@@ -134,12 +135,12 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega328P__" />
 					<Add option="-DARDUINO_AVR_UNO" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega328p" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="Arduino Nano">
@@ -150,12 +151,12 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega328P__" />
 					<Add option="-DARDUINO_AVR_NANO" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega328p" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="Arduino Pro Mini">
@@ -166,12 +167,12 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega328P__" />
 					<Add option="-DARDUINO_AVR_PRO_MINI" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega328p" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="Arduino Leonardo">
@@ -182,13 +183,14 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega32U4__" />
 					<Add option="-include AVR/USB/avr-usb-config.h" />
 					<Add option="-DARDUINO_AVR_LEONARDO" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
-					<Variable name="PROG" value="usbasp" />
+					<Variable name="PROG" value="avr109 -P /dev/ttyACM0" />
 				</Environment>
 			</Target>
 			<Target title="Arduino Pro Micro">
@@ -199,13 +201,13 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega32U4__" />
 					<Add option="-include AVR/USB/avr-usb-config.h" />
 					<Add option="-DARDUINO_AVR_PRO_MICRO" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega32u4" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Target title="Arduino Mega 2560">
@@ -216,17 +218,16 @@
 				<Option compiler="avr-gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-D__AVR_ATmega2560__" />
 					<Add option="-DARDUINO_AVR_MEGA2560" />
 					<Add option="-DCRYSTAL_FREQ=16000000UL" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="atmega2560" />
-					<Variable name="PROG" value="usbasp" />
 				</Environment>
 			</Target>
 			<Environment>
-				<Variable name="ADAPTER" value="usbasp" />
-				<Variable name="ADAPTER_PORT" value="" />
+				<Variable name="PROG" value="usbasp" />
 			</Environment>
 		</Build>
 		<Compiler>
@@ -1095,9 +1096,13 @@
 		<Unit filename="KentAVR/Core/fuses.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="KentAVR/Core/isr.cpp" />
 		<Unit filename="KentAVR/Core/macro.h" />
 		<Unit filename="KentAVR/Core/nostream.h" />
 		<Unit filename="KentAVR/Core/oscillator.h" />
+		<Unit filename="KentAVR/Core/startup.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="KentAVR/Core/type_traits.h" />
 		<Unit filename="KentAVR/Core/type_traits/is_connected.h" />
 		<Unit filename="KentAVR/Core/type_traits/is_enum.h" />
@@ -1141,14 +1146,10 @@
 		<Unit filename="KentAVR/Services/Console/debug.h" />
 		<Unit filename="KentAVR/Services/Settings/settings.h" />
 		<Unit filename="KentAVR/Services/Settings/settings.tpp" />
-		<Unit filename="KentAVR/Core/startup.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="KentAVR/Core/isr.cpp" />
 		<Unit filename="KentAVR/core.h" />
 		<Unit filename="config.h" />
-		<Unit filename="usb-config.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="usb-config.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

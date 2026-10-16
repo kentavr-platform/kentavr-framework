@@ -9,7 +9,7 @@
 #include "config.h"
 //------------------------------------------------------------------------------------------------
 #ifdef DEBUG
-    // static SerialBitOut <B4, 1000000> debug; Console console(debug);
+    // static SerialBitOut <B4, 500000> debug;  Console console(debug);
     // static UART0 uart;                       Console console(uart);
     // static SerialUSB usb;                    Console console(usb);
 #else
@@ -29,7 +29,7 @@ void early_init()
 //------------------------------------------------------------------------------------------------
 int main()
 {
-    // uart.init(1000000);
+    // uart.init(500000);   // the highest baudrate supported for 16 and 20 MHz crystal both
     // usb.init();
 
 
