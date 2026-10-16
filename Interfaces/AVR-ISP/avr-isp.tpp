@@ -3,6 +3,79 @@
  * File: avr-isp.tpp
  * Included from avr-isp.h; do not compile separately.
 //----------------------------------------------------------------------------------------------*/
+/** Configure GPIO timing for a low-speed, mode 0, MSB-first ISP transfer. */
+template <class SPI, class RST_PIN>
+void AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: init(uint32_t frequency)
+{
+    const uint32_t half_period_us = (500000UL + frequency - 1UL) / frequency;
+    // Scope calibration: about 2 us fixed overhead and 25% per-loop overhead.
+    delay_microseconds = (half_period_us - 2UL) * 3UL / 4UL;
+    enable();
+}
+//------------------------------------------------------------------------------------------------
+/** Claim the SPI pins for software transfers. */
+template <class SPI, class RST_PIN>
+void AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: enable()
+{
+    GPIO <typename pins :: MOSI> :: set_mode(OUTPUT_LOW);
+    GPIO <typename pins :: MISO> :: set_mode(INPUT_OPEN);
+    GPIO <typename pins :: SCK>  :: set_mode(OUTPUT_LOW);
+}
+//------------------------------------------------------------------------------------------------
+/** Release the SPI pins to their high-impedance input state. */
+template <class SPI, class RST_PIN>
+void AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: disable()
+{
+    GPIO <typename pins :: MOSI> :: set_mode(INPUT_OPEN);
+    GPIO <typename pins :: MISO> :: set_mode(INPUT_OPEN);
+    GPIO <typename pins :: SCK>  :: set_mode(INPUT_OPEN);
+}
+//------------------------------------------------------------------------------------------------
+/** Wait at least one requested half-period; loop overhead can slow SCK further. */
+template <class SPI, class RST_PIN>
+void AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: delay_half_period()
+{
+    for(uint32_t us = delay_microseconds; us; --us)
+    {
+        udelay(1);
+    }
+}
+//------------------------------------------------------------------------------------------------
+/** Transfer bytes by bit-banging the SPI pins in mode 0, MSB first. */
+template <class SPI, class RST_PIN>
+ResultCode AVR_ISP <SPI, RST_PIN> :: LowSpeedSPI :: duplex(const uint8_t *tx, uint8_t *rx,
+                                                            uint16_t size)
+{
+    if(!size || (!tx && !rx))
+        return ERR_BAD_PARAMETER;
+
+    for(uint16_t i = 0; i < size; ++i)
+    {
+        uint8_t tx_byte = tx ? tx[i] : 0xFF;
+        uint8_t rx_byte = 0;
+
+        for(uint8_t bit = 0; bit < 8; ++bit)
+        {
+            if(tx_byte & 0x80)
+                GPIO <typename pins :: MOSI> :: write_high();
+            else
+                GPIO <typename pins :: MOSI> :: write_low();
+
+            delay_half_period();
+            GPIO <typename pins :: SCK> :: write_high();
+            delay_half_period();
+            if(rx)
+                rx_byte = uint8_t((rx_byte << 1) | (GPIO <typename pins :: MISO> :: read() != 0));
+            GPIO <typename pins :: SCK> :: write_low();
+            tx_byte <<= 1;
+        }
+
+        if(rx)
+            rx[i] = rx_byte;
+    }
+    return OK;
+}
+//------------------------------------------------------------------------------------------------
 /**
  * @class AVR_ISP
  * @brief In-System Programming session over an SPI master interface.
@@ -11,22 +84,47 @@
  * transfers; command and response buffers passed to command() must each hold
  * exactly four bytes. Flash addresses exposed by this interface are byte
  * addresses. Page geometry remains the responsibility of the caller.
- * Calls wait for interrupt-driven SPI transfers and require enabled interrupts;
- * do not call them from an ISR. Reserve the SPI bus for the entire session.
- * Target programming times must not exceed the fixed 20 ms write/erase wait
- * used by this driver.
+ * Calls are blocking and must not be made from an ISR. The hardware SPI path
+ * polls the peripheral; LowSpeedSPI toggles GPIO pins and can be stretched by
+ * interrupts. Reserve the SPI bus for the entire session.
+ * Flash and EEPROM writes use RDY/BSY polling for recognized ISP targets;
+ * other programming operations and unrecognized targets use a fixed 20 ms wait.
  * Include through core.h so GPIO and the target pin types are available.
  *
- * @tparam SPI SPI peripheral type configured as master.
+ * @tparam SPI SPI peripheral type whose pin mapping and minimum master rate
+ *             are exposed to the ISP driver.
  * @tparam RST_PIN GPIO pin connected to the target RESET line.
  */
 /** Configure the SPI master rate and release the target from reset. */
 template <class SPI, class RST_PIN>
 ResultCode AVR_ISP <SPI, RST_PIN> :: init(uint32_t frequency)
 {
-    if(active) return ERR_BUSY;
-    ResultCode result = SPI :: init_master(frequency, SPI_CLOCK_MODE_0, SPI_MSB_FIRST);
-    if(result != OK) return result;
+    if(active)
+        return ERR_BUSY;
+
+    if(frequency == 0)
+            return ERR_BAD_PARAMETER;
+
+    if(frequency < SPI :: min_master_frequency)
+    {
+        if(SPI :: is_busy())
+            return ERR_BUSY;
+        SPI :: disable();
+        LowSpeedSPI :: init(frequency);
+        low_speed = true;
+    }
+    else
+    {
+        if(SPI :: is_busy())
+            return ERR_BUSY;
+        LowSpeedSPI :: disable();
+        low_speed = false;
+        initialized = false;
+        ResultCode result = SPI :: init_master(frequency, SPI_CLOCK_MODE_0, SPI_MSB_FIRST);
+        if(result != OK)
+            return result;
+    }
+
     GPIO <RST_PIN> :: set_mode(OUTPUT_HIGH);
     initialized = true;
     extended_address = 0;
@@ -46,6 +144,9 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: enter_programming_mode()
     if(SPI :: is_busy())
         return ERR_BUSY;
 
+    if(low_speed)
+        LowSpeedSPI :: enable();
+
     const uint8_t request[4] = {0xAC, 0x53, 0, 0};
     uint8_t response[4];
     ResultCode result = ERR_REJECTED;
@@ -57,7 +158,7 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: enter_programming_mode()
         GPIO <RST_PIN> :: write_low();
         mdelay(reset_wait_ms);
         extended_address = 0;
-        result = SPI :: duplex(request, response, 4);
+        result = exchange(request, response, 4);
         if(result != OK)
             break;
         if(response[2] == 0x53)
@@ -68,6 +169,8 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: enter_programming_mode()
         result = ERR_REJECTED;
     }
     GPIO <RST_PIN> :: write_high();
+    if(low_speed)
+        LowSpeedSPI :: disable();
     return result;
 }
 //------------------------------------------------------------------------------------------------
@@ -77,8 +180,20 @@ void AVR_ISP <SPI, RST_PIN> :: leave_programming_mode()
 {
     if(initialized)
         GPIO <RST_PIN> :: write_high();
+
+    if(low_speed)
+        LowSpeedSPI :: disable();
+
     active = false;
     extended_address = 0;
+}
+//------------------------------------------------------------------------------------------------
+/** Clear cached target information before connecting to a different target. */
+template <class SPI, class RST_PIN>
+void AVR_ISP <SPI, RST_PIN> :: forget_target()
+{
+    target_signature = 0;
+    target_supports_rdy_bsy = false;
 }
 //------------------------------------------------------------------------------------------------
 /** Execute one raw four-byte AVR ISP instruction during programming mode. */
@@ -94,10 +209,32 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: command(const uint8_t request[4], uint8_t r
     // Save before transfer: callers may use the same buffer for TX and RX.
     const bool extended = (request[0] == 0x4D);
     const uint8_t bank = request[2];
-    ResultCode result = SPI :: duplex(request, response, 4);
+    ResultCode result = exchange(request, response, 4);
     if(result == OK && extended)
         extended_address = bank;
+    if(result == OK && request[0] == 0x30 && request[1] == 0 && request[2] < 3)
+    {
+        const uint8_t signature_index = request[2];
+        const uint8_t shift = uint8_t(16 - 8 * signature_index);
+        const uint32_t data_mask = uint32_t(0xFF) << shift;
+        const uint32_t read_mask = uint32_t(1) << (24 + signature_index);
+        target_signature = (target_signature & ~data_mask)
+                         | (uint32_t(response[3]) << shift)
+                         | read_mask;
+        if((target_signature & 0x07000000UL) == 0x07000000UL)
+        {
+            target_supports_rdy_bsy = supports_rdy_bsy();
+        }
+    }
     return result;
+}
+//------------------------------------------------------------------------------------------------
+template <class SPI, class RST_PIN>
+ResultCode AVR_ISP <SPI, RST_PIN> :: exchange(const uint8_t *tx, uint8_t *rx, uint16_t size)
+{
+    if(low_speed)
+        return LowSpeedSPI :: duplex(tx, rx, size);
+    return SPI :: duplex(tx, rx, size);
 }
 //------------------------------------------------------------------------------------------------
 template <class SPI, class RST_PIN>
@@ -192,6 +329,128 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: select_address(uint32_t address)
     return instruction(0x4D, 0, bank, 0);
 }
 //------------------------------------------------------------------------------------------------
+/** Check the known classic megaAVR/tinyAVR signatures with ISP RDY/BSY polling. */
+template <class SPI, class RST_PIN>
+bool AVR_ISP <SPI, RST_PIN> :: supports_rdy_bsy() const
+{
+    const uint32_t signature = target_signature & 0x00FFFFFFUL;
+    switch(signature)
+    {
+    case 0x1E9007UL: // ATtiny13
+    case 0x1E9108UL: // ATtiny25
+    case 0x1E9109UL: // ATtiny26
+    case 0x1E910AUL: // ATtiny2313
+    case 0x1E910BUL: // ATtiny24
+    case 0x1E910CUL: // ATtiny261
+    case 0x1E9205UL: // ATmega48
+    case 0x1E9206UL: // ATtiny45
+    case 0x1E9207UL: // ATtiny44
+    case 0x1E9208UL: // ATtiny461
+    case 0x1E9209UL: // ATtiny48
+    case 0x1E920AUL: // ATmega48P/PA
+    case 0x1E9210UL: // ATmega48PB
+    case 0x1E920DUL: // ATtiny4313
+    case 0x1E920EUL: // ATtiny40
+    case 0x1E9215UL: // ATtiny441
+    case 0x1E930AUL: // ATmega88
+    case 0x1E930BUL: // ATtiny85
+    case 0x1E930CUL: // ATtiny84
+    case 0x1E930DUL: // ATtiny861
+    case 0x1E930FUL: // ATmega88P/PA
+    case 0x1E9311UL: // ATtiny88
+    case 0x1E9314UL: // ATtiny828
+    case 0x1E9315UL: // ATtiny841
+    case 0x1E9316UL: // ATmega88PB
+    case 0x1E9401UL: // ATmega161
+    case 0x1E9402UL: // ATmega163
+    case 0x1E9403UL: // ATmega16
+    case 0x1E9404UL: // ATmega162
+    case 0x1E9405UL: // ATmega169
+    case 0x1E9406UL: // ATmega168
+    case 0x1E9407UL: // ATmega165P/PA
+    case 0x1E940AUL: // ATmega164P
+    case 0x1E940BUL: // ATmega168P/PA
+    case 0x1E940FUL: // ATmega164A
+    case 0x1E9410UL: // ATmega165
+    case 0x1E9411UL: // ATmega169A
+    case 0x1E9412UL: // ATtiny1634
+    case 0x1E9415UL: // ATmega168PB
+    case 0x1E9483UL: // AT90PWM316
+    case 0x1E9487UL: // ATtiny167
+    case 0x1E9488UL: // ATmega16U4
+    case 0x1E9489UL: // ATmega16U2
+    case 0x1E9502UL: // ATmega32
+    case 0x1E9503UL: // ATmega329
+    case 0x1E9504UL: // ATmega3290
+    case 0x1E9505UL: // ATmega325
+    case 0x1E9506UL: // ATmega3250
+    case 0x1E9508UL: // ATmega324P
+    case 0x1E950BUL: // ATmega329P/PA
+    case 0x1E950CUL: // ATmega3290P/PA
+    case 0x1E950DUL: // ATmega325P/PA
+    case 0x1E950EUL: // ATmega3250P/PA
+    case 0x1E950FUL: // ATmega328P
+    case 0x1E9511UL: // ATmega324PA
+    case 0x1E9514UL: // ATmega328
+    case 0x1E9515UL: // ATmega324A
+    case 0x1E9516UL: // ATmega328PB
+    case 0x1E9517UL: // ATmega324PB
+    case 0x1E9581UL: // AT90CAN32
+    case 0x1E9584UL: // ATmega32M1
+    case 0x1E9587UL: // ATmega32U4
+    case 0x1E958AUL: // ATmega32U2
+    case 0x1E9602UL: // ATmega64
+    case 0x1E9603UL: // ATmega649
+    case 0x1E9604UL: // ATmega6490
+    case 0x1E9605UL: // ATmega645
+    case 0x1E9606UL: // ATmega6450
+    case 0x1E9608UL: // ATmega640
+    case 0x1E9609UL: // ATmega644
+    case 0x1E960AUL: // ATmega644P/PA
+    case 0x1E960BUL: // ATmega649P
+    case 0x1E960CUL: // ATmega6490P
+    case 0x1E960DUL: // ATmega645P
+    case 0x1E960EUL: // ATmega6450P
+    case 0x1E9682UL: // AT90USB646
+    case 0x1E9684UL: // ATmega64M1
+    case 0x1E9702UL: // ATmega128
+    case 0x1E9703UL: // ATmega1280
+    case 0x1E9704UL: // ATmega1281
+    case 0x1E9705UL: // ATmega1284P
+    case 0x1E9706UL: // ATmega1284
+    case 0x1E9781UL: // AT90CAN128
+    case 0x1E9782UL: // AT90USB1286
+    case 0x1E9801UL: // ATmega2560
+    case 0x1E9802UL: // ATmega2561
+        return true;
+    default:
+        return false;
+    }
+}
+//------------------------------------------------------------------------------------------------
+template <class SPI, class RST_PIN>
+ResultCode AVR_ISP <SPI, RST_PIN> :: wait_for_programming_operation()
+{
+    if(!target_supports_rdy_bsy)
+    {
+        mdelay(programming_wait_ms);
+        return OK;
+    }
+
+    for(uint8_t elapsed = 0; elapsed <= programming_wait_ms; ++elapsed)
+    {
+        uint8_t status;
+        ResultCode result = instruction(0xF0, 0, 0, 0, &status);
+        if(result != OK)
+            return result;
+        if(!(status & 0x01))
+            return OK;
+        if(elapsed < programming_wait_ms)
+            mdelay(1);
+    }
+    return ERR_UNKNOWN;
+}
+//------------------------------------------------------------------------------------------------
 /** Read target Flash bytes using a byte address. */
 template <class SPI, class RST_PIN>
 ResultCode AVR_ISP <SPI, RST_PIN> :: read_flash(uint32_t address, uint8_t *data, uint16_t size)
@@ -200,16 +459,54 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: read_flash(uint32_t address, uint8_t *data,
     // ISP has a 24-bit word address (including the extended address byte).
     if((size && !data) || address > 0x2000000UL || size > 0x2000000UL - address)
         return ERR_BAD_PARAMETER;
-    for(uint16_t i = 0; i < size; ++i, ++address)
+
+    // An odd start needs its own high-byte read to reach the next word.
+    if(size && (address & 1))
     {
         ResultCode result = select_address(address);
         if(result != OK)
             return result;
 
-        result = instruction((address & 1) ? 0x28 : 0x20,
-                             uint8_t(address >> 9), uint8_t(address >> 1), 0, data + i);
+        result = instruction(0x28, uint8_t(address >> 9), uint8_t(address >> 1), 0, data);
         if(result != OK)
             return result;
+        ++address;
+        ++data;
+        --size;
+    }
+
+    // Read both bytes of each word in one uninterrupted SPI transfer.
+    while(size >= 2)
+    {
+        ResultCode result = select_address(address);
+        if(result != OK)
+            return result;
+
+        const uint8_t address_high = uint8_t(address >> 9);
+        const uint8_t address_low = uint8_t(address >> 1);
+        const uint8_t request[8] = {
+            0x20, address_high, address_low, 0,
+            0x28, address_high, address_low, 0
+        };
+        uint8_t response[8];
+        result = exchange(request, response, sizeof(request));
+        if(result != OK)
+            return result;
+
+        data[0] = response[3];
+        data[1] = response[7];
+        address += 2;
+        data += 2;
+        size -= 2;
+    }
+
+    if(size)
+    {
+        ResultCode result = select_address(address);
+        if(result != OK)
+            return result;
+
+        return instruction(0x20, uint8_t(address >> 9), uint8_t(address >> 1), 0, data);
     }
     return OK;
 }
@@ -246,7 +543,7 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: write_flash_page(uint32_t address, const ui
     }
     result = instruction(0x4C, uint8_t(address >> 9), uint8_t(address >> 1), 0);
     if(result == OK)
-        mdelay(programming_wait_ms);
+        result = wait_for_programming_operation();
     return result;
 }
 //------------------------------------------------------------------------------------------------
@@ -286,7 +583,9 @@ ResultCode AVR_ISP <SPI, RST_PIN> :: write_eeprom(uint16_t address, const uint8_
         ResultCode result = instruction(0xC0, uint8_t(address >> 8), uint8_t(address), data[i]);
         if(result != OK)
             return result;
-        mdelay(programming_wait_ms);
+        result = wait_for_programming_operation();
+        if(result != OK)
+            return result;
     }
     return OK;
 }

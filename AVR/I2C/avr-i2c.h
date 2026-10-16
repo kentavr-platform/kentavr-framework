@@ -105,11 +105,11 @@ struct TWI_dispatcher
     }
 };
 //------------------------------------------------------------------------------------------------
-#define _SETUP_TWI_ISR(VECT, BUS)                                                \
-  ISR(VECT)                                                                      \
-  {                                                                              \
-      TWI_dispatcher <I2C##BUS> :: interrupt();                                  \
-  }
+#ifdef ISR_HANDLERS_MODULE
+  #define _SETUP_TWI_ISR(VECT, BUS)   ISR(VECT) { TWI_dispatcher <I2C##BUS> :: interrupt(); }
+#else
+  #define _SETUP_TWI_ISR(VECT, BUS)
+#endif
 
 #if defined(TWI_vect)
   #define _ENABLE_TWI_ISR_0() _SETUP_TWI_ISR(TWI_vect, 0)

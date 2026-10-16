@@ -13,6 +13,9 @@ template <uint8_t N, uint16_t TX_BUF_SIZE>
 class SPI
 {
 public:
+    using pins = SPI_pins <N>;
+    static constexpr uint32_t min_master_frequency = (F_CPU + 127UL) / 128UL;
+
     static ResultCode   init_master(uint32_t frequency,
                                     SPI_Clock_Mode clock_mode = SPI_CLOCK_MODE_0,
                                     SPI_Bit_Order bit_order = SPI_MSB_FIRST);
@@ -29,7 +32,6 @@ public:
                                void (*callback)(ResultCode result) = nullptr);
 private:
     using regs = SPI_traits <N>;
-    using pins = SPI_pins <N>;
     static inline volatile SPI_Mode mode = SPI_DISABLED;
     static inline volatile bool busy = false;
     static inline uint8_t tx_buf[TX_BUF_SIZE];
@@ -47,6 +49,7 @@ private:
                                   bool master, uint8_t prescaler, bool double_speed);
     static ResultCode   transfer(const uint8_t *tx, uint8_t *data, uint16_t size,
                                  void (*callback)(ResultCode));
+    static ResultCode   polling_transfer(const uint8_t *tx, uint8_t *rx, uint16_t size);
     static void         _start();
     static void         complete(ResultCode result);
     static void         interrupt();
@@ -59,9 +62,15 @@ private:
   #define SPI0_INT_vect  SPI_STC_vect
 #endif
 
+#ifdef ISR_HANDLERS_MODULE
+  #define _SETUP_SPI_ISR(VECT, N) ISR(VECT) { SPI_dispatcher <SPI##N> :: interrupt(); }
+#else
+  #define _SETUP_SPI_ISR(VECT, N)
+#endif
+
 #define _ENABLE_SPI(N, TX_BUF_SIZE)                                                         \
   using SPI##N = SPI <N, TX_BUF_SIZE>;                                                      \
-  ISR(SPI##N##_INT_vect) { SPI_dispatcher <SPI##N> :: interrupt(); }
+  _SETUP_SPI_ISR(SPI##N##_INT_vect, N)
 
 #if defined(SPI0_SUPPORTED)
   #define ENABLE_SPI0(TX_BUF_SIZE) _ENABLE_SPI(0, TX_BUF_SIZE)

@@ -223,8 +223,8 @@ __inline SPI_Mode SPI <N, TX_BUF_SIZE> :: get_mode()
  * until the method returns. If @p callback is non-null, the data is copied to
  * the driver's fixed-size buffer and the method returns after starting the
  * transfer. The callback runs from interrupt context and must be short and
- * non-blocking. Blocking use requires global interrupts and must not be called
- * from an interrupt handler.
+ * non-blocking. Blocking mode polls the peripheral and does not rely on the
+ * SPI interrupt. Do not call blocking transfers from an interrupt handler.
  *
  * @param data Non-null source buffer containing @p count bytes.
  * @param count Number of bytes to transmit; must be nonzero and must not
@@ -250,8 +250,9 @@ __inline ResultCode SPI <N, TX_BUF_SIZE> :: send(const uint8_t *data, uint16_t c
  * The receive buffer remains owned by the caller. It must stay valid and
  * untouched until this method returns in blocking mode, or until the
  * completion callback runs in non-blocking mode. The count is not limited by
- * TX_BUF_SIZE because no caller transmit data is copied. Blocking use requires
- * global interrupts and must not be called from an interrupt handler.
+ * TX_BUF_SIZE because no caller transmit data is copied. Blocking mode polls
+ * the peripheral and does not rely on the SPI interrupt. Do not call blocking
+ * transfers from an interrupt handler.
  *
  * @param data Non-null destination buffer for @p count received bytes.
  * @param count Number of bytes to receive; must be nonzero.
@@ -281,8 +282,9 @@ __inline ResultCode SPI <N, TX_BUF_SIZE> :: receive(uint8_t *data, uint16_t coun
  * receive buffer must remain valid and untouched until this method returns
  * in blocking mode, or until completion in non-blocking mode. A null
  * @p callback selects blocking mode; otherwise the callback runs from
- * interrupt context and must be short and non-blocking. Blocking use requires
- * global interrupts and must not be called from an interrupt handler.
+ * interrupt context and must be short and non-blocking. Blocking mode polls
+ * the peripheral and does not rely on the SPI interrupt. Do not call blocking
+ * transfers from an interrupt handler.
  *
  * @param tx Optional source buffer; when non-null, must provide @p count
  *           bytes. Blocking mode reads it directly; non-blocking mode copies
@@ -305,10 +307,11 @@ __inline ResultCode SPI <N, TX_BUF_SIZE> :: duplex(const uint8_t *tx, uint8_t *r
 }
 //------------------------------------------------------------------------------------------------
 /**
- * @brief Validate, prepare, and start a master transfer; wait if blocking.
+ * @brief Validate and perform a blocking or non-blocking master transfer.
  * @param tx Optional transmit buffer; copied for non-blocking transfers and
  *           read directly for blocking transfers.
- * @param rx Optional receive buffer; written by the interrupt handler.
+ * @param rx Optional receive buffer; written by polling in blocking mode or
+ *           by the interrupt handler in non-blocking mode.
  * @param size Number of bytes to transfer.
  * @param callback Optional completion callback.
  * @return The result code for validation or transfer completion.
@@ -329,8 +332,11 @@ __inline ResultCode SPI <N, TX_BUF_SIZE> :: transfer(const uint8_t *tx, uint8_t 
     if(tx && callback && size > TX_BUF_SIZE)
         return ERR_BAD_PARAMETER;
 
+    if(!callback)
+        return polling_transfer(tx, rx, size);
+
     master.tx = tx;
-    if(tx && callback)
+    if(tx)
     {
         memcpy(tx_buf, tx, size);
         master.tx = tx_buf;
@@ -342,17 +348,48 @@ __inline ResultCode SPI <N, TX_BUF_SIZE> :: transfer(const uint8_t *tx, uint8_t 
     master.result = ERR_UNKNOWN;
     busy = true;
 
-    if(callback)
+    _start();
+    return OK;
+}
+//------------------------------------------------------------------------------------------------
+/** @brief Transfer bytes by polling the peripheral instead of servicing an ISR per byte. */
+template <uint8_t N, uint16_t TX_BUF_SIZE>
+__inline ResultCode SPI <N, TX_BUF_SIZE> :: polling_transfer(const uint8_t *tx, uint8_t *rx,
+                                                            uint16_t size)
+{
+    busy = true;
+    master.callback = nullptr;
+#if defined(AVR_DX_FAMILY)
+    regs :: INT_MASK = 0;
+#else
+    clr_bit(regs :: CONTROL, regs :: INTERRUPT);
+#endif
+
+    for(uint16_t i = 0; i < size; ++i)
     {
-        // non-blocking mode
-        _start();
-        return OK;
+        regs :: DATA = tx ? tx[i] : 0xFF;
+        while(!(regs :: STATUS & _bit(regs :: TRANSFER_COMPLETE)))
+        {
+            if(!busy || mode != SPI_MASTER)
+                return ERR_ABORTED;
+        }
+        const uint8_t received = regs :: DATA;
+        if(rx)
+            rx[i] = received;
+        if(!busy || mode != SPI_MASTER)
+            return ERR_ABORTED;
     }
 
-    // blocking mode
-    _start();
-    wait();
-    return master.result;
+    master.result = OK;
+#if defined(AVR_DX_FAMILY)
+    regs :: INT_MASK = _bit(regs :: INTERRUPT);
+#else
+    set_bit(regs :: CONTROL, regs :: INTERRUPT);
+#endif
+    if(!busy || mode != SPI_MASTER)
+        return ERR_ABORTED;
+    busy = false;
+    return OK;
 }
 //------------------------------------------------------------------------------------------------
 /** @brief Write the first master byte and start the SPI transfer. */

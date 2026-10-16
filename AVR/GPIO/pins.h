@@ -28,6 +28,22 @@ struct NC {};       // Not Connected "pin"
 //------------------------------------------------------------------------------------------------
 #define DECLARE_PIN(ID, PORT, DDR, PIN, TGL, BIT) struct ID : pin <PORT, DDR, PIN, TGL, BIT> {};
 //------------------------------------------------------------------------------------------------
+// Physical RX and TX pins for hardware UART peripheral N.
+template <uint8_t N>
+struct UART_pins
+{
+    using RX_PIN = NC;
+    using TX_PIN = NC;
+};
+
+#define DECLARE_UART_PINS(N, _RX_PIN, _TX_PIN)  \
+  template <>                                   \
+  struct UART_pins <N>                          \
+  {                                             \
+      using RX_PIN = _RX_PIN;                   \
+      using TX_PIN = _TX_PIN;                   \
+  };
+//------------------------------------------------------------------------------------------------
 // Physical signals for the hardware SPI peripheral N: MOSI, MISO, SCK, SS.
 template <uint8_t N>
 struct SPI_pins
