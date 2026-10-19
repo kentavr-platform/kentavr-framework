@@ -226,6 +226,22 @@
 					<Variable name="MCU" value="atmega2560" />
 				</Environment>
 			</Target>
+			<Target title="Digispark attiny85">
+				<Option output="output/$(PROJECTNAME).elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="." />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D__AVR_ATtiny85__" />
+					<Add option="-DINTERNAL_CLOCK_8MHZ" />
+				</Compiler>
+				<Environment>
+					<Variable name="MCU" value="attiny85" />
+					<Variable name="PROG" value="micronucleus" />
+				</Environment>
+			</Target>
 			<Environment>
 				<Variable name="PROG" value="usbasp" />
 			</Environment>
@@ -235,6 +251,7 @@
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
 			<Add option="-std=c++17" />
+			<Add option="-fdata-sections" />
 			<Add option="-save-temps=obj" />
 			<Add option="-mmcu=$(MCU)" />
 			<Add option="-Wa,-I,KentAVR" />
@@ -246,7 +263,6 @@
 		<Linker>
 			<Add option="-mmcu=$(MCU)" />
 			<Add option="-ffunction-sections" />
-			<Add option="-fdata-sections" />
 			<Add option="-fno-exceptions" />
 			<Add option="-fno-rtti" />
 			<Add option="-Wl,--gc-sections" />
@@ -270,6 +286,10 @@
 			<Add after="avr-readelf -sW $(TARGET_OUTPUT_FILE) | grep OBJECT &gt; $(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).data || true" />
 			<Add after="avr-size -C --mcu=$(MCU) -d $(TARGET_OUTPUT_FILE)" />
 		</ExtraCommands>
+		<Unit filename="KentAVR/AVR/ADC/avr-adc-channels.h" />
+		<Unit filename="KentAVR/AVR/ADC/avr-adc-regs.h" />
+		<Unit filename="KentAVR/AVR/ADC/avr-adc.cpp" />
+		<Unit filename="KentAVR/AVR/ADC/avr-adc.h" />
 		<Unit filename="KentAVR/AVR/EEPROM/avr-eeprom.h" />
 		<Unit filename="KentAVR/AVR/GPIO/avr-gpio.h" />
 		<Unit filename="KentAVR/AVR/GPIO/avr-gpio.tpp" />

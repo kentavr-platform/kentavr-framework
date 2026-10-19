@@ -106,4 +106,17 @@
 // ENABLE_USART_SPI2(0);
 // ENABLE_USART_SPI3(0);
 //------------------------------------------------------------------------------------------------
+/**
+    Enable interrupt-driven ADC conversions with a task queue.
+
+    Allows schedule() to enqueue conversions without waiting for their results.
+    Each completed task calls its callback with the supplied id and ADC result.
+
+    Callbacks run in ADC interrupt context; global interrupts must be enabled.
+    Enabled async mode reserves RAM for the queue and its processing state.
+
+    Uncomment the following line to enable ADC async mode.
+                                                                                                */
+// #define ENABLE_ADC_ASYNC_MODE
+//------------------------------------------------------------------------------------------------
 #endif

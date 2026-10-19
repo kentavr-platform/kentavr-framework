@@ -31,11 +31,13 @@
 #include "AVR/SPI/avr-spi.h"
 #include "AVR/SPI/avr-usart-spi.h"
 #include "AVR/USB/avr-usb.h"
-
-
-
 #include "AVR/EEPROM/avr-eeprom.h"
+
+// services
 #include "Services/Settings/settings.h"
+
+// drivers with config-defined settings
+#include "AVR/ADC/avr-adc.h"
 
 // interfaces
 #include "Interfaces/OneWire/one-wire.h"
