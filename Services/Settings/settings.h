@@ -101,7 +101,7 @@ private:
 //------------------------------------------------------------------------------------------------
 #define ENABLE_SETTINGS(Size)                                                    \
     static_assert((Size) <= E2END + 1, "Settings size exceeds EEPROM size");     \
-    uint8_t _settings_eeprom_reserved[(Size)] EEMEM __attribute__((used)) = {};  \
-    Settings <Size> settings;
+    __inline uint8_t _settings_eeprom_reserved[(Size)] EEMEM __attribute__((used)) = {};  \
+    __inline Settings <Size> settings;
 //------------------------------------------------------------------------------------------------
 #endif
