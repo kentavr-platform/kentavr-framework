@@ -16,8 +16,12 @@
   #define F_CPU             EXTERNAL_CLOCK      // external clock source
 #elif defined(INTERNAL_CLOCK_8MHZ)
   #define F_CPU             8000000UL           // internal RC clock generator
+#elif defined(INTERNAL_CLOCK_16MHZ)
+  #define F_CPU            16000000UL          // internal RC clock generator
+#elif defined(INTERNAL_CLOCK_16_5MHZ)
+  #define F_CPU            16500000UL          // internal RC clock generator
 #else
-  #error ! Define CRYSTAL_FREQ=, EXTERNAL_CLOCK= or INTERNAL_CLOCK_8MHZ
+  #error ! Define CRYSTAL_FREQ=, EXTERNAL_CLOCK= or INTERNAL_CLOCK_x
   #define F_CPU
 #endif
 //------------------------------------------------------------------------------------------------

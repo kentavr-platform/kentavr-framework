@@ -235,7 +235,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D__AVR_ATtiny85__" />
-					<Add option="-DINTERNAL_CLOCK_8MHZ" />
+					<Add option="-DINTERNAL_CLOCK_16_5MHZ" />
 				</Compiler>
 				<Environment>
 					<Variable name="MCU" value="attiny85" />
@@ -252,6 +252,7 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++17" />
 			<Add option="-fdata-sections" />
+			<Add option="-ffunction-sections" />
 			<Add option="-save-temps=obj" />
 			<Add option="-mmcu=$(MCU)" />
 			<Add option="-Wa,-I,KentAVR" />
@@ -262,7 +263,6 @@
 		</Compiler>
 		<Linker>
 			<Add option="-mmcu=$(MCU)" />
-			<Add option="-ffunction-sections" />
 			<Add option="-fno-exceptions" />
 			<Add option="-fno-rtti" />
 			<Add option="-Wl,--gc-sections" />

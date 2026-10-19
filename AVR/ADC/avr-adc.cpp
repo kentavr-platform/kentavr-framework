@@ -27,6 +27,7 @@ AVR_ADC :: Queue AVR_ADC :: queue {};
  * Computes the number of conversions covering 125 us and
  * remembers the input/reference currently selected in the multiplexer.
  * In async mode, clears the queue and enables the ADC interrupt.
+ * ATtinyX5 uses bipolar differential results with normal input polarity.
  * @note The requested clock is not checked against the MCU's accuracy limits.
  * The selected clock may differ from adc_clock. Call before requesting conversions.
  * Reinitialization preserves the selected input/reference as the previous settings;
@@ -66,13 +67,24 @@ ResultCode AVR_ADC :: init(uint32_t adc_clock)
         }
     }
 
+#ifdef ADC_HAS_POWER_CONTROL
     clr_bit(regs :: POWERSAVE, regs :: POWERSAVE_BIT);
+#endif
+
     regs :: CONTROL_A = selected_prescaler;
+
+#if defined(AVR_TINY_X5_FAMILY)
+    set_bit(regs :: CONTROL_B, regs :: BIPOLAR_BIT);
+    clr_bit(regs :: CONTROL_B, regs :: POLARITY_BIT);
+#endif
 
     // recover previous channel and reference from registers
     prev_channel = ADC_Channel(regs :: MULTIPLEXER & regs :: MUX_MASK);
-    prev_reference = ADC_reference(regs :: MULTIPLEXER &
-                                   (_bits(regs :: REFERENCE_0, regs :: REFERENCE_1)));
+#if defined(AVR_MEGA_U4_FAMILY) || defined(AVR_MEGA_X0_FAMILY)
+    if(test_bit(regs :: CONTROL_B, regs :: MUX_HIGH_BIT))
+        prev_channel = ADC_Channel(uint8_t(prev_channel) | _bit(5));
+#endif
+    prev_reference = ADC_reference(regs :: MULTIPLEXER & regs :: REFERENCE_MASK);
 
     // Number of 13-clock conversions covering 125 us.
     constexpr uint32_t conversion_rate = 13UL * 1000000UL / 125UL;
@@ -114,9 +126,10 @@ __inline uint8_t AVR_ADC :: is_differential(ADC_Channel channel)
  * @param reference Requested reference selection.
  * @return Settling count for changed settings. For unchanged settings, returns
  * the remaining async skip count, or zero in sync mode.
- * @details Changed differential settings use skip_125us. For VBG, changed settings
- * use ten times that count; this empirical multiplier is not a datasheet timing
- * guarantee. Other single-ended inputs discard one conversion when the reference
+ * @details Changed differential settings use skip_125us. For VBG, all targets use
+ * ten times that count; this covers the ATtinyX5 1 ms settling requirement and
+ * retains the empirical delay used on ATmega1284P. Other single-ended inputs
+ * discard one conversion when the reference
  * changes and none otherwise. This function does not update the remembered settings.
  * @note skip_125us is already rounded up; multiplying it does not calculate an
  * exact 1250 us interval. The returned count is limited to uint16_t.
@@ -152,6 +165,7 @@ __inline uint16_t AVR_ADC :: calc_skip(ADC_Channel channel, ADC_reference refere
  * @param reference Requested reference selection.
  * @return Number of settling conversions to discard.
  * @details In async mode, also stores the returned count in skip for the ISR.
+ * ATmegaU4 and ATmegaX0 write MUX5 separately in CONTROL_B.
  */
 __inline uint16_t AVR_ADC :: start_conversion(ADC_Channel channel, ADC_reference reference)
 {
@@ -160,6 +174,15 @@ __inline uint16_t AVR_ADC :: start_conversion(ADC_Channel channel, ADC_reference
         skip = conversion_skip;
     prev_channel = channel;
     prev_reference = reference;
+
+#if defined(AVR_MEGA_U4_FAMILY) || defined(AVR_MEGA_X0_FAMILY)
+    // ADC_Channel stores MUX5 in bit 5; its ADCSRB position depends on the MCU.
+    if(test_bit(uint8_t(channel), 5))
+        set_bit(regs :: CONTROL_B, regs :: MUX_HIGH_BIT);
+    else
+        clr_bit(regs :: CONTROL_B, regs :: MUX_HIGH_BIT);
+#endif
+
     regs :: MULTIPLEXER = (uint8_t(channel) & regs :: MUX_MASK) | uint8_t(reference);
     set_bit(regs :: CONTROL_A, regs :: START);
     return conversion_skip;
@@ -173,7 +196,8 @@ __inline uint16_t AVR_ADC :: start_conversion(ADC_Channel channel, ADC_reference
  * @pre The conversion has completed.
  * @details Differential results are sign-extended from ten bits.
  * scale_to_mV() does not account for differential scaling or gain.
- * AREF and AVCC leave ref_mV at zero; pass their actual voltage to scale_to_mV(ref).
+ * External and supply references leave ref_mV at zero; pass their actual mV value
+ * to scale_to_mV(ref). Both ATtinyX5 2.56 V modes return 2560 mV.
  * Internal references set nominal values of 1100 or 2560 mV, without calibration.
  */
 __inline void AVR_ADC :: read_result(ADC_sample <10> &result, ADC_Channel channel, ADC_reference reference)
@@ -184,12 +208,22 @@ __inline void AVR_ADC :: read_result(ADC_sample <10> &result, ADC_Channel channe
                                                int16_t(value);
     switch(reference)
     {
+
+#if !defined(AVR_MEGA_8_FAMILY) && !defined(AVR_MEGA_U4_FAMILY)
     case ADC_REFERENCE_1V1:
         result.ref_mV = 1100;
         break;
+#endif
+
+#if !defined(AVR_MEGA_X8_FAMILY)
     case ADC_REFERENCE_2V56:
+#if defined(AVR_TINY_X5_FAMILY)
+    case ADC_REFERENCE_2V56_BYPASS:
+#endif
         result.ref_mV = 2560;
         break;
+#endif
+
     default:
         result.ref_mV = 0;
     }
