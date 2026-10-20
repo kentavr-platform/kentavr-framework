@@ -1108,6 +1108,9 @@
 		</Unit>
 		<Unit filename="KentAVR/AVR/USB/avr-usb-config.h" />
 		<Unit filename="KentAVR/AVR/USB/avr-usb.h" />
+		<Unit filename="KentAVR/AVR/Watchdog/avr-watchdog-regs.h" />
+		<Unit filename="KentAVR/AVR/Watchdog/avr-watchdog.cpp" />
+		<Unit filename="KentAVR/AVR/Watchdog/avr-watchdog.h" />
 		<Unit filename="KentAVR/AVR/avr-delay.h" />
 		<Unit filename="KentAVR/AVR/avr-macro.h" />
 		<Unit filename="KentAVR/AVR/avr-mcu.h" />

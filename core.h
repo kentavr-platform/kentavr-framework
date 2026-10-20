@@ -33,6 +33,7 @@
 #include "AVR/SPI/avr-usart-spi.h"
 #include "AVR/USB/avr-usb.h"
 #include "AVR/EEPROM/avr-eeprom.h"
+#include "AVR/Watchdog/avr-watchdog.h"
 
 // services
 #include "Services/Settings/settings.h"
