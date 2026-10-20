@@ -15,19 +15,8 @@
 #else
     Console console;    // a black-hole object with no output and zero runtime overhead
 #endif
-
 //------------------------------------------------------------------------------------------------
-void early_init()
-{
-    // Runs immediately after reset, before stack and runtime initialization.
-    // Use with extreme caution: only code that does not use the stack is safe here.
-    // See the GCC AVR documentation for section(".initX") and naked functions.
-    // ...
-
-    // Startup continues with stack and runtime initialization.
-}
-//------------------------------------------------------------------------------------------------
-int main()
+void main(Reset_source reset)
 {
     // uart.init(500000);   // the highest baudrate supported for 16 and 20 MHz crystal both
     // usb.init();
@@ -42,8 +31,9 @@ int main()
     {
         // main loop
 
+        // watchdog.kick();
+        mdelay(100);
     }
 
-    return 0;
 }
 //------------------------------------------------------------------------------------------------

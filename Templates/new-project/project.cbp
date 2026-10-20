@@ -253,6 +253,7 @@
 			<Add option="-std=c++17" />
 			<Add option="-fdata-sections" />
 			<Add option="-ffunction-sections" />
+			<Add option="-ffreestanding" />
 			<Add option="-save-temps=obj" />
 			<Add option="-mmcu=$(MCU)" />
 			<Add option="-Wa,-I,KentAVR" />
@@ -1120,9 +1121,8 @@
 		<Unit filename="KentAVR/Core/macro.h" />
 		<Unit filename="KentAVR/Core/nostream.h" />
 		<Unit filename="KentAVR/Core/oscillator.h" />
-		<Unit filename="KentAVR/Core/startup.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="KentAVR/Core/reset.cpp" />
+		<Unit filename="KentAVR/Core/reset.h" />
 		<Unit filename="KentAVR/Core/type_traits.h" />
 		<Unit filename="KentAVR/Core/type_traits/is_connected.h" />
 		<Unit filename="KentAVR/Core/type_traits/is_enum.h" />

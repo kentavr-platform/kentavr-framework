@@ -23,6 +23,7 @@
 // hardware-specific drivers
 #include "AVR/avr-macro.h"
 #include "AVR/avr-delay.h"
+#include "Core/reset.h"
 #include "Services/Console/debug.h"
 #include "AVR/GPIO/avr-gpio.h"
 #include "AVR/Timer/avr-timer.h"
@@ -54,8 +55,5 @@
 #include "Devices/Sensors/DS18S20/DS18S20.h"
 #include "Devices/Sensors/DS18B20/DS18B20.h"
 #include "Devices/RTC/DS3231/DS3231.h"
-//------------------------------------------------------------------------------------------------
-/// Early init could be useful in some cases
-void early_init() __attribute__((naked, used, section(".init0")));
 //------------------------------------------------------------------------------------------------
 #endif
