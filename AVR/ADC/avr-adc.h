@@ -44,12 +44,12 @@ private:
         uint8_t size = 0;
         ResultCode add(Callback callback, uint8_t id, ADC_Channel channel, ADC_reference reference);
     } queue;
-    static uint16_t         skip;
-    static volatile bool    active;
-    static uint8_t          skip_125us;
-    static uint32_t         clock_frequency;
-    static ADC_Channel      prev_channel;
-    static ADC_reference    prev_reference;
+    static uint16_t                 skip;
+    static volatile bool            active;
+    static uint8_t                  skip_125us;
+    static uint32_t                 clock_frequency;
+    static ADC_Channel              prev_channel;
+    static ADC_reference            prev_reference;
 #ifdef ENABLE_ADC_ASYNC_MODE
     static constexpr bool async_enabled = true;
 #else

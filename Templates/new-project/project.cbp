@@ -291,6 +291,9 @@
 		<Unit filename="KentAVR/AVR/ADC/avr-adc-regs.h" />
 		<Unit filename="KentAVR/AVR/ADC/avr-adc.cpp" />
 		<Unit filename="KentAVR/AVR/ADC/avr-adc.h" />
+		<Unit filename="KentAVR/AVR/ADC/Temperature/avr-temperature-traits.h" />
+		<Unit filename="KentAVR/AVR/ADC/Temperature/avr-temperature.cpp" />
+		<Unit filename="KentAVR/AVR/ADC/Temperature/avr-temperature.h" />
 		<Unit filename="KentAVR/AVR/EEPROM/avr-eeprom.h" />
 		<Unit filename="KentAVR/AVR/GPIO/avr-gpio.h" />
 		<Unit filename="KentAVR/AVR/GPIO/avr-gpio.tpp" />

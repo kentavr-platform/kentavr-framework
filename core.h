@@ -40,6 +40,7 @@
 
 // drivers with config-defined settings
 #include "AVR/ADC/avr-adc.h"
+#include "AVR/ADC/Temperature/avr-temperature.h"
 
 // interfaces
 #include "Interfaces/OneWire/one-wire.h"

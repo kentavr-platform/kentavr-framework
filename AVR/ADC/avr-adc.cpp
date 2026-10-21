@@ -3,10 +3,10 @@
  *
  * File: avr-adc.cpp
 //----------------------------------------------------------------------------------------------*/
-#include "avr-adc.h"
-#include "config.h"
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include "avr-adc.h"
+#include "config.h"
 //------------------------------------------------------------------------------------------------
 // static initializers
 volatile bool AVR_ADC :: active = false;
@@ -128,11 +128,13 @@ __inline uint8_t AVR_ADC :: is_differential(ADC_Channel channel)
  * the remaining async skip count, or zero in sync mode.
  * @details Changed differential settings use skip_125us. For VBG, all targets use
  * ten times that count; this covers the ATtinyX5 1 ms settling requirement and
- * retains the empirical delay used on ATmega1284P. Other single-ended inputs
- * discard one conversion when the reference
- * changes and none otherwise. This function does not update the remembered settings.
+ * retains the empirical delay used on ATmega1284P. Temperature inputs use eight
+ * times skip_125us to cover the ATtinyX5 internal reference's 1 ms settling time
+ * and the first-conversion discard required by ATmegaU4. Other single-ended
+ * inputs discard one conversion when the reference changes and none otherwise.
+ * This function does not update the remembered settings.
  * @note skip_125us is already rounded up; multiplying it does not calculate an
- * exact 1250 us interval. The returned count is limited to uint16_t.
+ * exact settling interval. The returned count is limited to uint16_t.
  */
 __inline uint16_t AVR_ADC :: calc_skip(ADC_Channel channel, ADC_reference reference)
 {
@@ -147,11 +149,11 @@ __inline uint16_t AVR_ADC :: calc_skip(ADC_Channel channel, ADC_reference refere
     if(is_differential(channel))
         return skip_125us;
 
+    if(channel == regs :: TEMPERATURE_CHANNEL)
+        return skip_125us * 8; // 1 ms is the longest settling time among supported temperature inputs
+
     if(channel == ADC_VBG)
-    {
-        // undocumented slow charge from VBG
-        return skip_125us * 10;  // experimentally got value
-    }
+        return skip_125us * 10; // undocumented slow charge from VBG (experimentally got value)
 
     if(reference != prev_reference)
         return 1;
