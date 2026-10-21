@@ -11,7 +11,7 @@
 #ifdef DEBUG
     // static SerialBitOut <B4, 500000> debug;  Console console(debug);
     // static UART0 uart;                       Console console(uart);
-    // static SerialUSB usb;                    Console console(usb);
+    // static SerialUSB usb(TX_only);           Console console(usb);
 #else
     Console console;    // a black-hole object with no output and zero runtime overhead
 #endif
@@ -21,12 +21,11 @@ void main(Reset_source reset)
     // uart.init(500000);   // the highest baudrate supported for 16 and 20 MHz crystal both
     // usb.init();
 
-
     // enable_interrupts();
 
     // console.log("== RESET ==");
 
-
+    // watchdog.enable(WATCHDOG_TIMEOUT_1S, WATCHDOG_MODE_RESET);
     while(1)
     {
         // main loop

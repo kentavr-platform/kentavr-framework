@@ -18,9 +18,10 @@
 //------------------------------------------------------------------------------------------------
 namespace
 {
+    SerialUSB_mode serial_usb_mode = RX_TX;
     int16_t rx_peeked = -1;
 
-    // SOF must not release the IN bank while a foreground transfer is filling it.
+    // Keep SOF data service from interrupting foreground endpoint access.
     class USB_sof_guard
     {
     public:
@@ -168,14 +169,25 @@ namespace
 }
 //------------------------------------------------------------------------------------------------
 /**
+ * @brief Select the runtime direction of the single USB CDC interface.
+ *
+ * @param mode RX_only, TX_only, or RX_TX (default). Construct before calling init().
+ */
+SerialUSB :: SerialUSB(enum SerialUSB_mode mode)
+{
+    serial_usb_mode = mode;
+}
+//------------------------------------------------------------------------------------------------
+/**
  * @brief Initialize LUFA and enable USB Start-of-Frame events.
  *
  * Call once before enabling global interrupts. LUFA handles control requests
  * in the control-endpoint ISR; the Start-of-Frame callback services CDC's
- * periodic IN flush.
+ * periodic IN flush and discards incoming OUT packets in TX_only mode.
  */
 void SerialUSB :: init()
 {
+    rx_peeked = -1;
     USB_Init(USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL);
     USB_Device_EnableSOFEvents();
 }
@@ -210,30 +222,34 @@ bool SerialUSB :: DTR()
 /**
  * @brief Return the number of bytes currently available from the host.
  *
- * The count includes a byte previously fetched by peek() and held in the
- * one-byte lookahead slot.
+ * Includes a byte previously fetched by peek(). Incoming packets remain
+ * in the hardware OUT bank until the application reads them.
  *
- * @return Number of bytes currently readable, up to the CDC OUT packet size.
+ * @return Number of readable bytes, or zero in TX_only mode.
  */
 uint8_t SerialUSB :: available()
 {
+    if(serial_usb_mode == TX_only)
+        return 0;
+    USB_sof_guard guard;
     return CDC_Device_BytesReceived(&cdc_interface) + (rx_peeked >= 0);
 }
 //------------------------------------------------------------------------------------------------
 /**
  * @brief Inspect the next byte from the host without consuming it logically.
  *
- * The byte is read from the CDC OUT endpoint and retained in a one-byte
- * lookahead slot until read() consumes it.
+ * Reads from the hardware OUT bank and retains one byte until read()
+ * consumes it logically.
  *
  * @return Next byte as an unsigned value promoted to int, or -1 if none exists.
  */
 int SerialUSB :: peek()
 {
+    if(serial_usb_mode == TX_only)
+        return -1;
+    USB_sof_guard guard;
     if(rx_peeked < 0)
-    {
         rx_peeked = CDC_Device_ReceiveByte(&cdc_interface);
-    }
     return rx_peeked;
 }
 //------------------------------------------------------------------------------------------------
@@ -245,12 +261,15 @@ int SerialUSB :: peek()
  */
 int SerialUSB :: read()
 {
+    if(serial_usb_mode == TX_only)
+        return -1;
     if(rx_peeked >= 0)
     {
         int16_t data = rx_peeked;
         rx_peeked = -1;
         return data;
     }
+    USB_sof_guard guard;
     return CDC_Device_ReceiveByte(&cdc_interface);
 }
 //------------------------------------------------------------------------------------------------
@@ -290,6 +309,8 @@ uint8_t SerialUSB :: read(uint8_t *buf, const uint8_t count)
  */
 uint8_t SerialUSB :: write(char data)
 {
+    if(serial_usb_mode == RX_only)
+        return ENDPOINT_RWSTREAM_DeviceDisconnected;
     USB_sof_guard guard;
     return CDC_Device_SendByte(&cdc_interface, static_cast <uint8_t> (data));
 }
@@ -303,6 +324,8 @@ uint8_t SerialUSB :: write(char data)
  */
 uint8_t SerialUSB :: write(const char *str)
 {
+    if(serial_usb_mode == RX_only)
+        return ENDPOINT_RWSTREAM_DeviceDisconnected;
     USB_sof_guard guard;
     return CDC_Device_SendString(&cdc_interface, str);
 }
@@ -316,6 +339,8 @@ uint8_t SerialUSB :: write(const char *str)
  */
 uint8_t SerialUSB :: write(FlashStringWrapper fs)
 {
+    if(serial_usb_mode == RX_only)
+        return ENDPOINT_RWSTREAM_DeviceDisconnected;
     USB_sof_guard guard;
     return CDC_Device_SendString_P(&cdc_interface, fs.str);
 }
@@ -330,6 +355,8 @@ uint8_t SerialUSB :: write(FlashStringWrapper fs)
  */
 uint8_t SerialUSB :: write(const uint8_t *buf, uint16_t count)
 {
+    if(serial_usb_mode == RX_only)
+        return ENDPOINT_RWSTREAM_DeviceDisconnected;
     USB_sof_guard guard;
     return CDC_Device_SendData(&cdc_interface, buf, count);
 }
@@ -378,6 +405,8 @@ uint8_t SerialUSB :: write_all(const uint8_t *buf, uint16_t count)
  */
 uint8_t SerialUSB :: tx_wait()
 {
+    if(serial_usb_mode == RX_only)
+        return ENDPOINT_RWSTREAM_DeviceDisconnected;
     USB_sof_guard guard;
     return CDC_Device_Flush(&cdc_interface);
 }
@@ -393,10 +422,21 @@ void EVENT_USB_Device_ControlRequest()
     CDC_Device_ProcessControlRequest(&cdc_interface);
 }
 //------------------------------------------------------------------------------------------------
-// LUFA invokes this once per USB frame, providing CDC's periodic IN flush.
+// LUFA invokes this once per USB frame to service the CDC data endpoints.
 void EVENT_USB_Device_StartOfFrame()
 {
-    CDC_Device_USBTask(&cdc_interface);
+    if(USB_DeviceState != DEVICE_STATE_Configured)
+        return;
+
+    if(serial_usb_mode == TX_only)
+    {
+        Endpoint_SelectEndpoint(SERIAL_USB_RX_ENDPOINT);
+        if(Endpoint_IsOUTReceived())
+            Endpoint_ClearOUT();
+    }
+
+    if(serial_usb_mode != RX_only)
+        CDC_Device_USBTask(&cdc_interface);
 }
 //------------------------------------------------------------------------------------------------
 uint16_t CALLBACK_USB_GetDescriptor(const uint16_t value,

@@ -9,6 +9,13 @@
 #include <stdint.h>
 #include "AVR/avr-macro.h"
 //------------------------------------------------------------------------------------------------
+enum SerialUSB_mode : uint8_t
+{
+    RX_only = 0x01,    // Receive from the hardware OUT bank; disable transmission.
+    TX_only = 0x02,    // Transmit; discard incoming host packets.
+    RX_TX   = 0x03     // Receive and transmit.
+};
+//------------------------------------------------------------------------------------------------
 /**
  * @brief USB CDC-ACM serial interface.
  *
@@ -18,6 +25,7 @@
 class SerialUSB
 {
 public:
+    explicit SerialUSB(enum SerialUSB_mode mode = RX_TX);
     static void init();
     static bool connected();
     static bool DTR();
