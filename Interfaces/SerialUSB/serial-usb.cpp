@@ -20,6 +20,28 @@ namespace
 {
     int16_t rx_peeked = -1;
 
+    // SOF must not release the IN bank while a foreground transfer is filling it.
+    class USB_sof_guard
+    {
+    public:
+        USB_sof_guard()
+        {
+            ATOMIC_BLOCK
+            enabled = USB_INT_IsEnabled(USB_INT_SOFI);
+            USB_Device_DisableSOFEvents();
+        }
+
+        ~USB_sof_guard()
+        {
+            ATOMIC_BLOCK
+            if(enabled)
+                USB_Device_EnableSOFEvents();
+        }
+
+    private:
+        bool enabled;
+    };
+
     USB_ClassInfo_CDC_Device_t cdc_interface =
     {
         {
@@ -268,6 +290,7 @@ uint8_t SerialUSB :: read(uint8_t *buf, const uint8_t count)
  */
 uint8_t SerialUSB :: write(char data)
 {
+    USB_sof_guard guard;
     return CDC_Device_SendByte(&cdc_interface, static_cast <uint8_t> (data));
 }
 //------------------------------------------------------------------------------------------------
@@ -280,6 +303,7 @@ uint8_t SerialUSB :: write(char data)
  */
 uint8_t SerialUSB :: write(const char *str)
 {
+    USB_sof_guard guard;
     return CDC_Device_SendString(&cdc_interface, str);
 }
 //------------------------------------------------------------------------------------------------
@@ -292,6 +316,7 @@ uint8_t SerialUSB :: write(const char *str)
  */
 uint8_t SerialUSB :: write(FlashStringWrapper fs)
 {
+    USB_sof_guard guard;
     return CDC_Device_SendString_P(&cdc_interface, fs.str);
 }
 //------------------------------------------------------------------------------------------------
@@ -305,6 +330,7 @@ uint8_t SerialUSB :: write(FlashStringWrapper fs)
  */
 uint8_t SerialUSB :: write(const uint8_t *buf, uint16_t count)
 {
+    USB_sof_guard guard;
     return CDC_Device_SendData(&cdc_interface, buf, count);
 }
 //------------------------------------------------------------------------------------------------
@@ -352,6 +378,7 @@ uint8_t SerialUSB :: write_all(const uint8_t *buf, uint16_t count)
  */
 uint8_t SerialUSB :: tx_wait()
 {
+    USB_sof_guard guard;
     return CDC_Device_Flush(&cdc_interface);
 }
 //------------------------------------------------------------------------------------------------
