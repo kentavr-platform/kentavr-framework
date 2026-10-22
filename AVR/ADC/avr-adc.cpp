@@ -66,11 +66,7 @@ ResultCode AVR_ADC :: init(uint32_t adc_clock)
             selected_divider = divider;
         }
     }
-
-#ifdef ADC_HAS_POWER_CONTROL
-    clr_bit(regs :: POWERSAVE, regs :: POWERSAVE_BIT);
-#endif
-
+    power.enable_adc_power();
     regs :: CONTROL_A = selected_prescaler;
 
 #if defined(AVR_TINY_X5_FAMILY)

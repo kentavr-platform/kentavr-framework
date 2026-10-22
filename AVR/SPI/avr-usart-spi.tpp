@@ -37,38 +37,7 @@ __inline ResultCode USART_SPI <N, TX_BUF_SIZE> :: init_master(uint32_t frequency
     if(divider > regs :: max_divider)
         return ERR_BAD_PARAMETER;
 
-    switch(N)
-    {
-        case 0:
-            #if defined(__AVR_HAVE_PRR1_PRUSART0)
-                clr_bit(regs :: POWER1, regs :: POWER_BIT);
-            #elif defined(__AVR_HAVE_PRR0_PRUSART0) || defined(__AVR_HAVE_PRR_PRUSART0)
-                clr_bit(regs :: POWER0, regs :: POWER_BIT);
-            #endif
-            break;
-        case 1:
-            #if defined(__AVR_HAVE_PRR1_PRUSART1)
-                clr_bit(regs :: POWER1, regs :: POWER_BIT);
-            #elif defined(__AVR_HAVE_PRR0_PRUSART1) || defined(__AVR_HAVE_PRR_PRUSART1)
-                clr_bit(regs :: POWER0, regs :: POWER_BIT);
-            #endif
-            break;
-        case 2:
-            #if defined(__AVR_HAVE_PRR1_PRUSART2)
-                clr_bit(regs :: POWER1, regs :: POWER_BIT);
-            #elif defined(__AVR_HAVE_PRR0_PRUSART2) || defined(__AVR_HAVE_PRR_PRUSART2)
-                clr_bit(regs :: POWER0, regs :: POWER_BIT);
-            #endif
-            break;
-        case 3:
-            #if defined(__AVR_HAVE_PRR1_PRUSART3)
-                clr_bit(regs :: POWER1, regs :: POWER_BIT);
-            #elif defined(__AVR_HAVE_PRR0_PRUSART3) || defined(__AVR_HAVE_PRR_PRUSART3)
-                clr_bit(regs :: POWER0, regs :: POWER_BIT);
-            #endif
-            break;
-    }
-
+    power.enable_uart_power();
     disable();
     regs :: BAUD = 0;
     uint8_t control = _bits(regs :: MODE0, regs :: MODE1);

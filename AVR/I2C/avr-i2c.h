@@ -6,12 +6,8 @@
 #ifndef AVR_I2C_H
 #define AVR_I2C_H
 //------------------------------------------------------------------------------------------------
-#include <stdint.h>
-#include <string.h>
-#include <avr/interrupt.h>
 #include <util/twi.h>
-#include "../avr-macro.h"
-#include "../../Core/errors.h"
+#include "../PowerSave/avr-powersave.h"
 #include "avr-i2c-regs.h"
 //------------------------------------------------------------------------------------------------
 enum I2C_Mode : uint8_t

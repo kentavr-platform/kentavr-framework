@@ -34,6 +34,7 @@
 #include "AVR/USB/avr-usb.h"
 #include "AVR/EEPROM/avr-eeprom.h"
 #include "AVR/Watchdog/avr-watchdog.h"
+#include "AVR/PowerSave/avr-powersave.h"
 
 // services
 #include "Services/Settings/settings.h"

@@ -11,27 +11,6 @@ struct SPI_traits
     static constexpr bool exists = false;
 };
 //------------------------------------------------------------------------------------------------
-// The device header identifies which power-reduction register contains PRSPI.
-#if defined(__AVR_HAVE_PRR_PRSPI)
-  #define SPI_POWER_CONTROL_REGS                                \
-    static constexpr bool has_power_control = true;             \
-    static inline volatile uint8_t& POWER = PRR;                \
-    static constexpr uint8_t POWER_BIT = PRSPI;
-#elif defined(__AVR_HAVE_PRR0_PRSPI)
-  #define SPI_POWER_CONTROL_REGS                                \
-    static constexpr bool has_power_control = true;             \
-    static inline volatile uint8_t& POWER = PRR0;               \
-    static constexpr uint8_t POWER_BIT = PRSPI;
-#elif defined(__AVR_HAVE_PRR1_PRSPI)
-  #define SPI_POWER_CONTROL_REGS                                \
-    static constexpr bool has_power_control = true;             \
-    static inline volatile uint8_t& POWER = PRR1;               \
-    static constexpr uint8_t POWER_BIT = PRSPI;
-#else
-  #define SPI_POWER_CONTROL_REGS                                \
-    static constexpr bool has_power_control = false;
-#endif
-//------------------------------------------------------------------------------------------------
 #define DEFINE_SPI_REGS(N, _CONTROL, _STATUS,                   \
                         _DATA, _ENABLE, _MASTER,                \
                         _ORDER, _PHASE, _POLARITY,              \
@@ -52,7 +31,6 @@ struct SPI_traits <N>                                           \
     static constexpr uint8_t DOUBLE           = _DOUBLE;        \
     static constexpr uint8_t INTERRUPT        = _INTERRUPT;     \
     static constexpr uint8_t TRANSFER_COMPLETE = SPIF;          \
-    SPI_POWER_CONTROL_REGS                                      \
 };
 //------------------------------------------------------------------------------------------------
 #define DEFINE_SPI_DX_REGS(N, _SPI)                             \
@@ -73,7 +51,6 @@ struct SPI_traits <N>                                           \
     static constexpr uint8_t INTERRUPT        = SPI_IE_bp;      \
     static constexpr uint8_t TRANSFER_COMPLETE = SPI_IF_bp;     \
     static constexpr uint8_t SS_DISABLE       = SPI_SSD_bp;     \
-    SPI_POWER_CONTROL_REGS                                      \
 };
 //------------------------------------------------------------------------------------------------
 # if defined(SPI_STC_vect)

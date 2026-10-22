@@ -192,6 +192,7 @@ __inline ResultCode TWI <N, TX_BUF_SIZE> :: init_master(uint32_t freq)
     if(freq < min_freq || freq > max_freq)
         return ERR_BAD_PARAMETER;
 
+    power.enable_i2c_power();
     mode = I2C_MASTER;
     regs :: SR = 0;
     regs :: BR = static_cast <uint8_t> (((F_CPU / freq) - 16) / 2);
@@ -231,6 +232,7 @@ __inline ResultCode TWI <N, TX_BUF_SIZE> :: init_master(uint32_t freq)
 template <uint8_t N, uint8_t TX_BUF_SIZE>
 __inline ResultCode TWI <N, TX_BUF_SIZE> :: init_slave(const I2C_Slave_Config &config)
 {
+    power.enable_i2c_power();
     if(config.address > 0x7F || !config.receiver_callback || !config.transmitter_callback)
     {
         disable();

@@ -115,10 +115,6 @@ __inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _configure(uint32_t ra
                                                                      enum UART_PARITY parity,
                                                                      enum UART_STOP_BITS sbits)
 {
-    // disable everything and set default values
-    regs :: CTRLA = 0;
-    regs :: CTRLB = 0;
-    regs :: CTRLC = 0;
     constexpr uint32_t max_baud_error_ppm = 20000; // 2%
     BaudConfig baud_cfg = _select_baud(rate);
     if(baud_cfg.error_ppm > max_baud_error_ppm)
@@ -126,6 +122,12 @@ __inline ResultCode UART <N, RX_BUF_SIZE, TX_BUF_SIZE> :: _configure(uint32_t ra
         // ATTENTION! Baud rate error is too high!
         return ERR_BAD_PARAMETER;
     }
+
+    power.enable_uart_power();
+    // disable everything and set default values
+    regs :: CTRLA = 0;
+    regs :: CTRLB = 0;
+    regs :: CTRLC = 0;
     if(baud_cfg.u2x)
     {
         set_bit(regs :: CTRLA, U2X);

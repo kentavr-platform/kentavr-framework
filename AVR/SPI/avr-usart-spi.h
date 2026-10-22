@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------------------------
 #include "avr-spi-common.h"
 #include "avr-usart-spi-regs.h"
+#include "../PowerSave/avr-powersave.h"
 //------------------------------------------------------------------------------------------------
 /**
  * @brief USART peripheral operating in master SPI mode.

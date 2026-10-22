@@ -6,6 +6,7 @@
 #include <avr/io.h>
 #include "reset.h"
 #include "Core/macro.h"
+#include "AVR/PowerSave/avr-powersave.h"
 //------------------------------------------------------------------------------------------------
 // Some bootloaders hands control to the application with a jump 0 rather than a
 // hardware reset. In this case they can leave peripheral interrupts enabled
@@ -42,6 +43,13 @@ void after_bootloader()
     UDIEN = 0;
 #endif
     __asm__ __volatile__("nop");
+}
+//------------------------------------------------------------------------------------------------
+// .init5 runs after RAM initialization and before global constructors
+extern "C" void disable_peripheral_power() __attribute__((naked, used, section(".init5")));
+void disable_peripheral_power()
+{
+    power.cpu_only();
 }
 //------------------------------------------------------------------------------------------------
 extern "C" int reset_entry() asm("main");

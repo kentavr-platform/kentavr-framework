@@ -11,6 +11,7 @@
 #include <avr/interrupt.h>
 #include "../../Core/errors.h"
 #include "../avr-macro.h"
+#include "../PowerSave/avr-powersave.h"
 #include "avr-timer-regs.h"
 //------------------------------------------------------------------------------------------------
 enum Timer_mode

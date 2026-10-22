@@ -3,6 +3,7 @@
  *
  * File: serial-usb.cpp
 //----------------------------------------------------------------------------------------------*/
+#include "AVR/PowerSave/avr-powersave.h"
 #include "AVR/USB/avr-usb.h"
 #include "serial-usb.h"
 #include "serial-usb-config.h"
@@ -188,6 +189,7 @@ SerialUSB :: SerialUSB(enum SerialUSB_mode mode)
 void SerialUSB :: init()
 {
     rx_peeked = -1;
+    power.enable_usb_power();
     USB_Init(USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL);
     USB_Device_EnableSOFEvents();
 }

@@ -512,6 +512,7 @@ ResultCode Timer <N> :: set_mode(enum Timer_mode mode)
 
         if(supported)
         {
+            power.enable_timers_power();
             regs :: CONTROL_A = (regs :: CONTROL_A & ~uint8_t(0x03)) | (wgm & 0x03);
             regs :: CONTROL_B = (regs :: CONTROL_B & ~_bit(3)) | ((wgm & 0x04) << 1);
 
@@ -520,10 +521,8 @@ ResultCode Timer <N> :: set_mode(enum Timer_mode mode)
 
             return OK;
         }
-
         return ERR_BAD_PARAMETER;
     }
-
     return ERR_BAD_PARAMETER;
 }
 //------------------------------------------------------------------------------------------------

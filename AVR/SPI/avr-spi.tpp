@@ -36,6 +36,7 @@ __inline ResultCode SPI <N, TX_BUF_SIZE> :: init_master(uint32_t frequency,
     if(frequency == 0 || frequency > F_CPU / 2 || frequency < (F_CPU + 127UL) / 128UL)
         return ERR_BAD_PARAMETER;
 
+    power.enable_spi_power();
     regs :: CONTROL = 0;
 
     // Choose the fastest supported rate that does not exceed the requested rate.
@@ -77,6 +78,7 @@ __inline ResultCode SPI <N, TX_BUF_SIZE> :: init_slave(const SPI_Slave_Config &c
     if(!config.callback)
         return ERR_BAD_PARAMETER;
 
+    power.enable_spi_power();
     regs :: CONTROL = 0;
     slave = config;
     regs :: DATA = config.first_tx;
@@ -97,9 +99,6 @@ template <uint8_t N, uint16_t TX_BUF_SIZE>
 __inline void SPI <N, TX_BUF_SIZE> :: configure(SPI_Clock_Mode clock_mode, SPI_Bit_Order bit_order,
                                                 bool master, uint8_t prescaler, bool double_speed)
 {
-    if constexpr(regs :: has_power_control)
-        clr_bit(regs :: POWER, regs :: POWER_BIT);
-
 #if defined(AVR_DX_FAMILY)
     regs :: INT_MASK = 0;
     regs :: CONTROL_B = (uint8_t) clock_mode;

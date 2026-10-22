@@ -9,6 +9,7 @@
 #include <avr/pgmspace.h>
 #include <string.h>
 #include "../avr-macro.h"
+#include "../PowerSave/avr-powersave.h"
 #include "avr-uart-regs.h"
 //------------------------------------------------------------------------------------------------
 enum UART_BAUD_RATE

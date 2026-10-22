@@ -31,8 +31,6 @@ struct USART_SPI_traits <N> : USART_traits <N> { \
     static constexpr uint8_t PHASE = 1; \
     static constexpr uint8_t ORDER = 2; \
     static constexpr uint8_t POLARITY = _POLARITY; \
-    static constexpr uint8_t POWER_BIT = PRUSART##N; \
-    USART_SPI_POWER_REGS \
 };
 //------------------------------------------------------------------------------------------------
 #define DEFINE_USART_SPI_DX_REGS(N, _USART, _PORT) \
@@ -64,25 +62,6 @@ struct USART_SPI_traits <N> { \
 #if defined(USART_TX_vect) && !defined(USART0_TX_vect)
   #define USART0_TX_vect USART_TX_vect
 #endif
-//------------------------------------------------------------------------------------------------
-#if defined(PRR0)
-  #define USART_SPI_POWER0_REG \
-    static inline volatile uint8_t& POWER0 = PRR0;
-#elif defined(PRR)
-  #define USART_SPI_POWER0_REG \
-    static inline volatile uint8_t& POWER0 = PRR;
-#else
-  #define USART_SPI_POWER0_REG
-#endif
-#if defined(PRR1)
-  #define USART_SPI_POWER1_REG \
-    static inline volatile uint8_t& POWER1 = PRR1;
-#else
-  #define USART_SPI_POWER1_REG
-#endif
-#define USART_SPI_POWER_REGS \
-    USART_SPI_POWER0_REG \
-    USART_SPI_POWER1_REG
 //------------------------------------------------------------------------------------------------
 #if defined(UDR0) && defined(UMSEL00) && defined(UMSEL01)
   DEFINE_USART_SPI_REGS(0, RXEN0, TXEN0, TXCIE0, TXC0, RXC0,
